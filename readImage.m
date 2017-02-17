@@ -23,7 +23,7 @@ function[RGB] = readImage( nimage )
 
          RGB = imresize( IMG, [RES_VH(1) RES_VH(2)] );
          %RGB = im2double(RGB);
-         RGB  = im2single(RGB);
+        %% RGB  = im2single(RGB);
          
 %%
 %% Pre-process %%

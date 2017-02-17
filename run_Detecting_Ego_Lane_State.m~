@@ -17,8 +17,7 @@ function [msg] = run_Detecting_Ego_Lane_State( nimage )
     RGB = readImage( nimage );
     added = add_Image_To_Buffer( RGB);
     
-    % If this is a KeyFrame or if its the first run.
-    % Process only frames that contributes something new 
+    % If this is a KeyFrame or it is the first run
     if 1 == added || STATE_COUNTER == 0
                
         STATE_COUNTER = STATE_COUNTER + 1;
