@@ -9,14 +9,23 @@
 %% 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [ msg ] = find_Lane_Candidates( nimage )
+function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, Masks )
+
+
+
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%
     %% all required globals %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%
-    global LANE_CONF_THRESHOLD OBS_NEG_NOMIN OBS_NEG_NORMA LANE_FILTER_OFFSET_V OBS_L OBS_R OBS_N IDEPTH_TEMPLATE VP_BINS_HST VP_STEP_HST VP_FILTER_OFFSET_V PX_STEP IDX_FOC_TOT_P VP_RANGE_H C_V C_H FOC_TOT_P AVG_DIR_TOT_P MASK_FOC_TOT_P LANE_BINS_H LANE_FILTER LANE_TRANSITION LANE_PRIOR LANE_FILTER_BINS_H CM_TO_PIXEL MIN_LANE_WIDTH MAX_LANE_WIDTH RES_VH IDX_LANE_PIX STATE_READY STATE_ERROR
-    global LANE_WIDTH INT_HIST_LANE_PROB INT_HIST_VP_PROB %% the Lane intersection observations histograms
-    global LANE_BOUNDARIES     %% the 5XN lane boundary model
+    global STATE_READY STATE_ERROR
+    global LANE_CONF_THRESHOLD C_V C_H RES_VH
+    global OBS_NEG_NOMIN OBS_NEG_NORMA OBS_L OBS_R OBS_N
+    global VP_BINS_HST VP_STEP_HST PX_STEP VP_RANGE_H LANE_BINS_H LANE_FILTER LANE_TRANSITION LANE_PRIOR LANE_FILTER_BINS_H LANE_FILTER_OFFSET_V VP_FILTER_OFFSET_V 
+    global CM_TO_PIXEL MIN_LANE_WIDTH MAX_LANE_WIDTH   LANE_WIDTH INT_HIST_LANE_PROB INT_HIST_VP_PROB %% the Lane intersection observations histograms
+    global LANE_BOUNDARIES    
+    
+    
+    %% the 5XN lane boundary model
                                %% 1,n left intersection with bottom wrt VP
                                %% 2,n right intersection with bottom wrt VP (not used)
                                %% 3,n intersection with horizon wrt VP left-side
@@ -24,31 +33,31 @@ function [ msg ] = find_Lane_Candidates( nimage )
                                %% 5,n total prob of peak
     
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% get all active pixles %%
-    %% tuned for high recall %%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%
+    %% Get All Active Pixles %%
+    % tuned for high recall %
+    
     IDX_LANE_PIX = IDX_FOC_TOT_P;
     [VC, HC] = ind2sub([RES_VH(1) RES_VH(2)],IDX_LANE_PIX);
 
 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% to VP coordinate system
     %%
-    %%              ^ + V (2nd dim)
-    %%              |   
-    %%              |
-    %%             VP --> + H (1st dim)
-    %%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Tranformation to VP Coordinate System
+    %
+    %              ^ + V (2nd dim)
+    %              |   
+    %              |
+    %             VP --> + H (1st dim)
+    %
+    
     O_V = C_V; %%+ VP_V; %% VP to image coordinate system
     O_H = C_H; %%+ VP_H; %% VP to image coordinate system
     Lane_Points    = [ HC-(O_H) -( VC-(O_V) ) ]; %% lane pixels to VP coordinate system
-    Lane_Props     = FOC_TOT_P(IDX_LANE_PIX);
-    Lane_Mask      = MASK_FOC_TOT_P(IDX_LANE_PIX);
-    Lane_Depth     = IDEPTH_TEMPLATE(IDX_LANE_PIX);
-    Max_Lane_Depth = max( IDEPTH_TEMPLATE(:), [], 1 )+1; %% RES_VH(1);
+    Lane_Props     = Likelihoods.TOT_MAX_FOCUSED(IDX_LANE_PIX);
+    Lane_Mask      = Masks.FOCUS(IDX_LANE_PIX);
+    Lane_Depth     = Templates.DEPTH(IDX_LANE_PIX);
+    Max_Lane_Depth = max( Templates.DEPTH(:), [], 1 )+1; %% RES_VH(1);
     
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -61,7 +70,7 @@ function [ msg ] = find_Lane_Candidates( nimage )
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% compute intersection with offseted horizon %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Lane_Angle            = round(AVG_DIR_TOT_P(IDX_LANE_PIX));
+    Lane_Angle            = round(Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX));
     Tan_Lane_Angle        = tand(Lane_Angle);                        
     Lane_Int_Horizon      = ((horizon-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);    
     idx                   = find(Lane_Angle==90); 
@@ -130,6 +139,7 @@ function [ msg ] = find_Lane_Candidates( nimage )
     covStd( isnan(covStd) ) = 0;    
     INT_HIST_LANE_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob        
     
+    
     %%%%%%%%%%%%%%%%%%%%%%
     %% same for VP prob %%
     %%%%%%%%%%%%%%%%%%%%%%
@@ -142,6 +152,8 @@ function [ msg ] = find_Lane_Candidates( nimage )
     covStd( isnan(covStd) ) = 0;    
     INT_HIST_VP_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob    
          
+    
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% normalize for further computation %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -8,7 +8,7 @@
   %%
     % Temp modify by Rameez
     %GRAY_P = 1./(1 + exp(-NGRAY(1)*(V-NGRAY(2))));
-    GRAY_P = 1./(1 + exp(-NGRAY(1)*(I-NGRAY(2))));
+     GRAY_P = 1./(1 + exp(-NGRAY(1)*(I-NGRAY(2))));
 
     %%
     %YELL_P originally with dsigmf---->relpacing it with sigmf

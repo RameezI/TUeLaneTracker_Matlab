@@ -143,8 +143,10 @@ function [] = laneTracker2()
     %
     %
     %
+  
     
-    %%
+    
+   %%
    %% The lane filter expressed in the VP coordinate system %%
    
     global  LANE_CONF_THRESHOLD OBS_L OBS_R OBS_N LANE_BINS_H LANE_INFO LANE_FILTER_BINS_H PX_STEP LANE_PRIOR LANE_TRANSITION LANE_FILTER PX_MAX LANE_FILTER_OFFSET_V
@@ -155,6 +157,8 @@ function [] = laneTracker2()
     LANE_INFO          = [0 0 0 1 1];                                              %% ?
     [LANE_PRIOR, LANE_TRANSITION] = createLanePrior( LANE_FILTER_BINS_H, 1/CM_TO_PIXEL, AVG_LANE_WIDTH, MIN_LANE_WIDTH, MAX_LANE_WIDTH, STD_LANE_WIDTH );
     LANE_FILTER        = LANE_PRIOR;                                               %% the lane filter histogram bins
+    
+    
     
     
     
@@ -203,18 +207,10 @@ function [] = laneTracker2()
     OBS_NEG_NOMIN = 2*OBS_NEG_SIFMA^2;
     OBS_NEG_NORMA = 2/(sqrt(2*pi*OBS_NEG_SIFMA^2)); %% only positive side of x-axis, so half a Gaussian
     
-    
-    
-    %%
-    %% Write PNG Images
-	 % { Write PNG Images to Disk
-	 %for nimage = 1:size(IMAGE_FILES,1)   
-	 %   write_PNG_images(nimage);   
-	 %end
-	 % }
 
 %%
-%% Start the State Machine
+%% Start the State Machine%%
+
    startStateMachine ();    
     
 end 

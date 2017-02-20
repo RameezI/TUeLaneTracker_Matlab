@@ -3,7 +3,7 @@
 %%
 %% the center lane filter
 %%
-function [ msg ] = find_Center_Lane( nimage )             
+function [ msg ] = find_Center_Lane( )             
         
     %%%%%%%%%%%%%%%%%%%%%%%%%%
     %% all required globals %%

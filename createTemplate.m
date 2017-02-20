@@ -1,10 +1,6 @@
+
 %%
-%%
-%%
-%% create edge template
-%%
-%%
-%%
+%% create edge template%%
 function [TEMPLATE] = createTemplate( H ,W )
 
     %% empty template

@@ -10,12 +10,12 @@
 %% 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [ msg ] = find_Vanashing_Point()
+function VanishingPt = find_Vanashing_Point(VanishingPt)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%
     %% all required globals %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%
-    global LANE_WIDTH_DIFF_NORMA LANE_WIDTH_DIFF_NOMIN LANE_WIDTH VP_LANE_RATIO CM_TO_PIXEL OBS_NEG_NORMA OBS_NEG_NOMIN VP_BINS_HST VP_STEP_HST VP_TRANSITION VP_FILTER_OFFSET_V VP_PRIOR VP_V VP_H VP_BINS_V VP_BINS_H LANE_BOUNDARIES INT_HIST_VP_PROB VP_FILTER SEGMENT_EDGE SEGMENT OLD_VP_V OLD_VP_H C_V C_H
+    global LANE_WIDTH_DIFF_NORMA LANE_WIDTH_DIFF_NOMIN LANE_WIDTH VP_LANE_RATIO CM_TO_PIXEL OBS_NEG_NORMA OBS_NEG_NOMIN VP_BINS_HST VP_STEP_HST VP_TRANSITION VP_FILTER_OFFSET_V VP_PRIOR VP_BINS_V VP_BINS_H LANE_BOUNDARIES INT_HIST_VP_PROB VP_FILTER SEGMENT_EDGE SEGMENT C_V C_H
 
         
     
@@ -130,7 +130,7 @@ function [ msg ] = find_Vanashing_Point()
     %% contract solution                                   %%
     %% here we use the VP to get back to image coordinates %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    [SEGMENT SEGMENT_TIGHT SEGMENT_VERY_TIGHT SEGMENT_WIDE] = createEgoLaneMask( LANE_BOUNDARIES, C_V, C_H, VP_V, VP_H );
+    [SEGMENT SEGMENT_TIGHT SEGMENT_VERY_TIGHT SEGMENT_WIDE] = createEgoLaneMask( LANE_BOUNDARIES, C_V, C_H, VanishingPt.V, VanishingPt.H );
     
     
     
@@ -144,10 +144,10 @@ function [ msg ] = find_Vanashing_Point()
     %%%%%%%%%%%%%%%%%%%%%%
     %% asign the new VP %%
     %%%%%%%%%%%%%%%%%%%%%%
-    OLD_VP_V = VP_V;
-    OLD_VP_H = VP_H;
-    VP_V = UPD_VP_V;
-    VP_H = UPD_VP_H;
+    VanishingPt.V_prev = VanishingPt.V;
+    VanishingPt.H_prev = VanishingPt.H;
+    VanishingPt.V = UPD_VP_V;
+    VanishingPt.H = UPD_VP_H;
 
 end
 

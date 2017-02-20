@@ -1,7 +1,7 @@
 %%
 %% state function
 %%
-function [msg] = run_Filling_Buffers_State( nimage)
+function [msg, Templates, Likelihoods, Masks] = run_Filling_Buffers_State(VanishingPt, Templates, Likelihoods, Masks )
 
 
 
@@ -15,17 +15,15 @@ msg = STATE_BUSY;
 while msg ~= STATE_READY  
     
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% add an image to the buffer %%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+    %%
+    %% Add Image Buffer %% 
     RGB = readImage( N_IMAGE );
-
+   
     
-    
-    
-    added = add_Image_To_Buffer( RGB);
+    [added, Templates, Likelihoods, Masks] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Masks );
      
-    showResults( N_IMAGE, msg );
+
+    showResults( RGB, VanishingPt, msg );
        
        
     

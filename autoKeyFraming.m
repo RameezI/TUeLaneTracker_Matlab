@@ -3,11 +3,10 @@ function [innovation] = autoKeyFraming(TOT_P_LAST_FRAME, PROB)
 %%
 %% Thresholds %%
 
-    GRAY_T = 0.5; %% 0.5 is the value of the "tipping" point of the membership functions
-    YELL_T = 0.5.* 0.5;
+    GRAY_T = 0.5*0.5; %% 0.5 is the value of the "tipping" point of the membership functions
     MAG_T  = 0.5;
     DIR_T  = 0.5;
-    TOT_T  = min(GRAY_T,YELL_T).*MAG_T.*DIR_T;
+    TOT_T  = GRAY_T.*MAG_T.*DIR_T;
 
 %% 
 %% INNOVATION %%
