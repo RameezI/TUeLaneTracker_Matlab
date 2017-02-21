@@ -24,11 +24,11 @@ function [] = laneTracker2()
     %%
     %% TUe DATASET %%
     global DATASET IMAGE_FILES LOGO
-    DATASET = '/media/rameez/Linux-Extended/DataSet/eindhoven/';
+    DATASET = '/home/rameez/Desktop/subDataSet/';
     LOGO = im2double(imread('tue.png'));
    
     DATASET
-    IMAGE_FILES= dir([DATASET,'/PNG_imgs/*.png']);
+    IMAGE_FILES= dir([DATASET,'*.png']);
     
     
     %%

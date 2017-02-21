@@ -11,7 +11,7 @@ CENTER_OFFSET = 0.5;
 %%  Obtain the number of Images, Start and End Index %%
 Number_Of_Images = size(IMAGE_FILES,1);
         
-                START = 1500;
+                START = 1;
                 END   = Number_Of_Images;
 
 START_END_FRAMES = [START END];
@@ -46,7 +46,7 @@ STEP_SIZE     = 1;
 
 
 
-while N_IMAGE < START+1500
+while N_IMAGE < END
            
                         
      switch CURRENT_STATE
