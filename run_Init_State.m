@@ -7,33 +7,33 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
 %     coder.cstructname(vpFilter,   'MatlabStruct_vpFilter'  );
     %%         
 
-    TOT_P_ALL           = zeros( RES_VH(1), RES_VH(2), NBUFFER);
-    DIR_ALL             = zeros( RES_VH(1), RES_VH(2), NBUFFER);
-    TOT_P_ALL_BACK_UP   = zeros( RES_VH(1), RES_VH(2), NBUFFER);
-    DIR_ALL_BACK_UP     = zeros( RES_VH(1), RES_VH(2), NBUFFER);
+    TOT_P_ALL           = single(zeros( RES_VH(1), RES_VH(2), NBUFFER));
+    DIR_ALL             = single(zeros( RES_VH(1), RES_VH(2), NBUFFER));
+    TOT_P_ALL_BACK_UP   = single(zeros( RES_VH(1), RES_VH(2), NBUFFER));
+    DIR_ALL_BACK_UP     = single(zeros( RES_VH(1), RES_VH(2), NBUFFER));
     
-    MASK_FOC_TOT_P      = zeros(RES_VH(1), RES_VH(2));
-    FOC_TOT_P           = zeros( RES_VH(1), RES_VH(2));
+    MASK_FOC_TOT_P      = single(zeros(RES_VH(1), RES_VH(2)));
+    FOC_TOT_P           = single(zeros( RES_VH(1), RES_VH(2)));
     
     
     
-    TOT_P               = zeros( RES_VH(1), RES_VH(2));
-    AVG_DIR_TOT_P       = zeros( RES_VH(1), RES_VH(2));
+    TOT_P               = single(zeros( RES_VH(1), RES_VH(2)));
+    AVG_DIR_TOT_P       = single(zeros( RES_VH(1), RES_VH(2)));
 
 
     %%
     %% Create Gradient Direction Template %%
     RES_VH              = single(RES_VH);
-    ROOT_DIR_TEMPLATE   = createTemplate(RES_VH(1),RES_VH(2));  %%^TODO: Verify this on C side!
+    ROOT_DIR_TEMPLATE   = single(createTemplate(RES_VH(1),RES_VH(2)));  %%^TODO: Verify this on C side
 
     %%
     %% Create Focus Template %%
     %%Masks out parts above horizon + margin%%
 
         Margin                  = 100; %% Note: Should be fitted using sweeps
-        ROOT_FOCUS_TEMPLATE     = zeros(2*RES_VH(1)+1,RES_VH(2));
+        ROOT_FOCUS_TEMPLATE     = single(zeros(2*RES_VH(1)+1,RES_VH(2)));
 
-        ROOT_FOCUS_TEMPLATE(RES_VH(1)+Margin:end,:) = 1;
+        ROOT_FOCUS_TEMPLATE(RES_VH(1)+1+Margin:end,:) = 1;
 
         for n = 481:RES_VH(1)+Margin
           ROOT_FOCUS_TEMPLATE(n,:) = ((n-RES_VH(1))/Margin)^3;
@@ -42,15 +42,19 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     %%
     %% Create Depth Template %%
 
-        ROOT_IDEPTH_TEMPLATE = zeros(2*RES_VH(1)+1,RES_VH(2));
+        ROOT_IDEPTH_TEMPLATE = single(zeros(2*RES_VH(1)+1,RES_VH(2)));
         step  = 45/RES_VH(1);
         angle = 90-step;
         for n = RES_VH(1)+1:2*RES_VH(1)+1
-            ROOT_IDEPTH_TEMPLATE(n,:) = 1.75*tand(angle);
+            x=  1.75*tand(angle);
+            if x > 100
+                x=100;
+            end
+            ROOT_IDEPTH_TEMPLATE(n,:) =x;
+            
             angle                     = angle-step;
         end
-        ROOT_IDEPTH_TEMPLATE( 100 < ROOT_IDEPTH_TEMPLATE ) = 100;
-
+    
     %%  
     %% Assign Matrices to corresponding structures %%
 

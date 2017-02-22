@@ -45,7 +45,8 @@ VP_H = VanishingPt.H;
 %% Extract From Templates %%
 
 
-Masks.FOCUS             = Templates.FOCUS_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, : );
+Masks.FOCUS             = Templates.FOCUS_ROOT( (RES_VH(1)-VP_V+1)-240 : RES_VH(1)-VP_V+240, : );
+
 Templates.GRADIENT_DIR  = Templates.GRADIENT_DIR_ROOT(  (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, (RES_VH(2)-VP_H+1)-320:RES_VH(2)-VP_H+320 );
 Templates.DEPTH         = Templates.DEPTH_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, : ); 
 

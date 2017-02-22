@@ -1,0 +1,19 @@
+MEX {
+	global:
+		mexFunction;
+		emlrtMexFcnProperties;
+		createTemplate;
+		emxEnsureCapacity;
+		emxFree_boolean_T;
+		emxFree_int32_T;
+		emxFree_real32_T;
+		emxInit_boolean_T;
+		emxInit_int32_T;
+		emxInit_int32_T1;
+		emxInit_real32_T;
+		createTemplate_initialize;
+		createTemplate_terminate;
+		createTemplate_atexit;
+	local:
+		*;
+};
