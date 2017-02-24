@@ -8,10 +8,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     %%         
 
     TOT_P_ALL           = single(zeros( RES_VH(1), RES_VH(2), NBUFFER));
-    DIR_ALL             = single(zeros( RES_VH(1), RES_VH(2), NBUFFER));
-    TOT_P_ALL_BACK_UP   = single(zeros( RES_VH(1), RES_VH(2), NBUFFER));
-    DIR_ALL_BACK_UP     = single(zeros( RES_VH(1), RES_VH(2), NBUFFER));
-    
+    DIR_ALL             = single(zeros( RES_VH(1), RES_VH(2), NBUFFER));   
     MASK_FOC_TOT_P      = single(zeros(RES_VH(1), RES_VH(2)));
     FOC_TOT_P           = single(zeros( RES_VH(1), RES_VH(2)));
     
@@ -79,18 +76,14 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
                         likelihoods =struct;
 
                               likelihoods.TOT_ALL                      = TOT_P_ALL;
-                              likelihoods.TOT_ALL_BACKUP               = TOT_P_ALL_BACK_UP;
-                              likelihoods.TOT_MAX                      = TOT_P;
-
                               likelihoods.GRADIENT_DIR_ALL             = DIR_ALL;
-                              likelihoods.GRADIENT_DIR_ALL_BACKUP      = DIR_ALL_BACK_UP;
+                              likelihoods.TOT_MAX                      = TOT_P;
                               likelihoods.GRADIENT_DIR_TOT_MAX         = AVG_DIR_TOT_P;
-
-                              likelihoods.TOT_MAX_FOCUSED               = FOC_TOT_P;
+                              likelihoods.TOT_MAX_FOCUSED              = FOC_TOT_P;
 
 
                                 masks =struct;
-                                masks.FOCUS                             = MASK_FOC_TOT_P;
+                                masks.FOCUS                            = MASK_FOC_TOT_P;
 
 
     %%                                                  

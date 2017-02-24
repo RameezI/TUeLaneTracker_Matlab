@@ -126,7 +126,7 @@ while N_IMAGE < END
                      %% perform state function
                      STATE_COUNTER = STATE_COUNTER + 1;
                      disp(['[STATE] RESET STATE: ',num2str(STATE_COUNTER)])
-                     [msg, likelihoods, templates, vanishingPt, masks] = run_Reset_State(likelihoods_Backup, templates_Backup, vanishingPt_Backup, masks_Backup);
+                     [msg, vanishingPt] = run_Reset_State(likelihoods_Backup, templates_Backup, vanishingPt_Backup, masks_Backup);
                                                      
                      %% check on transition
                      if msg == STATE_READY
