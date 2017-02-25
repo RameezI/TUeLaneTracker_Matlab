@@ -71,10 +71,6 @@ DIR = DIRI;
 %% Compute Lane Marker Probabilities %% 
 
 
-
-%[PROB, PROB_BACK_UP] = laneMarkerProbabilities( NGRAY, NYELL, NSAT, NMAG, NDIR, S, H, V, MAG, DIR, DIR_TEMPLATE, DIR_TEMPLATE_BACK_UP);
-
-% Without HSV Channels
  PROB = laneMarkerProbabilities( NGRAY, NMAG, NDIR, I,  MAG, DIR, Templates.GRADIENT_DIR);
     
       
