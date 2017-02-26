@@ -9,7 +9,7 @@
 %% 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, Masks )
+function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
 
 
 
@@ -51,13 +51,15 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %             VP --> + H (1st dim)
     %
     
+    %%Random Access Operations--> Compute on Arm
+    
     O_V = C_V; %%+ VP_V; %% VP to image coordinate system
     O_H = C_H; %%+ VP_H; %% VP to image coordinate system
     Lane_Points    = [ HC-(O_H) -( VC-(O_V) ) ]; %% lane pixels to VP coordinate system
     Lane_Props     = Likelihoods.TOT_MAX_FOCUSED(IDX_LANE_PIX);
-    Lane_Mask      = Masks.FOCUS(IDX_LANE_PIX);
     Lane_Depth     = Templates.DEPTH(IDX_LANE_PIX);
     Max_Lane_Depth = max( Templates.DEPTH(:), [], 1 )+1; %% RES_VH(1);
+    Lane_Angle     = round(Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX));
     
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,7 +72,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% compute intersection with offseted horizon %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Lane_Angle            = round(Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX));
+   
     Tan_Lane_Angle        = tand(Lane_Angle);                        
     Lane_Int_Horizon      = ((horizon-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);    
     idx                   = find(Lane_Angle==90); 
@@ -82,9 +84,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     keep = find(  -VP_RANGE_H-VP_STEP_HST/2 < Lane_Int_Horizon & Lane_Int_Horizon < VP_RANGE_H+VP_STEP_HST/2  );
     Lane_Int_Horizon = Lane_Int_Horizon(keep);
-    IDX_LANE_PIX     = IDX_LANE_PIX(keep);
     Lane_Props       = Lane_Props(keep);
-    Lane_Mask        = Lane_Mask(keep);
     Lane_Depth       = Lane_Depth(keep);
     VC               = ceil(Lane_Depth)+1; %% used for weighting pixels
 
@@ -105,7 +105,6 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     Lane_Int_Bottom  = Lane_Int_Bottom(keep);
     Lane_Int_Horizon = Lane_Int_Horizon(keep); 
     Lane_Props       = Lane_Props(keep);
-    Lane_Mask        = Lane_Mask(keep);
     Lane_Depth       = Lane_Depth(keep);
     VC               = VC(keep);
 

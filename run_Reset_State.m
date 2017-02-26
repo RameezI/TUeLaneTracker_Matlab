@@ -1,7 +1,7 @@
 %%
 %% reset all important variables back to default
 %%
-function [msg, VanishingPt] = run_Reset_State(Likelihoods_Backup, Templates_Backup, VanishingPt_Backup, Masks_Backup)
+function [msg, VanishingPt, Likelihoods, Templates, Masks ] = run_Reset_State(Likelihoods_Backup, Templates_Backup, VanishingPt_Backup, Masks_Backup)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%
     %% All Required Globals %%

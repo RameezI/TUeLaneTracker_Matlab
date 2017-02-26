@@ -11,7 +11,7 @@ CENTER_OFFSET = 0.5;
 %%  Obtain the number of Images, Start and End Index %%
 Number_Of_Images = size(IMAGE_FILES,1);
         
-                START = 1500;
+                START = 3000;
                 END   = Number_Of_Images;
 
 START_END_FRAMES = [START END];
@@ -126,7 +126,7 @@ while N_IMAGE < END
                      %% perform state function
                      STATE_COUNTER = STATE_COUNTER + 1;
                      disp(['[STATE] RESET STATE: ',num2str(STATE_COUNTER)])
-                     [msg, vanishingPt] = run_Reset_State(likelihoods_Backup, templates_Backup, vanishingPt_Backup, masks_Backup);
+                     [msg, vanishingPt, likelihoods, templates, masks] = run_Reset_State(likelihoods_Backup, templates_Backup, vanishingPt_Backup, masks_Backup);
                                                      
                      %% check on transition
                      if msg == STATE_READY
