@@ -15,11 +15,11 @@ function [msg, VanishingPt, Templates, Likelihoods, Masks] = run_Detecting_Ego_L
     %%
     %% Add an Image to the Buffer 
     RGB = readImage( N_IMAGE );
-    [added, Templates, Likelihoods, Masks] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Masks );
+    [Templates, Likelihoods, Masks] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Masks );
     
     % If this is a KeyFrame or if its the first run.
     % Process only frames that contributes something new 
-    if 1 == added || STATE_COUNTER == 0
+  %  if 1 == added || STATE_COUNTER == 0
                
         STATE_COUNTER = STATE_COUNTER + 1;
           
@@ -50,17 +50,11 @@ function [msg, VanishingPt, Templates, Likelihoods, Masks] = run_Detecting_Ego_L
         %% State Staus Update %%
         if msg ~= STATE_ERROR
             
-            if  1 <= STATE_COUNTER
                 msg = STATE_READY;
-            else
-                msg = STATE_BUSY;
-            end
+           
 
         end
         
-    else
-        msg = STATE_BUSY;
-    end
         
 end
             

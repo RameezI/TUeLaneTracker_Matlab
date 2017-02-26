@@ -20,16 +20,12 @@ while msg ~= STATE_READY
     RGB = readImage( N_IMAGE );
    
     
-    [added, Templates, Likelihoods, Masks] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Masks );
+    [Templates, Likelihoods, Masks] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Masks );
      
 
     showResults( RGB, VanishingPt, msg );
-       
-       
-    
-    if added==1
-        STATE_COUNTER = STATE_COUNTER + 1;
-    end
+
+    STATE_COUNTER = STATE_COUNTER + 1;
                 
     %%%%%%%%%%%%%%%%%
     %% are we done %%

@@ -1,9 +1,9 @@
           
-function [ADDED, Templates, Likelihoods, Masks] = add_Image_To_Buffer( RGB, VanishingPt, Templates, Likelihoods, Masks  )
+function [Templates, Likelihoods, Masks] = add_Image_To_Buffer( RGB, VanishingPt, Templates, Likelihoods, Masks  )
 
 
 %%Required Global Variables %%
-global  DIR_KEY PROB_KEY  PREV_INO STEP_SIZE NBUFFER NGRAY NMAG NDIR  RES_VH              
+global   NBUFFER NGRAY NMAG NDIR  RES_VH              
 
  
 %%Local Variables Extracted from Arguments%%
@@ -55,12 +55,7 @@ Templates.DEPTH         = Templates.DEPTH_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)
 
 
 
-%%
-%% MAX POOLING %%
-  
-%[MAG, DIR] = maxPool_Gradients(MAGI, MAGSH, MAGS, MAGV, DIRI, DIRSH, DIRS, DIRV );
 
-% Without Max Pooling
 MAG = MAGI;    
 DIR = DIRI;
 
@@ -74,50 +69,8 @@ DIR = DIRI;
  PROB = laneMarkerProbabilities( NGRAY, NMAG, NDIR, I,  MAG, DIR, Templates.GRADIENT_DIR);
     
       
- 
-if STEP_SIZE == 1
-    
-    PROB_KEY = PROB;
-    DIR_KEY  = DIR;
-    
-end
 
-    
-    innovation = autoKeyFraming(Likelihoods.TOT_ALL(:,:,end), PROB);
-
-    
-    % No longer increase in innovation %%
-    if innovation <= PREV_INO             
-
-            [Likelihoods] = updateLaneLikelihoods(NBUFFER, PROB_KEY,  DIR_KEY, Likelihoods);
-
-            PREV_INO  = 0;
-            STEP_SIZE = 1;
-            ADDED     = 1;        
-            disp(['[MESSAGE] ADDING KEY FRAME'])
-    
-    % Innovation is good enough OR step size is large enough
-    elseif 0.75 <= innovation || 10 <= STEP_SIZE 
-            
-        
-           PROB_KEY= PROB;
-          [Likelihoods] = updateLaneLikelihoods(NBUFFER, PROB_KEY,  DIR_KEY, Likelihoods);
-          
-            PREV_INO  = 0;
-            STEP_SIZE = 1;
-            ADDED     = 1;        
-            disp(['[MESSAGE] ADDING KEY FRAME'])
-
-    
-    % Otherwise
-    else
-            PROB_KEY         = PROB;
-            DIR_KEY          = DIR;
-            PREV_INO         = innovation;
-            STEP_SIZE = STEP_SIZE + 1;
-            ADDED     = 0;
-
-    end
-
+  [Likelihoods] = updateLaneLikelihoods(NBUFFER, PROB,  DIR, Likelihoods);
+     
         
 end
