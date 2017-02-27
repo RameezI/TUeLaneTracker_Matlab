@@ -60,7 +60,8 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     Lane_Depth     = Templates.DEPTH(IDX_LANE_PIX);
     Max_Lane_Depth = max( Templates.DEPTH(:), [], 1 )+1; %% RES_VH(1);
     Lane_Angle     = round(Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX));
-    
+    idx                   = find(Lane_Angle==90);
+    Lane_Angle(idx)       = Lane_Angle(idx)-0.1; % Add small amount to avoid tan(90)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% bottom in VP coordinate system %%
@@ -72,11 +73,10 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% compute intersection with offseted horizon %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   
     Tan_Lane_Angle        = tand(Lane_Angle);                        
     Lane_Int_Horizon      = ((horizon-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);    
-    idx                   = find(Lane_Angle==90); 
-    Lane_Int_Horizon(idx) = Lane_Points(idx,1);
+     
+    %Lane_Int_Horizon(idx) = Lane_Points(idx,1);
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
