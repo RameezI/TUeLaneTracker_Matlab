@@ -92,9 +92,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% compute intersection with bottom image %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Lane_Int_Bottom      = ((bottom-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);
-    idx                  = find(Lane_Angle==90); 
-    Lane_Int_Bottom(idx) = Lane_Points(idx,1);    
+    Lane_Int_Bottom      = ((bottom-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);   
     Lane_Int_Bottom      = Lane_Int_Bottom(keep); %% from previous keep
     
     
