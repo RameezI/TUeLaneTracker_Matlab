@@ -2,6 +2,7 @@
 function [Templates, Likelihoods, Masks] = add_Image_To_Buffer( RGB, VanishingPt, Templates, Likelihoods, Masks  )
 
 
+Templates.
 
 
 %%Required Global Variables %%

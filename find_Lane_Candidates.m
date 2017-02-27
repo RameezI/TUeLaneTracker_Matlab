@@ -55,13 +55,15 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     
     O_V = C_V; %%+ VP_V; %% VP to image coordinate system
     O_H = C_H; %%+ VP_H; %% VP to image coordinate system
+    
+    
     Lane_Points    = [ HC-(O_H) -( VC-(O_V) ) ]; %% lane pixels to VP coordinate system
     Lane_Props     = Likelihoods.TOT_MAX_FOCUSED(IDX_LANE_PIX);
     Lane_Depth     = Templates.DEPTH(IDX_LANE_PIX);
     Max_Lane_Depth = max( Templates.DEPTH(:), [], 1 )+1; %% RES_VH(1);
     Lane_Angle     = round(Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX));
     idx                   = find(Lane_Angle==90);
-    Lane_Angle(idx)       = Lane_Angle(idx)-0.1; % Add small amount to avoid tan(90)
+    Lane_Angle(idx)       = Lane_Angle(idx)-0.01; % Add small amount to avoid tan(90)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% bottom in VP coordinate system %%
@@ -90,7 +92,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% compute intersection with bottom image %%
+    %% compute intersection with bottom Image  %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Lane_Int_Bottom      = ((bottom-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);   
     Lane_Int_Bottom      = Lane_Int_Bottom(keep); %% from previous keep
@@ -105,21 +107,25 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     Lane_Props       = Lane_Props(keep);
     Lane_Depth       = Lane_Depth(keep);
     VC               = VC(keep);
-
+    VC(size(VC)+1)   = Max_Lane_Depth;
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% make weighted histogram over both intersections                              %%
     %% the weight is pixel surface (i.e. depth squared) times per-pixel probability %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     firstDim  = ceil( (Lane_Int_Horizon - VP_BINS_HST(1)  + (VP_STEP_HST/2)) / VP_STEP_HST  );  %% horizon intersection
-    secondDim = ceil( (Lane_Int_Bottom  - LANE_BINS_H(1)  + (PX_STEP/2)) / PX_STEP  );          %% bottom intersection
-    INT_HIST_LANE_PROB = accumarray( [[secondDim; size(LANE_BINS_H,2)] [VC; Max_Lane_Depth]], [(Lane_Depth.^2).*Lane_Props; 0] );
+    secondDim = ceil( (Lane_Int_Bottom  - LANE_BINS_H(1)  + (PX_STEP/2)) / PX_STEP  );          %% bottom  intersection
+    
+    firstDim(size(firstDim)+1)      = size(VP_BINS_HST,2);
+    secondDim(size(secondDim)+1)    = size(LANE_BINS_H,2);
+    
+    INT_HIST_LANE_PROB = accumarray( [secondDim VC], [(Lane_Depth.^2).*Lane_Props; 0] );
     
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% do the same but only use surface as weight %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    INT_HIST_VP_PROB = accumarray( [[firstDim; size(VP_BINS_HST,2)] [VC; Max_Lane_Depth]], [(Lane_Depth.^2).*Lane_Props; 0] );
+    INT_HIST_VP_PROB = accumarray( [firstDim VC], [(Lane_Depth.^2).*Lane_Props; 0] );
   
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
