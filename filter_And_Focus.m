@@ -39,7 +39,7 @@ function [IDX_FOC_TOT_P, Likelihoods] = filter_And_Focus(Likelihoods, MASKS)
         
     %%
     %% Get the Active Pixels %%
-    IDX_FOC_TOT_P  = find( 0 < MASKS.FOCUS );
+    IDX_FOC_TOT_P  = find( 0 <  Likelihoods.TOT_MAX_FOCUSED );
     
 end
 
