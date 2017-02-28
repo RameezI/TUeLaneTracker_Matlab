@@ -31,12 +31,15 @@ VP_H = VanishingPt.H;
     GRAD_SIGMA = 1.5; %% can be swept           
     I = imfilter( I, fspecial('gaussian',11,GRAD_SIGMA), 'replicate' );
     
+    I_uint8 = im2uint8(I);
     
     
 %%
 %% Get Gradients %%
     
 [MAGI, DIRI]   =  getGradientInfo( I  );
+
+
 %[MAGSH, DIRSH] = getGradientInfo( SH ); 
 %[MAGS, DIRS]   = getGradientInfo( S  ); 
 %[MAGV, DIRV]   = getGradientInfo( V  );                
@@ -58,9 +61,11 @@ Templates.DEPTH         = Templates.DEPTH_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)
 
 
 
+% MAG = MAGI_uint8;    
+% DIR = DIRI_uint8;
+
 MAG = MAGI;    
 DIR = DIRI;
-
 
 
 
@@ -68,7 +73,7 @@ DIR = DIRI;
 %% Compute Lane Marker Probabilities %% 
 
 
- PROB = laneMarkerProbabilities( NGRAY, NMAG, NDIR, I,  MAG, DIR, Templates.GRADIENT_DIR);
+ PROB = laneMarkerProbabilities( NGRAY, NMAG, NDIR, I_uint8,  MAG, DIR, Templates.GRADIENT_DIR);
     
       
 

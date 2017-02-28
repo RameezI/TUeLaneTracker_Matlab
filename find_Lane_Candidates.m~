@@ -199,6 +199,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %% predict step %%
     %%%%%%%%%%%%%%%%%%
     TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
+    
     TEMP = TEMP / sum(TEMP(:),1);
     LANE_FILTER = 0.5*TEMP + 0.5*LANE_PRIOR; %% change the 0.5 to make filter more strict or loose
 

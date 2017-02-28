@@ -58,7 +58,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
 
                          templates = struct;
 
-                              templates.GRADIENT_DIR_ROOT  = ROOT_DIR_TEMPLATE;
+                              templates.GRADIENT_DIR_ROOT  = round(ROOT_DIR_TEMPLATE);
                               templates.FOCUS_ROOT         = ROOT_FOCUS_TEMPLATE;
                               templates.DEPTH_ROOT         = ROOT_IDEPTH_TEMPLATE;
 

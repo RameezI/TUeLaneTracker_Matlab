@@ -121,15 +121,16 @@ function [] = laneTracker2()
     %%
     %% Lane Normal Distributions %%
     
-    global NGRAY NYELL NSAT NMAG NDIR
-    NGRAY = [25 0.6];              %% sigmoid membership: white is more likely to be a lane boundary
-    NYELL = [100 0.16-0.05 100 0.33+0.05]; %% sigmoid membership: saturated yellow is more likely to be a lana boundary (hue part)
-    NSAT  = [10 0.4];              %% sigmoid membership: saturated yellow is more likely to be a lane boundary (saturation part)
-    NMAG  = [50 0.15];             %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
-    NDIR  = [-0.25 15];            %% sigmoid membership: direction according to the template is more likely to be a lane boundary   
+    global NGRAY NMAG NDIR
+%     NGRAY = [25 0.6];              %% sigmoid membership: white is more likely to be a lane boundary
+%     NMAG  = [50 0.15];             %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
+%     NDIR  = [-0.25 15];            %% sigmoid membership: direction according to the template is more likely to be a lane boundary   
     
 
-
+     NGRAY = [25 0.6];              %% sigmoid membership: white is more likely to be a lane boundary
+     NMAG  = [50 0.15];             %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
+     NDIR  = [-0.25 15];            %% sigmoid membership: direction according to the template is more likely to be a lane boundary   
+    
     %%
     %% The VP Coordinate System %%^TODO: Is the column first dimension herer?
     %
