@@ -134,26 +134,30 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %% higher std means that lane is detected over larger distance %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     covCount = sum(INT_HIST_LANE_PROB,2); %% sum coverage
-    maskVC   = 0 < INT_HIST_LANE_PROB;
-    covVC    = maskVC .* repmat([1:Max_Lane_Depth],size(LANE_BINS_H,2),1);    
-    covVCCnt = sum( maskVC, 2);
-    covMean  = sum(covVC,2)./covVCCnt;
-    covStd   = sqrt(sum( maskVC .* (covVC-repmat(covMean,1,Max_Lane_Depth)).^2, 2 )./covVCCnt); 
-    covStd( isnan(covStd) ) = 0;    
-    INT_HIST_LANE_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob        
+%     maskVC   = 0 < INT_HIST_LANE_PROB;
+%     covVC    = maskVC .* repmat([1:Max_Lane_Depth],size(LANE_BINS_H,2),1);    
+%     covVCCnt = sum( maskVC, 2);
+%     covMean  = sum(covVC,2)./covVCCnt;
+%     covStd   = sqrt(sum( maskVC .* (covVC-repmat(covMean,1,Max_Lane_Depth)).^2, 2 )./covVCCnt); 
+%     covStd( isnan(covStd) ) = 0;    
+%     %INT_HIST_LANE_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob
+    
+     INT_HIST_LANE_PROB = (covCount)'; %% final prob is per-pixel prob times lane boundary prob 
     
     
     %%%%%%%%%%%%%%%%%%%%%%
     %% same for VP prob %%
     %%%%%%%%%%%%%%%%%%%%%%
     covCount = sum(INT_HIST_VP_PROB,2); %% sum coverage
-    maskVC   = 0 < INT_HIST_VP_PROB;
-    covVC    = maskVC .* repmat([1:Max_Lane_Depth],size(VP_BINS_HST,2),1);    
-    covVCCnt = sum( maskVC, 2);
-    covMean  = sum(covVC,2)./covVCCnt;
-    covStd   = sqrt(sum( maskVC .* (covVC-repmat(covMean,1,Max_Lane_Depth)).^2, 2 )./covVCCnt); 
-    covStd( isnan(covStd) ) = 0;    
-    INT_HIST_VP_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob    
+%     maskVC   = 0 < INT_HIST_VP_PROB;
+%     covVC    = maskVC .* repmat([1:Max_Lane_Depth],size(VP_BINS_HST,2),1);    
+%     covVCCnt = sum( maskVC, 2);
+%     covMean  = sum(covVC,2)./covVCCnt;
+%     covStd   = sqrt(sum( maskVC .* (covVC-repmat(covMean,1,Max_Lane_Depth)).^2, 2 )./covVCCnt); 
+%     covStd( isnan(covStd) ) = 0;    
+%     %INT_HIST_VP_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob
+    
+    INT_HIST_VP_PROB = (covCount)'; %% final prob is per-pixel prob times lane boundary prob 
          
     
     
