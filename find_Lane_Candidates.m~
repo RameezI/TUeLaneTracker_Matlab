@@ -133,14 +133,14 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %% use the std of depth per lane bin                           %%
     %% higher std means that lane is detected over larger distance %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-     covCount = sum(INT_HIST_LANE_PROB,2); %% sum coverage
+    covCount = sum(INT_HIST_LANE_PROB,2); %% sum coverage
 %     maskVC   = 0 < INT_HIST_LANE_PROB;
 %     covVC    = maskVC .* repmat([1:Max_Lane_Depth],size(LANE_BINS_H,2),1);    
 %     covVCCnt = sum( maskVC, 2);
 %     covMean  = sum(covVC,2)./covVCCnt;
 %     covStd   = sqrt(sum( maskVC .* (covVC-repmat(covMean,1,Max_Lane_Depth)).^2, 2 )./covVCCnt); 
 %     covStd( isnan(covStd) ) = 0;    
-%     INT_HIST_LANE_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob
+%     %INT_HIST_LANE_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob
     
      INT_HIST_LANE_PROB = (covCount)'; %% final prob is per-pixel prob times lane boundary prob 
     
@@ -148,14 +148,14 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %%%%%%%%%%%%%%%%%%%%%%
     %% same for VP prob %%
     %%%%%%%%%%%%%%%%%%%%%%
-     covCount = sum(INT_HIST_VP_PROB,2); %% sum coverage
+    covCount = sum(INT_HIST_VP_PROB,2); %% sum coverage
 %     maskVC   = 0 < INT_HIST_VP_PROB;
 %     covVC    = maskVC .* repmat([1:Max_Lane_Depth],size(VP_BINS_HST,2),1);    
 %     covVCCnt = sum( maskVC, 2);
 %     covMean  = sum(covVC,2)./covVCCnt;
 %     covStd   = sqrt(sum( maskVC .* (covVC-repmat(covMean,1,Max_Lane_Depth)).^2, 2 )./covVCCnt); 
 %     covStd( isnan(covStd) ) = 0;    
-%     INT_HIST_VP_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob
+%     %INT_HIST_VP_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob
     
     INT_HIST_VP_PROB = (covCount)'; %% final prob is per-pixel prob times lane boundary prob 
          
@@ -167,7 +167,35 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     INT_HIST_LANE_PROB = INT_HIST_LANE_PROB / sum(INT_HIST_LANE_PROB,2);        
     INT_HIST_VP_PROB   = INT_HIST_VP_PROB   / sum(INT_HIST_VP_PROB,2);
     
+    
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     %% plot the observation histogram %%
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     sfigure(456);
+%     clf
+%     hold on
+%     bar( LANE_BINS_H, INT_HIST_LANE_PROB' )  
+%     grid on
+%     drawnow
+%     
+%     sfigure(457); 
+%     clf
+%     hold on
+%     bar( VP_BINS_HST, INT_HIST_VP_PROB' )  
+%     grid on
+%     drawnow
 
+    
+
+    %%
+    %%
+    %%
+    %%
+    %% Histogram Bayes filter for bottom lane intersections
+    %% This brings the solution to object-level (object = lane = 2 lane boundaries)
+    %% Lane prob = Left_boundary_prob * Right_boundary_prob * Inner_lane_Uniformity
+    %%
+    %%
 
 
 
@@ -176,7 +204,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %%%%%%%%%%%%%%%%%%
     TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
     TEMP = TEMP / sum(TEMP(:),1);
-    LANE_FILTER = 0.5*TEMP +0.5*LANE_PRIOR ;
+    LANE_FILTER = TEMP ;
     
     %+ 0.1*LANE_PRIOR; %% change the 0.5 to make filter more strict or loose
 
@@ -186,6 +214,22 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %%%%%%%%%%%%%%%%%
     %% update step %%
     %%%%%%%%%%%%%%%%%
+
+
+
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     %% show histogram and model %%
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%     sfigure(134);
+%     clf           
+%     h = bar3( LANE_FILTER );               
+%     hold on    
+%     set(h,'EdgeColor','none');
+%     axis vis3d
+%     view(135,35);
+%     title('LANE FILTER PREDICT')
+%     drawnow
+    
 
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -222,11 +266,9 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
                     %% the likelihood of the observations given %% 
                     %% te model                                 %%                                  
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                    likelihood_left  = sum( modelL.*INT_HIST_LANE_PROB, 2 ); 
-                    likelihood_right = sum( modelR.*INT_HIST_LANE_PROB, 2 );
-                    %likelihood_Neg   = OBS_NEG_NORMA * exp( -sum( obsNeg.*INT_HIST_LANE_PROB, 2 )^2/OBS_NEG_NOMIN );
-                    likelihood_Neg   = 1-sum(obsNeg.*INT_HIST_LANE_PROB, 2 );
-                    conditional_prob       = likelihood_left * likelihood_right *likelihood_Neg ;
+                    update_mask_left  = sum( modelL.*INT_HIST_LANE_PROB, 2 ); 
+                    update_mask_right = sum( modelR.*INT_HIST_LANE_PROB, 2 );
+                    conditional_prob       = update_mask_left * update_mask_right * OBS_NEG_NORMA * exp( -sum( obsNeg.*INT_HIST_LANE_PROB, 2 )^2/OBS_NEG_NOMIN );
                                              
 
 
@@ -249,7 +291,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             if best < LANE_FILTER(left,right);
                 best       = LANE_FILTER(left,right);
-                LANE_MODEL = [left_offset right_offset likelihood_left likelihood_right];
+                LANE_MODEL = [left_offset right_offset update_mask_left update_mask_right];
                 LANE_WIDTH = width;
             end
 
