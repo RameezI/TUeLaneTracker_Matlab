@@ -52,6 +52,7 @@ function [ STRENGHT, DIR ] = getGradientInfo( IN )
   angle= atan2(dX,dY);
   angle= angle * (180/pi);
   angle = round(angle);
+  %angle = -1*(angle);
   %angle = ceil(angle);
   
 % 

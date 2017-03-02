@@ -166,7 +166,7 @@ function [] = laneTracker2()
    %% The Lane Observation Histograms 
     [OBS_L, OBS_R, OBS_N] = createLaneObservationModel( LANE_FILTER_BINS_H, LANE_BINS_H, MIN_LANE_WIDTH, MAX_LANE_WIDTH, LANE_FILTER_BINS_H, CM_TO_PIXEL );
     LANE_FILTER_OFFSET_V  = -240;
-    LANE_CONF_THRESHOLD   = 2; %% the minumum confidence required for a lane boundary. Expressed in percentage of total lande boundary observation pdf.
+    LANE_CONF_THRESHOLD   = 0.5; %% the minumum confidence required for a lane boundary. Expressed in percentage of total lande boundary observation pdf.
     
     
     

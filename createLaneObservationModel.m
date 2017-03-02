@@ -76,8 +76,8 @@ function [ ObsL,ObsR, ObsNeg ] = fillLaneObservationModel( binsLaneOffset, binsL
         ObsL(idxL+[-1:1])     = [ 0.25 1 0.25 ];
         ObsR(idxR+[-1:1])     = [ 0.25 1 0.25 ];
         ObsNeg(idxL+2:idxR-2) = 1;
-        %idxM = round((idxL+idxR)/2);
-        %ObsNeg(idxM+[-4:4])   = 0;
+        idxM = round((idxL+idxR)/2);
+        ObsNeg(idxM+[-4:4])   = 0;
     end
     
 end
