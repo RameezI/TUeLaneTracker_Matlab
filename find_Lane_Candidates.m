@@ -51,8 +51,6 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %             VP --> + H (1st dim)
     %
     
-    %%Random Access Operations--> Compute on Arm
-    
     O_V = C_V; %%+ VP_V; %% VP to image coordinate system
     O_H = C_H; %%+ VP_H; %% VP to image coordinate system
     
@@ -60,10 +58,9 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     Lane_Points    = [ HC-(O_H) -( VC-(O_V) ) ]; %% lane pixels to VP coordinate system
     Lane_Props     = Likelihoods.TOT_MAX_FOCUSED(IDX_LANE_PIX);
     Lane_Depth     = Templates.DEPTH(IDX_LANE_PIX);
-    Max_Lane_Depth = max( Templates.DEPTH(:), [], 1 )+1; %% RES_VH(1);
     Lane_Angle     = Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX);
     idx                   = find(Lane_Angle==90);
-    Lane_Angle(idx)       = Lane_Angle(idx)-0.01; % Add small amount to avoid tan(90)
+    Lane_Angle(idx)       = Lane_Angle(idx)-1; % Add small amount to avoid tan(90)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% bottom in VP coordinate system %%
@@ -72,43 +69,57 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     horizon = VP_FILTER_OFFSET_V; %% use an offest from horizon to make intersections more pronounced
 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% compute intersection with offseted horizon %%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Tan_Lane_Angle        = tand(Lane_Angle);                        
-    Lane_Int_Horizon      = ((horizon-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);    
-     
-    %Lane_Int_Horizon(idx) = Lane_Points(idx,1);
-
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% only keep point in range %%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    keep = find(  -VP_RANGE_H-VP_STEP_HST/2 < Lane_Int_Horizon & Lane_Int_Horizon < VP_RANGE_H+VP_STEP_HST/2  );
-    Lane_Int_Horizon = Lane_Int_Horizon(keep);
-    Lane_Props       = Lane_Props(keep);
-    Lane_Depth       = Lane_Depth(keep);
-    VC               = ceil(Lane_Depth)+1; %% used for weighting pixels
-
-
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% compute intersection with bottom Image  %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Lane_Int_Bottom      = ((bottom-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);   
-    Lane_Int_Bottom      = Lane_Int_Bottom(keep); %% from previous keep
+    Tan_Lane_Angle        = tand(Lane_Angle);
+    Lane_Int_Bottom_tmp      = ((bottom-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);   
+   
+
+      
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %% compute intersection with offseted horizon %%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                         
+    Lane_Int_Horizon_tmp      = ((horizon-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);    
+
     
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% only keep point in range %%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    keep = find( LANE_BINS_H(1)-(PX_STEP/2) < Lane_Int_Bottom & Lane_Int_Bottom < LANE_BINS_H(end)+(PX_STEP/2) ); %% new keep
-    Lane_Int_Bottom  = Lane_Int_Bottom(keep);
-    Lane_Int_Horizon = Lane_Int_Horizon(keep); 
-    Lane_Props       = Lane_Props(keep);
-    Lane_Depth       = Lane_Depth(keep);
-    VC               = VC(keep);
-    VC(size(VC)+1)   = Max_Lane_Depth;
+     Lane_Int_Bottom = single(zeros(size(Lane_Int_Bottom_tmp,1),1));
+     Lane_Int_Horizon = single(zeros(size(Lane_Int_Horizon_tmp,1),1));
+     Lane_Props_Int   = single(zeros(size(IDX_LANE_PIX,1),1));
+     Lane_Depth_Int   = single(zeros(size(IDX_LANE_PIX,1),1));
+     Index =1;
+     
+
+     
+    for i= 1: size(IDX_LANE_PIX)
+        
+        if ( Lane_Int_Bottom_tmp(i)>LANE_BINS_H(1)-(PX_STEP/2)            &&           Lane_Int_Bottom_tmp(i) < LANE_BINS_H(end)+(PX_STEP/2))
+        
+            
+            if (  Lane_Int_Horizon_tmp(i) > -VP_RANGE_H-VP_STEP_HST/2     &&           Lane_Int_Horizon_tmp(i) < VP_RANGE_H+VP_STEP_HST/2  )
+                
+                
+                        Lane_Int_Bottom(Index)    = Lane_Int_Bottom_tmp(i);
+                        Lane_Int_Horizon(Index)   = Lane_Int_Horizon_tmp(i);
+                        Lane_Props_Int(Index)     = Lane_Props(i);
+                        Lane_Depth_Int(Index)     = Lane_Depth(i);
+                        
+                        Index = Index+1;               
+            end
+               
+        end
     
+    end
+
+    Lane_Int_Horizon   = Lane_Int_Horizon(1:Index);
+    Lane_Int_Bottom    = Lane_Int_Bottom(1:Index);
+    Lane_Props_Int     = Lane_Props_Int(1:Index);
+    Lane_Depth_Int     = Lane_Depth_Int(1:Index);
+           
+
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% make weighted histogram over both intersections                              %%
     %% the weight is pixel surface (i.e. depth squared) times per-pixel probability %%
@@ -119,9 +130,9 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     firstDim(size(firstDim)+1)      = size(VP_BINS_HST,2);
     secondDim(size(secondDim)+1)    = size(LANE_BINS_H,2);
     
-    INT_HIST_LANE_PROB = accumarray( secondDim, [(Lane_Depth.^2).*Lane_Props; 0] );
+    INT_HIST_LANE_PROB = accumarray( secondDim, [(Lane_Depth_Int.^2).*Lane_Props_Int; 0] );
     
-    INT_HIST_VP_PROB = accumarray( firstDim, [(Lane_Depth.^2).*Lane_Props; 0] );
+    INT_HIST_VP_PROB = accumarray( firstDim, [(Lane_Depth_Int.^2).*Lane_Props_Int; 0] );
   
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  

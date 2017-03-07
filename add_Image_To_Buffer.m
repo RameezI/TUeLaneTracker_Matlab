@@ -55,7 +55,7 @@ Masks.FOCUS             = Templates.FOCUS_ROOT( (RES_VH(1)-VP_V+1)-240 : RES_VH(
 Templates.GRADIENT_DIR  = Templates.GRADIENT_DIR_ROOT(  (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, (RES_VH(2)-VP_H+1)-320:RES_VH(2)-VP_H+320 );
 Templates.DEPTH         = Templates.DEPTH_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, : ); 
 
-
+    
     
 
 

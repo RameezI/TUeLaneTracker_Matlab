@@ -33,10 +33,17 @@ function [ STRENGHT, DIR ] = getGradientInfo( IN )
  
  dY( dY > 256 ) =  256;
  dX( dX > 256 ) =  256;
+ 
+  dX =  round(dX);
+  dY =  round(dY);
   
   %% get mangitude
-  magnitude = sqrt(dX.^2 + dY.^2);
-  magnitude= magnitude;  
+  
+  %magnitude = sqrt(dX.^2 + dY.^2); 
+  
+  magnitude = abs(dX)*0.5 + abs(dY)*0.5;
+  magnitude(magnitude>256) = 256;
+  
     
     %magnitude = abs(dX) + abs(dY);
 

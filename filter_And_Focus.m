@@ -25,17 +25,18 @@ function [IDX_FOC_TOT_P, Likelihoods] = filter_And_Focus(Likelihoods, MASKS)
         DIR_MAX_P(mask)     = tempD(mask);  %%^TODO: SOMETHING FISHY WITH THIS AVERAGE
         
     end
+
     
-    Likelihoods.TOT_MAX              = MAX_P;
-    Likelihoods.GRADIENT_DIR_TOT_MAX = DIR_MAX_P;
-    
+    Likelihoods.TOT_MAX              = round(MAX_P*255);
+    Likelihoods.GRADIENT_DIR_TOT_MAX = round(DIR_MAX_P);
+    MASKS.FOCUS = round(MASKS.FOCUS*255);
         
     %%
     %% Apply the focus maks to the probs %%
     % Masks out certain distances %
     Likelihoods.TOT_MAX_FOCUSED = MASKS.FOCUS .* Likelihoods.TOT_MAX;
     
-    
+    Likelihoods.TOT_MAX_FOCUSED = Likelihoods.TOT_MAX_FOCUSED/255;
         
     %%
     %% Get the Active Pixels %%

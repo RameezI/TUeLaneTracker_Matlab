@@ -51,6 +51,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
             
             angle                     = angle-step;
         end
+         ROOT_IDEPTH_TEMPLATE = floor(ROOT_IDEPTH_TEMPLATE);
     
     %%  
     %% Assign Matrices to corresponding structures %%

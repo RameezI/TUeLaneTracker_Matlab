@@ -127,8 +127,8 @@ function [] = laneTracker2()
 %     NDIR  = [-0.25 15];            %% sigmoid membership: direction according to the template is more likely to be a lane boundary   
     
 
-     NGRAY = [25 0.6];              %% sigmoid membership: white is more likely to be a lane boundary
-     NMAG  = [50 0.15];             %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
+     NGRAY = [0.1 153];              %% sigmoid membership: white is more likely to be a lane boundary
+     NMAG  = [0.1  45];             %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
      NDIR  = [-0.25 15];            %% sigmoid membership: direction according to the template is more likely to be a lane boundary   
     
     %%
@@ -166,7 +166,7 @@ function [] = laneTracker2()
    %% The Lane Observation Histograms 
     [OBS_L, OBS_R, OBS_N] = createLaneObservationModel( LANE_FILTER_BINS_H, LANE_BINS_H, MIN_LANE_WIDTH, MAX_LANE_WIDTH, LANE_FILTER_BINS_H, CM_TO_PIXEL );
     LANE_FILTER_OFFSET_V  = -240;
-    LANE_CONF_THRESHOLD   = 0.5; %% the minumum confidence required for a lane boundary. Expressed in percentage of total lande boundary observation pdf.
+    LANE_CONF_THRESHOLD   = 1; %% the minumum confidence required for a lane boundary. Expressed in percentage of total lande boundary observation pdf.
     
     
     
