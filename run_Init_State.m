@@ -35,6 +35,8 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
         for n = 481:RES_VH(1)+Margin
           ROOT_FOCUS_TEMPLATE(n,:) = ((n-RES_VH(1))/Margin)^3;
         end
+        
+        ROOT_FOCUS_TEMPLATE = floor(ROOT_FOCUS_TEMPLATE*255);
 
     %%
     %% Create Depth Template %%
@@ -51,6 +53,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
             
             angle                     = angle-step;
         end
+        
          ROOT_IDEPTH_TEMPLATE = floor(ROOT_IDEPTH_TEMPLATE);
     
     %%  

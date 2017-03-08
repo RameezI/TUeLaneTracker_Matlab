@@ -130,9 +130,9 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     firstDim(size(firstDim)+1)      = size(VP_BINS_HST,2);
     secondDim(size(secondDim)+1)    = size(LANE_BINS_H,2);
     
-    INT_HIST_LANE_PROB = accumarray( secondDim, [(Lane_Depth_Int.^2).*Lane_Props_Int; 0] );
+    INT_HIST_LANE_PROB = accumarray( secondDim, [(Lane_Depth_Int.^2).*Lane_Props_Int/255; 0] );
     
-    INT_HIST_VP_PROB = accumarray( firstDim, [(Lane_Depth_Int.^2).*Lane_Props_Int; 0] );
+    INT_HIST_VP_PROB = accumarray( firstDim, [(Lane_Depth_Int.^2).*Lane_Props_Int/255; 0] );
   
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
