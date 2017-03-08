@@ -24,16 +24,16 @@ IN= int16(IN);
  %dY=single(dY)*256;
  %dX=single(dX)*256;
  
-%  %Apply saturation
-%  dY( dY > 255 ) =  255;
-%  dX( dX > 255 ) =  255;
-%  
-%  dY( dY < -255 ) =  -255;
-%  dX( dX < -255 ) =  -255;
+ %Apply saturation
+ dY( dY > 255 ) =  255;
+ dX( dX > 255 ) =  255;
+ 
+ dY( dY < -255 ) =  -255;
+ dX( dX < -255 ) =  -255;
  
  
  %Apply saturation
- dY( dY > 255 ) =  255;
+ dY =  255;
  dX( dX > 255 ) =  255;
  
  dY( dY < -255 ) =  -255;

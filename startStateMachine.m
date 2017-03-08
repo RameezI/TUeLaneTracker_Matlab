@@ -11,7 +11,7 @@ CENTER_OFFSET = 0.5;
 %%  Obtain the number of Images, Start and End Index %%
 Number_Of_Images = size(IMAGE_FILES,1);
         
-                START = 2800;
+                START = 4200;
                 END   = Number_Of_Images;
 
 START_END_FRAMES = [START END];
