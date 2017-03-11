@@ -31,10 +31,8 @@ function [ Prior Trans ] = createLanePrior( bins, pix_to_cm, meanL, minL, maxL, 
     end
     
     %% normalize
-    Prior = Prior / sum(Prior(:),1);
+    Prior = Prior / sum(sum(Prior));
     
     %% Transition
-    Trans = ones(7,7);
-    Trans = Trans / sum(Trans(:),1);
-    
+    Trans = ones(7,7);    
 end

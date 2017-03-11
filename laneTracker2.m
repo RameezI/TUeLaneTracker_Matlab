@@ -127,9 +127,9 @@ function [] = laneTracker2()
 %     NDIR  = [-0.25 15];            %% sigmoid membership: direction according to the template is more likely to be a lane boundary   
     
 
-     NGRAY = [0.1 153];              %% sigmoid membership: white is more likely to be a lane boundary
-     NMAG  = [0.1  45];             %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
-     NDIR  = [-0.25 15];            %% sigmoid membership: direction according to the template is more likely to be a lane boundary   
+     NGRAY = [ 2^-3   153];              %% sigmoid membership: white is more likely to be a lane boundary
+     NMAG  = [ 2^-3    45];             %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
+     NDIR  = [-2^-2   15];            %% sigmoid membership: direction according to the template is more likely to be a lane boundary   
     
     %%
     %% The VP Coordinate System %%^TODO: Is the column first dimension herer?

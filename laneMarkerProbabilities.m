@@ -24,6 +24,6 @@
     %% compute total lane marker probability %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    PROB         = floor((GRAY_P .* MAG_P .* DIR_P)/255^2);         %% prob with dir
+    PROB         = floor(((GRAY_P+1) .* (MAG_P+1) .* (DIR_P+1))/256^2);         %% prob with dir
     
   end

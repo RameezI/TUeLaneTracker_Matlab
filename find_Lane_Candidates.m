@@ -74,14 +74,19 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %% compute intersection with bottom Image  %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Tan_Lane_Angle        = tand(Lane_Angle);
-    Lane_Int_Bottom_tmp      = ((bottom-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);   
-   
-
+    
+    
+    
+    
       
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% compute intersection with offseted horizon %%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                         
-    Lane_Int_Horizon_tmp      = ((horizon-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);    
+    %% compute intersection with offseted horizon  and Botton%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+    
+    Lane_Int_Bottom_tmp   = ((bottom-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);   
+   
+                       
+    Lane_Int_Horizon_tmp  = ((horizon-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);    
 
     
     
@@ -89,10 +94,11 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
      Lane_Int_Horizon = single(zeros(size(Lane_Int_Horizon_tmp,1),1));
      Lane_Props_Int   = single(zeros(size(IDX_LANE_PIX,1),1));
      Lane_Depth_Int   = single(zeros(size(IDX_LANE_PIX,1),1));
-     Index =1;
      
-
      
+     
+     
+    Index =1;     
     for i= 1: size(IDX_LANE_PIX)
         
         if ( Lane_Int_Bottom_tmp(i)>LANE_BINS_H(1)-(PX_STEP/2)            &&           Lane_Int_Bottom_tmp(i) < LANE_BINS_H(end)+(PX_STEP/2))
@@ -113,11 +119,15 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     
     end
 
+    
+    
     Lane_Int_Horizon   = Lane_Int_Horizon(1:Index);
     Lane_Int_Bottom    = Lane_Int_Bottom(1:Index);
     Lane_Props_Int     = Lane_Props_Int(1:Index);
     Lane_Depth_Int     = Lane_Depth_Int(1:Index);
-           
+    
+    Lane_Scaled_Props_Int =  ((Lane_Props_Int+1).*(Lane_Depth_Int.^2)) * 2^-8;
+    Lane_Scaled_Props_Int =  floor(Lane_Scaled_Props_Int);
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -130,9 +140,11 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     firstDim(size(firstDim)+1)      = size(VP_BINS_HST,2);
     secondDim(size(secondDim)+1)    = size(LANE_BINS_H,2);
     
-    INT_HIST_LANE_PROB = accumarray( secondDim, [(Lane_Depth_Int.^2).*Lane_Props_Int/255; 0] );
     
-    INT_HIST_VP_PROB = accumarray( firstDim, [(Lane_Depth_Int.^2).*Lane_Props_Int/255; 0] );
+    
+    INT_HIST_LANE_PROB =   accumarray( secondDim, [Lane_Scaled_Props_Int; 0] );
+    
+    INT_HIST_VP_PROB   =   accumarray( firstDim,  [Lane_Scaled_Props_Int; 0] );
   
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
@@ -186,8 +198,9 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %% predict step %%
     %%%%%%%%%%%%%%%%%%
     TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
-    TEMP = TEMP / sum(TEMP(:),1);
-    LANE_FILTER = 0.5*TEMP +0.5*LANE_PRIOR ;
+    TEMP = TEMP / sum(sum(TEMP));
+    LANE_FILTER = 2^-1*TEMP + 2^-1*LANE_PRIOR ;
+    
     
     %+ 0.1*LANE_PRIOR; %% change the 0.5 to make filter more strict or loose
 
@@ -278,7 +291,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     %%%%%%%%%%%%%%%%%%%%%%%%
     %% normalize as usual %%
     %%%%%%%%%%%%%%%%%%%%%%%%
-    LANE_FILTER = LANE_FILTER / sum(LANE_FILTER(:),1);
+    LANE_FILTER = LANE_FILTER / max(max(LANE_FILTER));
 
 
 
