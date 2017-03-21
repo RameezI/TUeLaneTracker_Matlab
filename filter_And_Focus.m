@@ -22,7 +22,7 @@ function [IDX_FOC_TOT_P, Likelihoods] = filter_And_Focus(Likelihoods, MASKS)
         
         mask                = MAX_P < tempP; 
         MAX_P(mask)         = tempP(mask);                
-        DIR_MAX_P(mask)     = tempD(mask);  %%^TODO: SOMETHING FISHY WITH THIS AVERAGE
+        DIR_MAX_P(mask)     = tempD(mask);  
         
     end
 

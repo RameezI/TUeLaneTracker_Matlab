@@ -38,9 +38,9 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     % tuned for high recall %
     
     IDX_LANE_PIX = IDX_FOC_TOT_P;
-    [VC, HC] = ind2sub([RES_VH(1) RES_VH(2)],IDX_LANE_PIX);
+    [VC, HC] = ind2sub([185 RES_VH(2)],IDX_LANE_PIX);
 
-
+    VC = VC + (480-185);
 
     %%
     % Tranformation to VP Coordinate System

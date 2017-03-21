@@ -102,7 +102,6 @@ while N_IMAGE < END
 %%                     
         case DETECTING_EGO_LANE
                  
-             N_IMAGE       = N_IMAGE + 1;
              disp(['[STATE] DETECTING EGO LANE: ',num2str(STATE_COUNTER)])
              
              [msg, vanishingPt,templates, likelihoods, masks]        = run_Detecting_Ego_Lane_State(vanishingPt, templates, likelihoods, masks );
