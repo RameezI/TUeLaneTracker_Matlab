@@ -75,6 +75,7 @@ I_uint8  = imcrop(I_uint8,   [1,RES_VH(1)-span+1,RES_VH(2), span]);
 
 
 TemplateGradientDir = imcrop(Templates.GRADIENT_DIR, [1,RES_VH(1)-span+1,RES_VH(2), span]);
+Templates.DEPTH     = imcrop(Templates.DEPTH,        [1,RES_VH(1)-span+1,RES_VH(2), span]);
 
 %%
 %% Compute Lane Marker Probabilities %% 

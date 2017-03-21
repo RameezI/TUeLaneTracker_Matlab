@@ -40,7 +40,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     IDX_LANE_PIX = IDX_FOC_TOT_P;
     [VC, HC] = ind2sub([185 RES_VH(2)],IDX_LANE_PIX);
 
-    VC = VC + (480-185);
+    VC = VC + (480-185) +1;
 
     %%
     % Tranformation to VP Coordinate System
@@ -56,8 +56,11 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates)
     
     
     Lane_Points    = [ HC-(O_H) -( VC-(O_V) ) ]; %% lane pixels to VP coordinate system
+    
     Lane_Props     = Likelihoods.TOT_MAX_FOCUSED(IDX_LANE_PIX);
+    
     Lane_Depth     = Templates.DEPTH(IDX_LANE_PIX);
+    
     Lane_Angle     = Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX);
     idx                   = find(Lane_Angle==90);
     Lane_Angle(idx)       = Lane_Angle(idx)-1; % Add small amount to avoid tan(90)
