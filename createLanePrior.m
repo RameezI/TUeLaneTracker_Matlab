@@ -5,7 +5,7 @@
 %% expressed as histograms
 %%
 %%
-function [ Prior Trans ] = createLanePrior( bins, pix_to_cm, meanL, minL, maxL, sigmaL  )
+function [ Prior, Trans ] = createLanePrior( bins, pix_to_cm, meanL, minL, maxL, sigmaL  )
     
     %% fill histogram
     nbins  = size(bins,2);
@@ -34,5 +34,5 @@ function [ Prior Trans ] = createLanePrior( bins, pix_to_cm, meanL, minL, maxL, 
     Prior = Prior / sum(sum(Prior));
     
     %% Transition
-    Trans = ones(7,7);    
+    Trans = ones(7,7);
 end

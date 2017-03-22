@@ -3,7 +3,7 @@
 %%
 %% state function
 %%
-function [msg, VanishingPt, Templates, Likelihoods, Masks] = run_Detecting_Ego_Lane_State( VanishingPt, Templates, Likelihoods, Masks )
+function [msg, VanishingPt, Templates, Likelihoods, Mask] = run_Detecting_Ego_Lane_State( VanishingPt, Templates, Likelihoods, Mask )
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%
     %% all required globals %%
@@ -15,7 +15,7 @@ function [msg, VanishingPt, Templates, Likelihoods, Masks] = run_Detecting_Ego_L
     %%
     %% Add an Image to the Buffer 
     RGB = readImage( N_IMAGE );
-    [Templates, Likelihoods, Masks] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Masks );
+    [Templates, Likelihoods, Mask] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Mask );
     
     % If this is a KeyFrame or if its the first run.
     % Process only frames that contributes something new 
@@ -25,13 +25,13 @@ function [msg, VanishingPt, Templates, Likelihoods, Masks] = run_Detecting_Ego_L
           
         %%
         %% Filter out Horizon based on Focus Mask %
-        [IDX_FOC_TOT_P, Likelihoods] = filter_And_Focus(Likelihoods,Masks); 
+        [IDX_FOC_TOT_P, Likelihoods] = filter_And_Focus(Likelihoods,Mask); 
         
         
         
         %%
         %% Find Lane Candidatae in the ROI %%
-        msg = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates);
+        msg = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, Mask);
         
 
         %%

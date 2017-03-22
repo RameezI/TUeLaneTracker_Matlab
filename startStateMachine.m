@@ -1,7 +1,7 @@
 function  [] = startStateMachine()
 
 global  N_IMAGE RES_VH LANE_FILTER LANE_PRIOR VP_FILTER VP_PRIOR  CENTER_OFFSET NBUFFER IMAGE_FILES INIT_STATE  STATE_READY  STEP_SIZE CURRENT_STATE PREV_INO STATE_COUNTER  FILLING_BUFFERS DETECTING_EGO_LANE RESET_STATE START_END_FRAMES STATE_ERROR 
-       
+global VP_RANGE_V;
 NBUFFER       = 3;
 CENTER_OFFSET = 0.5;
 
@@ -73,12 +73,8 @@ while N_IMAGE < END
             disp(['[STATE] INIT: ',num2str(STATE_COUNTER)])
             RES_VH = int32(RES_VH);
             NBUFFER = int32(NBUFFER);
-            [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, NBUFFER);
+            [likelihoods, templates, vanishingPt, FocusMask] = run_Init_State(RES_VH, NBUFFER, VP_RANGE_V);
             
-            likelihoods_Backup = likelihoods;
-            templates_Backup  = templates;
-            vanishingPt_Backup = vanishingPt;
-            masks_Backup       = masks;
             
             RES_VH = single(RES_VH);
                       
@@ -91,7 +87,7 @@ while N_IMAGE < END
                     
         case FILLING_BUFFERS
                 
-             [msg, templates, likelihoods, masks ]= run_Filling_Buffers_State(vanishingPt, templates, likelihoods, masks );
+             [msg, templates, likelihoods, FocusMask ]= run_Filling_Buffers_State(vanishingPt, templates, likelihoods, FocusMask);
              
             %%Transition
                      if msg == STATE_READY
@@ -104,7 +100,7 @@ while N_IMAGE < END
                  
              disp(['[STATE] DETECTING EGO LANE: ',num2str(STATE_COUNTER)])
              
-             [msg, vanishingPt,templates, likelihoods, masks]        = run_Detecting_Ego_Lane_State(vanishingPt, templates, likelihoods, masks );
+             [msg, vanishingPt,templates, likelihoods, FocusMask]        = run_Detecting_Ego_Lane_State(vanishingPt, templates, likelihoods, FocusMask);
 
              disp(['[STATE] DETECTING EGO LANE: ',num2str(STATE_COUNTER)])
                        

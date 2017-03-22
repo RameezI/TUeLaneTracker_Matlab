@@ -1,7 +1,7 @@
 %%
 %% state function
 %%
-function [msg, Templates, Likelihoods, Masks] = run_Filling_Buffers_State(VanishingPt, Templates, Likelihoods, Masks )
+function [msg, Templates, Likelihoods, Masks] = run_Filling_Buffers_State(VanishingPt, Templates, Likelihoods, Mask)
 
 
 
@@ -20,7 +20,7 @@ while msg ~= STATE_READY
     RGB = readImage( N_IMAGE );
    
     
-    [Templates, Likelihoods, Masks] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Masks );
+    [Templates, Likelihoods, Masks] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Mask);
      
 
     showResults( RGB, VanishingPt, msg );

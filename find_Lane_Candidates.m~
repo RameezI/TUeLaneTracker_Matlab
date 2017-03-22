@@ -180,21 +180,23 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
          
     
     
-    %%
-    %% Normalize for Further Computation %%
-   
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %% normalize for further computation %%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      INT_HIST_LANE_PROB = INT_HIST_LANE_PROB';
      INT_HIST_VP_PROB   = INT_HIST_VP_PROB';
      
-     INT_HIST_LANE_PROB = INT_HIST_LANE_PROB / sum(INT_HIST_LANE_PROB,2);        
-     INT_HIST_VP_PROB   = INT_HIST_VP_PROB   / sum(INT_HIST_VP_PROB,2);
+    INT_HIST_LANE_PROB = INT_HIST_LANE_PROB / sum(INT_HIST_LANE_PROB,2);        
+    INT_HIST_VP_PROB   = INT_HIST_VP_PROB   / sum(INT_HIST_VP_PROB,2);
     
+    %INT_HIST_LANE_PROB= INT_HIST_LANE_PROB;
+    %INT_HIST_LANE_PROB= INT_HIST_LANE_PROB /norm(INT_HIST_LANE_PROB);
 
 
 
     %%
-    %% Predict Step %%
-    
+    %% redict step %%
+    %%%%%%%%%%%%%%%%%%
     TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
     TEMP = TEMP / sum(sum(TEMP));
     LANE_FILTER = 2^-1*TEMP + 2^-1*LANE_PRIOR ;
@@ -205,9 +207,14 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
 
     
 
-    %%
-    %% Update Step %%
- 
+    %%%%%%%%%%%%%%%%%
+    %% update step %%
+    %%%%%%%%%%%%%%%%%
+
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %% for each possible state %%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     best  = 0;
     for left = 1:size(LANE_FILTER_BINS_H,2)
         for right = 1:size(LANE_FILTER_BINS_H,2)

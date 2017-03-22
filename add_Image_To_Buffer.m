@@ -1,5 +1,5 @@
           
-function [Templates, Likelihoods, Masks] = add_Image_To_Buffer( RGB, VanishingPt, Templates, Likelihoods, Masks  )
+function [Templates, Likelihoods, Mask] = add_Image_To_Buffer( RGB, VanishingPt, Templates, Likelihoods, Mask)
 
 
 
@@ -49,11 +49,10 @@ VP_H = VanishingPt.H;
 %%
 %% Extract From Templates %%
 
-start= 25-VP_V;
-Margin =80;       % ^TODO: Synchronise Margin value 
-span= floor(RES_VH(1)/2)-Margin + 25;
+start= Mask.VP_RANGE_V-VP_V;
+span= floor(RES_VH(1)/2)-Mask.Margin + Mask.VP_RANGE_V;
 
-Masks.FOCUS             = Templates.FOCUS_ROOT( start +1: start + span, : );
+Mask.FOCUS              = Templates.FOCUS_ROOT( start +1: start + span, : );
 
 Templates.GRADIENT_DIR  = Templates.GRADIENT_DIR_ROOT(  (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, (RES_VH(2)-VP_H+1)-320:RES_VH(2)-VP_H+320 );
 
