@@ -68,7 +68,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     
     idx             = find(Lane_Angle==90);
     
-    Lane_Angle(idx) = Lane_Angle(idx)-1; % Add small amount to avoid tan(90)
+    Lane_Angle(idx) = Lane_Angle(idx)-1; % Adjust to avoid tan(90)
     
     Tan_Lane_Angle = tand(Lane_Angle);
              
@@ -81,16 +81,14 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %%
     %% Compute Intersections with Offseted Horizon  and Botton%%
     
-    Lane_Int_Bottom_tmp   = ((bottom-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);   
-   
-                       
+    Lane_Int_Bottom_tmp   = ((bottom-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);                            
     Lane_Int_Horizon_tmp  = ((horizon-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);    
 
     
  
     
     
-     Lane_Int_Bottom = single(zeros(size(Lane_Int_Bottom_tmp,1),1));
+     Lane_Int_Bottom  = single(zeros(size(Lane_Int_Bottom_tmp,1),1));
      Lane_Int_Horizon = single(zeros(size(Lane_Int_Horizon_tmp,1),1));
      Lane_Props_Int   = single(zeros(size(IDX_LANE_PIX,1),1));
      Lane_Depth_Int   = single(zeros(size(IDX_LANE_PIX,1),1));
@@ -131,7 +129,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% make weighted histogram over both intersections                              %%
+    %% Weighted Histogram over both Intersections                              %%
     %% the weight is pixel surface (i.e. depth squared) times per-pixel probability %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     firstDim  = ceil( (Lane_Int_Horizon - VP_BINS_HST(1)  + (VP_STEP_HST/2)) / VP_STEP_HST  );  %% horizon intersection
@@ -146,12 +144,18 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     
     INT_HIST_VP_PROB   =   accumarray( firstDim,  [Lane_Scaled_Props_Int; 0] );
   
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-    %% go from per-pixel probs to segment (lane boundary) probs    %% 
-    %% use the std of depth per lane bin                           %%
-    %% higher std means that lane is detected over larger distance %%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    
+    
+    
+    
+%     Max_Lane_Depth =100;
+%     
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+%     %% go from per-pixel probs to segment (lane boundary) probs    %% 
+%     %% use the std of depth per lane bin                           %%
+%     %% higher std means that lane is detected over larger distance %%
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     covCount = sum(INT_HIST_LANE_PROB,2); %% sum coverage
 %     maskVC   = 0 < INT_HIST_LANE_PROB;
 %     covVC    = maskVC .* repmat([1:Max_Lane_Depth],size(LANE_BINS_H,2),1);    
@@ -160,13 +164,13 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
 %     covStd   = sqrt(sum( maskVC .* (covVC-repmat(covMean,1,Max_Lane_Depth)).^2, 2 )./covVCCnt); 
 %     covStd( isnan(covStd) ) = 0;    
 %     INT_HIST_LANE_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob
-    
-%     INT_HIST_LANE_PROB = (covCount)'; %% final prob is per-pixel prob times lane boundary prob 
-    
-    
-    %%%%%%%%%%%%%%%%%%%%%%
-    %% same for VP prob %%
-    %%%%%%%%%%%%%%%%%%%%%%
+%     
+%  
+%     
+%     
+%     %%%%%%%%%%%%%%%%%%%%%
+%     % same for VP prob %%
+%     %%%%%%%%%%%%%%%%%%%%%
 %     covCount = sum(INT_HIST_VP_PROB,2); %% sum coverage
 %     maskVC   = 0 < INT_HIST_VP_PROB;
 %     covVC    = maskVC .* repmat([1:Max_Lane_Depth],size(VP_BINS_HST,2),1);    
@@ -175,8 +179,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
 %     covStd   = sqrt(sum( maskVC .* (covVC-repmat(covMean,1,Max_Lane_Depth)).^2, 2 )./covVCCnt); 
 %     covStd( isnan(covStd) ) = 0;    
 %     INT_HIST_VP_PROB = (covCount.*covStd)'; %% final prob is per-pixel prob times lane boundary prob
-    
-%    INT_HIST_VP_PROB = (covCount)'; %% final prob is per-pixel prob times lane boundary prob 
+
          
     
     
