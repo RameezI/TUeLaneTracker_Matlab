@@ -11,6 +11,7 @@ function [ Obs, ObsL, ObsR, ObsN, Width ] = createVPObservationModel( LANE_BOUND
     %% compute intersection with current horizon %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     L  = (LANE_BOUNDARIES(1,1) + LANE_BOUNDARIES(2,1))/2; %% in VP coordiante system
+
     DX = TMP_VP_H - L;
     DY = TMP_VP_V + 240;
     IL = (DX/DY) * (OFFSET - TMP_VP_V) + TMP_VP_H;
@@ -20,22 +21,22 @@ function [ Obs, ObsL, ObsR, ObsN, Width ] = createVPObservationModel( LANE_BOUND
     DY = TMP_VP_V + 240;
     IR = (DX/DY) * (OFFSET - TMP_VP_V) + TMP_VP_H;
     
-%     figure(800)
-%     clf
-%     hold on
-%     plot( [L TMP_VP_H], [-240 TMP_VP_V], 'b' )
-%     plot( [TMP_VP_H TMP_VP_H], [TMP_VP_V TMP_VP_V], 'ob' )
-%     plot( [TMP_VP_H R], [TMP_VP_V -240], 'r' )
-%     plot( [TMP_VP_H TMP_VP_H], [TMP_VP_V TMP_VP_V], 'xr' )
-%     plot( [-320 320], [OFFSET OFFSET], 'k' )
-%     plot( [-320 320], [-240 -240], 'k' )
-%     plot( [IL IL], [OFFSET OFFSET], 'ob' )
-%     plot( [IR IR], [OFFSET OFFSET], 'xr' )
-%     axis([-320 320 -240 240]);
-%     axis equal    
-%     grid on
-%     drawnow
-%     pause
+    figure(800)
+    clf
+    hold on
+    plot( [L TMP_VP_H], [-240 TMP_VP_V], 'b' )
+    plot( [TMP_VP_H TMP_VP_H], [TMP_VP_V TMP_VP_V], 'ob' )
+    plot( [TMP_VP_H R], [TMP_VP_V -240], 'r' )
+    plot( [TMP_VP_H TMP_VP_H], [TMP_VP_V TMP_VP_V], 'xr' )
+    plot( [-320 320], [OFFSET OFFSET], 'k' )
+    plot( [-320 320], [-240 -240], 'k' )
+    plot( [IL IL], [OFFSET OFFSET], 'ob' )
+    plot( [IR IR], [OFFSET OFFSET], 'xr' )
+    axis([-320 320 -240 240]);
+    axis equal    
+    grid on
+    drawnow
+    pause
     
     
     %%%%%%%%%%%%%%%%%%%%%%%

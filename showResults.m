@@ -124,8 +124,8 @@ global DisplayNumber;
         set(gcf,'units','pixels')
         set(gcf,'position',[500 500 LANE_BINS_H(end)-LANE_BINS_H(1) 480])
         set(gcf,'PaperPositionMode','auto')
-        SAV = ['/home/rameez/Desktop/result_imgs/',sprintf('%06d',DisplayNumber),'.png'];
-        saveas(gcf,SAV)
+%         SAV = ['/home/rameez/Desktop/result_imgs/',sprintf('%06d',DisplayNumber),'.png'];
+%         saveas(gcf,SAV)
 DisplayNumber = DisplayNumber+1;
 
 end

@@ -15,8 +15,6 @@ function [IDX_FOC_TOT_P, Likelihoods] = filter_And_Focus(Likelihoods, MASKS)
     
     for ni = 2:NBUFFER
         
-        % Filter %
-    
         tempP               = Likelihoods.TOT_ALL(:,:,ni);
         tempD               = Likelihoods.GRADIENT_DIR_ALL(:,:,ni);
         
