@@ -23,12 +23,12 @@ function [] = laneTracker2()
 
     %%
     %% TUe DATASET %%
-    global DATASET IMAGE_FILES LOGO
+    global DATASET IMAGE_FILES LOGO DisplayNumber
     DATASET = '/media/rameez/Linux-Extended/DataSet/eindhoven/PNG_imgs/';
     LOGO = im2double(imread('tue.png'));
     DATASET
     IMAGE_FILES= dir([DATASET,'*.png']); 
-    
+    DisplayNumber =0;
     
     %%
     %% States of the system %%
@@ -69,9 +69,8 @@ function [] = laneTracker2()
     %              | 
     %              |
     %              v + V (1st dim)
-    %
-    %
-    %
+    
+    
     %% 
     %% Camera Properties %%
     global CM_TO_PIXEL RES_VH C_V C_H RGB
@@ -121,15 +120,12 @@ function [] = laneTracker2()
     %%
     %% Lane Normal Distributions %%
     
-      global NGRAY NMAG NDIR
-%     NGRAY = [25 0.6];              %% sigmoid membership: white is more likely to be a lane boundary
-%     NMAG  = [50 0.15];             %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
-%     NDIR  = [-0.25 15];            %% sigmoid membership: direction according to the template is more likely to be a lane boundary   
-    
+     global NGRAY NMAG NDIR  
 
-     NGRAY = [ 2^-3   153];              %% sigmoid membership: white is more likely to be a lane boundary
-     NMAG  = [ 2^-3    45];             %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
-     NDIR  = [-2^-2   15];            %% sigmoid membership: direction according to the template is more likely to be a lane boundary   
+     NGRAY = [ 2^-3   153];      %% sigmoid membership: white is more likely to be a lane boundary
+     NMAG  = [ 2^-3    45];      %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
+     NDIR  = [-2^-2   15];       %% sigmoid membership: direction according to the template is more likely to be a lane boundary
+     
     
     %%
     %% The VP Coordinate System %%^TODO: Is the column first dimension herer?

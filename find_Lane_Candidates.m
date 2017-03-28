@@ -198,10 +198,10 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %%
     %% Predict Step %%
     
-    TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
-    TEMP = TEMP / sum(sum(TEMP));
-    LANE_FILTER = 2^-1*TEMP + 2^-1*LANE_PRIOR ;
-    
+      TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
+      TEMP = TEMP / sum(sum(TEMP));
+      LANE_FILTER = 2^-1*TEMP + 2^-1*LANE_PRIOR;
+
     
     %+ 0.1*LANE_PRIOR; %% change the 0.5 to make filter more strict or loose
 
@@ -249,7 +249,6 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
                     
                   
                     likelihood_Neg    = OBS_NEG_NORMA * exp( -sum( obsNeg.*INT_HIST_LANE_PROB, 2 )^2/OBS_NEG_NOMIN );
-                    %likelihood_Neg   =  1- sum(obsNeg.*INT_HIST_LANE_PROB_NEG_NORM, 2);
                     conditional_prob  = likelihood_left * likelihood_right * likelihood_Neg;
                                              
 

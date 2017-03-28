@@ -8,7 +8,7 @@ function [] = showResults( RGB, VanishingPt, message )
     %% all required globals %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%    
     global LOGO VP_BINS_HST C_V C_H LANE_BINS_H INT_HIST_LANE_PROB INT_HIST_VP_PROB FILLING_BUFFERS STATE_COUNTER RES_VH DETECTING_EGO_LANE TRACKING_EGO_LANE_STABLE TRACKING_EGO_LANE CURRENT_STATE LANE_BOUNDARIES STATE_ERROR
-    
+    global N_IMAGE START_END_FRAMES
     
     
 
@@ -117,15 +117,16 @@ function [] = showResults( RGB, VanishingPt, message )
 
      %%
      %% save this figure %%
+global DisplayNumber;
 
         drawnow
         %pause(1);
-%        set(gcf,'units','pixels')
-%        set(gcf,'position',[500 500 LANE_BINS_H(end)-LANE_BINS_H(1) 480])
-%        set(gcf,'PaperPositionMode','auto')
-%        SAV = [DATASET,'/result_imgs/',sprintf('%06d',N_IMAGE-START_END_FRAMES(1)-1),'.png'];
-%        saveas(gcf,SAV)
-
+        set(gcf,'units','pixels')
+        set(gcf,'position',[500 500 LANE_BINS_H(end)-LANE_BINS_H(1) 480])
+        set(gcf,'PaperPositionMode','auto')
+        SAV = ['/home/rameez/Desktop/result_imgs/',sprintf('%06d',DisplayNumber),'.png'];
+        saveas(gcf,SAV)
+DisplayNumber = DisplayNumber+1;
 
 end
 
