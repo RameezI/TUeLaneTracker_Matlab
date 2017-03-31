@@ -5,7 +5,7 @@
 %%
 %%
 %%
-function [ STRENGHT, DIR ] = getGradientInfo( IN )
+function [ STRENGHT, DX, DY, angle ] = getGradientInfo( IN )
       
 % Sobel Filter
     sobel = [ -1 -2 -1; 0 0 0; 1 2 1];
@@ -18,7 +18,7 @@ IN= int16(IN);
  
  %% Apply saturation
  
- dY( dY > 255 ) =  255;
+ dY( dY > 65536 ) =  255;
  dX( dX > 255 ) =  255;
  
  dY( dY < -255 ) =  -255;
@@ -42,7 +42,8 @@ IN= int16(IN);
 
 %% return
     STRENGHT = magnitude;
-    DIR      = angle;
+    DX       = dX ;
+    DY       = dY;
 
    
     

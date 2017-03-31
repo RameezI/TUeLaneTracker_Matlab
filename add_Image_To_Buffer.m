@@ -5,7 +5,7 @@ function [Templates, Likelihoods, Mask] = add_Image_To_Buffer( RGB, VanishingPt,
 
 
 %%Required Global Variables %%
-global   NBUFFER NGRAY NMAG NDIR  RES_VH              
+global   NBUFFER NGRAY NMAG NDIR  RES_VH  tippingPoint_gradMag tippingPoint_gray          
 
  
 %%Local Variables Extracted from Arguments%%
@@ -37,7 +37,7 @@ VP_H = VanishingPt.H;
 %%
 %% Get Gradients %%
     
-[MAGI, DIRI]   =  getGradientInfo( I_uint8  );
+[MAGI, DX, DY, DIRI]   =  getGradientInfo( I_uint8  );
 
 
 %[MAGSH, DIRSH] = getGradientInfo( SH ); 
@@ -74,6 +74,10 @@ DIR      = imcrop(DIRI,      [1,RES_VH(1)-span+1,RES_VH(2), span]);
 I_uint8  = imcrop(I_uint8,   [1,RES_VH(1)-span+1,RES_VH(2), span]);
 
 
+
+tanDIR = single(DX)./single(DY);
+DIR_tangent      = imcrop(tanDIR,      [1,RES_VH(1)-span+1,RES_VH(2), span]);
+
   
 
 
@@ -91,7 +95,9 @@ Templates.DEPTH     = imcrop(Templates.DEPTH,        [1,RES_VH(1)-span+1,RES_VH(
 %%
 %% Compute Lane Marker Probabilities %% 
 
- PROB = laneMarkerProbabilities( NGRAY, NMAG, NDIR, I_uint8,  MAG, DIR, TemplateGradientDir);
+ 
+
+ PROB = laneMarkerProbabilities( tippingPoint_gray, tippingPoint_gradMag, I_uint8, MAG, DIR_tangent, DIR, TemplateGradientDir);
     
   [Likelihoods] = updateLaneLikelihoods(NBUFFER, PROB,  DIR, Likelihoods);
      
