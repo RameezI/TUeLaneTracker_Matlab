@@ -26,9 +26,7 @@
     tempProb = 0.5*MAG_P +0.5*GRAY_P; 
     tempProb(tempProb<0)=0;
     
-    
 
-    
     
     DIR= DIR.*pi/180; %conversion to radians
     % DIR_P = 1./(1 + exp(single(NDIR(1)*( abs(tan(DIR)-tan(DIR_TEMPLATE))) -NDIR(2) )));

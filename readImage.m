@@ -22,5 +22,5 @@ function[RGB] = readImage( nimage )
 %    GRAD_SIGMA = 1.5; %% can be swept           
 %    RGB = imfilter( RGB, fspecial('gaussian',11,GRAD_SIGMA), 'replicate' );
          
-     N_IMAGE = N_IMAGE+2;
+     N_IMAGE = N_IMAGE+1;
 end
