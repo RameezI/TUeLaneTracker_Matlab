@@ -22,12 +22,12 @@
     
     
     %DIR_TEMPLATE = uint8(round(DIR_TEMPLATE));
-
-    %White is more probabale, but low gradient will even have a negative
-    %penalty
-    tempProb = 0.5*MAG_P +0.5*GRAY_P; 
     
-    tempProb(tempProb<0)=0;
+    
+    
+    tempProb = 0.5*MAG_P +0.GRAY_P; 
+    
+    
     
     
     
