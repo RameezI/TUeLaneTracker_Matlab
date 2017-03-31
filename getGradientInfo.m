@@ -33,14 +33,17 @@ IN= int16(IN);
   magnitude(magnitude>255) = 255;
   
 
+  
 %% get angle
       angle= atan2(single(dX),single(dY));
       angle= angle * (180/pi);
-      angle = floor(angle);
+%       angle = floor(angle);
 
 
 %% return
     STRENGHT = magnitude;
     DIR      = angle;
+
+   
     
 end

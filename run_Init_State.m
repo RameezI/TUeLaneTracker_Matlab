@@ -22,8 +22,11 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     %% Create Gradient Direction Template %%
     RES_VH              = single(RES_VH);
     ROOT_DIR_TEMPLATE   = single(createTemplate(RES_VH(1),RES_VH(2)));  %%^TODO: Verify this on C side
-
-    
+ 
+%       figure(100)
+%       imshow(ROOT_DIR_TEMPLATE,[0 pi])
+%       colormap jet
+%       pause
     
     
     %%
@@ -33,9 +36,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
         ROOT_FOCUS_TEMPLATE(2*VP_RANGE_V +1:end,:) = 1;        
         ROOT_FOCUS_TEMPLATE = floor(ROOT_FOCUS_TEMPLATE*255);
         
-
-        
-        
+   
     %%
     %% Create Depth Template %%
 
@@ -62,7 +63,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
 
                          templates = struct;
 
-                              templates.GRADIENT_DIR_ROOT  = round(ROOT_DIR_TEMPLATE);
+                              templates.GRADIENT_DIR_ROOT  = ROOT_DIR_TEMPLATE;
                               templates.FOCUS_ROOT         = ROOT_FOCUS_TEMPLATE;
                               templates.DEPTH_ROOT         = ROOT_IDEPTH_TEMPLATE;
 

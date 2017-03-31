@@ -53,27 +53,27 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
             %%%%%%%%%%%%%%%%%%%%%
             %% get expected VP %%
             %%%%%%%%%%%%%%%%%%%%%
-            TMP_VP_V = VP_BINS_V(nv); %% in image center coordinates
-            TMP_VP_H = VP_BINS_H(nh); %% in image center coordinates
+            TMP_VP_V = VP_BINS_V(nv); 
+            TMP_VP_H = VP_BINS_H(nh);
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% to current VP coordinate system %%
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            TMP_VP_V = -TMP_VP_V + O_V; %% V axis is reversed for VP coordinate system
+            TMP_VP_V = -(TMP_VP_V - O_V); %% V axis is reversed for VP coordinate system 
             TMP_VP_H =  TMP_VP_H - O_H; %% H axis has the same orientation
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% create the observation model %%
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            [model modelL modelR modelN widht] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, VP_STEP_HST, VP_BINS_HST, VP_FILTER_OFFSET_V );
-            widht = (1/VP_LANE_RATIO) * widht * (1/CM_TO_PIXEL);
+            [model, modelN, width] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, VP_STEP_HST, VP_BINS_HST, VP_FILTER_OFFSET_V );
+            width = (1/VP_LANE_RATIO) * width * (1/CM_TO_PIXEL);
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% the likelihood of the observations given %% 
             %% te model                                 %%                                  
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             negP        = OBS_NEG_NORMA * exp( -sum( modelN.*INT_HIST_VP_PROB', 1 )^2/OBS_NEG_NOMIN );
-            widhtP      = LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-widht)^2 / LANE_WIDTH_DIFF_NOMIN );
+            widhtP      = LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-width)^2 / LANE_WIDTH_DIFF_NOMIN );
             update_prob = sum( INT_HIST_VP_PROB' .* model, 1) * negP * widhtP;
                        
 %             sfigure(562);
@@ -93,7 +93,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
     %%%%%%%%%%%%%%%
     %% normalize %%
     %%%%%%%%%%%%%%%
-    VP_FILTER = VP_FILTER / sum( VP_FILTER(:), 1 );
+    VP_FILTER = VP_FILTER / sum( sum(VP_FILTER) );
 
 
 
@@ -130,14 +130,14 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
     %% contract solution                                   %%
     %% here we use the VP to get back to image coordinates %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    [SEGMENT SEGMENT_TIGHT SEGMENT_VERY_TIGHT SEGMENT_WIDE] = createEgoLaneMask( LANE_BOUNDARIES, C_V, C_H, VanishingPt.V, VanishingPt.H );
+   % [SEGMENT SEGMENT_TIGHT SEGMENT_VERY_TIGHT SEGMENT_WIDE] = createEgoLaneMask( LANE_BOUNDARIES, C_V, C_H, VanishingPt.V, VanishingPt.H );
     
     
     
     %%%%%%%%%%%%%%
     %% get mask %%
     %%%%%%%%%%%%%%                        
-    SEGMENT_EDGE = SEGMENT_WIDE - SEGMENT_VERY_TIGHT;
+   % SEGMENT_EDGE = SEGMENT_WIDE - SEGMENT_VERY_TIGHT;
     
     
     

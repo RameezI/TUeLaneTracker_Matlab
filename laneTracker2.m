@@ -122,9 +122,9 @@ function [] = laneTracker2()
     
      global NGRAY NMAG NDIR  
 
-     NGRAY = [ 2^-3   153];      %% sigmoid membership: white is more likely to be a lane boundary
-     NMAG  = [ 2^-3    45];      %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
-     NDIR  = [-2^-2   15];       %% sigmoid membership: direction according to the template is more likely to be a lane boundary
+     NGRAY = [ 2^0    100];      %% sigmoid membership: white is more likely to be a lane boundary
+     NMAG  = [ 2^0     50];      %% Sobel edge filter - sigmoid membership: strong edge magnitude is more likelely to be a lane boundary
+     NDIR  = [ 2^0   0.26];       %% sigmoid membership: direction according to the template is more likely to be a lane boundary
      
     
     %%

@@ -29,7 +29,7 @@ VP_H = VanishingPt.H;
 %%
 %% PreProcessing %%
     GRAD_SIGMA = 1.5; %% can be swept           
-    I = imfilter( I, fspecial('gaussian',11,GRAD_SIGMA), 'replicate' );
+    I = imfilter( I, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );
     
     I_uint8 = im2uint8(I);
     
@@ -54,6 +54,8 @@ span= floor(RES_VH(1)/2)-Mask.Margin + Mask.VP_RANGE_V;
 
 Mask.FOCUS              = Templates.FOCUS_ROOT( start +1: start + span, : );
 
+
+
 Templates.GRADIENT_DIR  = Templates.GRADIENT_DIR_ROOT(  (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, (RES_VH(2)-VP_H+1)-320:RES_VH(2)-VP_H+320 );
 
 
@@ -61,7 +63,6 @@ Templates.DEPTH         = Templates.DEPTH_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)
 
     
     
-
 
 
 
@@ -73,17 +74,25 @@ DIR      = imcrop(DIRI,      [1,RES_VH(1)-span+1,RES_VH(2), span]);
 I_uint8  = imcrop(I_uint8,   [1,RES_VH(1)-span+1,RES_VH(2), span]);
 
 
+  
+
+
+
 TemplateGradientDir = imcrop(Templates.GRADIENT_DIR, [1,RES_VH(1)-span+1,RES_VH(2), span]);
 Templates.DEPTH     = imcrop(Templates.DEPTH,        [1,RES_VH(1)-span+1,RES_VH(2), span]);
+
+
+
+%     figure(100)
+%     imshow(TemplateGradientDir,[0 pi])
+%     pause
+
 
 %%
 %% Compute Lane Marker Probabilities %% 
 
-
  PROB = laneMarkerProbabilities( NGRAY, NMAG, NDIR, I_uint8,  MAG, DIR, TemplateGradientDir);
     
-      
-
   [Likelihoods] = updateLaneLikelihoods(NBUFFER, PROB,  DIR, Likelihoods);
      
         

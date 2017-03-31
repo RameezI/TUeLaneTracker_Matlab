@@ -27,7 +27,8 @@ function [TEMPLATE] = createTemplate( H ,W )
         index = sub2ind([2*H+1, 2*W+1], pixrot(2,:), pixrot(1,:) );
 
         %% draw
-        TEMPLATE(index) = rad2deg(an);          
+        %TEMPLATE(index) = rad2deg(an);
+        TEMPLATE(index) = an; 
     end
    
     %% bottom border left part
@@ -50,7 +51,8 @@ function [TEMPLATE] = createTemplate( H ,W )
         index = sub2ind([2*H+1, 2*W+1], pixrot(2,:), pixrot(1,:) );
 
         %% draw
-        TEMPLATE(index) = rad2deg(an);         
+        %TEMPLATE(index) = rad2deg(an);
+        TEMPLATE(index) = an;
     end
 
     %% bottom border rithg part
@@ -73,7 +75,8 @@ function [TEMPLATE] = createTemplate( H ,W )
         index = sub2ind([2*H+1, 2*W+1], pixrot(2,:), pixrot(1,:) );
 
         %% draw
-        TEMPLATE(index) = rad2deg(an);         
+        %TEMPLATE(index) = rad2deg(an);
+        TEMPLATE(index) = an;  
     end
 
     %% right border
@@ -97,7 +100,8 @@ function [TEMPLATE] = createTemplate( H ,W )
         index = sub2ind([2*H+1, 2*W+1], pixrot(2,:), pixrot(1,:) );     
         
         %% draw
-        TEMPLATE(index) = rad2deg(an);          
+        %TEMPLATE(index) = rad2deg(an);    
+         TEMPLATE(index) = an;
     end
     
     %% fill in holes
