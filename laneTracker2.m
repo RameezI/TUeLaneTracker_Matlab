@@ -128,7 +128,7 @@ function [] = laneTracker2()
 % %      NDIR  = [ 2^0   0.26];       %% sigmoid membership: direction according to the template is more likely to be a lane boundary
 
 global tippingPoint_gray tippingPoint_gradMag;
-tippingPoint_gray= 100;
+tippingPoint_gray= 170;
 tippingPoint_gradMag= 50;
      
     

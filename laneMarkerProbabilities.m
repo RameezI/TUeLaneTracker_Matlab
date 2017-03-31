@@ -61,7 +61,7 @@
     PROB         = floor(((tempProb+1) .* (DIR_P+1)) /256);  %% prob with dir
     
     
-%     
+    
 %     figure(220);
 %     imshow(PROB, [0, 255]);
   end

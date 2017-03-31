@@ -200,7 +200,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     
       TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
       TEMP = TEMP / sum(sum(TEMP));
-      LANE_FILTER = 2^-1*TEMP + 2^-1*LANE_PRIOR;
+      LANE_FILTER =TEMP; 
 
     
     %+ 0.1*LANE_PRIOR; %% change the 0.5 to make filter more strict or loose
