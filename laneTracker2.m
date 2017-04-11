@@ -129,7 +129,7 @@ function [] = laneTracker2()
 
 global tippingPoint_gray tippingPoint_gradMag;
 tippingPoint_gray= uint8(100);
-tippingPoint_gradMag= uint8(40);
+tippingPoint_gradMag= uint8(50);
      
     
     %%
