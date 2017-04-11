@@ -64,13 +64,16 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     
     Lane_Depth      = Templates.DEPTH(IDX_LANE_PIX);
     
-    Lane_Angle      = Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX);
-    
-    idx             = find(Lane_Angle==90);
-    
-    Lane_Angle(idx) = Lane_Angle(idx)-1; % Adjust to avoid tan(90)
-    
-    Tan_Lane_Angle = tand(Lane_Angle);
+%     Lane_Angle      = Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX);
+%     
+%     idx             = find(Lane_Angle==90);
+%     
+%     Lane_Angle(idx) = Lane_Angle(idx)-1; % Adjust to avoid tan(90)
+%     
+%     Tan_Lane_Angle = tand(Lane_Angle);
+
+      Tan_Lane_Angle= Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX);
+
              
     bottom  = LANE_FILTER_OFFSET_V; %% keep fixed regardless of the FOV or use, keeps the cm-to-pixel ratio more stable
     
@@ -81,8 +84,8 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %%
     %% Compute Intersections with Offseted Horizon  and Botton%%
     
-    Lane_Int_Bottom_tmp   = ((bottom-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);                            
-    Lane_Int_Horizon_tmp  = ((horizon-Lane_Points(:,2))./Tan_Lane_Angle) + Lane_Points(:,1);    
+    Lane_Int_Bottom_tmp   = floor(  ((bottom-Lane_Points(:,2)) *2^7  )./Tan_Lane_Angle) + Lane_Points(:,1);                            
+    Lane_Int_Horizon_tmp  = floor(  ((horizon-Lane_Points(:,2))*2^7  )./Tan_Lane_Angle) + Lane_Points(:,1);    
 
     
  
@@ -200,7 +203,8 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     
       TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
       TEMP = TEMP / sum(sum(TEMP));
-      LANE_FILTER =TEMP; 
+      LANE_FILTER = TEMP;
+%       LANE_FILTER = 0.5*TEMP +0.5*LANE_PRIOR ; 
 
     
     %+ 0.1*LANE_PRIOR; %% change the 0.5 to make filter more strict or loose
@@ -316,7 +320,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %% unstable track ?            %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     LANE_BOUNDARIES
-    if LANE_BOUNDARIES(5,1) < LANE_CONF_THRESHOLD || LANE_BOUNDARIES(5,2) < LANE_CONF_THRESHOLD
+    if LANE_BOUNDARIES(5,1) < LANE_CONF_THRESHOLD  || LANE_BOUNDARIES(5,2) < LANE_CONF_THRESHOLD
         msg = STATE_ERROR;
     else
         msg = STATE_READY;    

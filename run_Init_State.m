@@ -22,7 +22,13 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     %% Create Gradient Direction Template %%
     RES_VH              = single(RES_VH);
     ROOT_DIR_TEMPLATE   = single(createTemplate(RES_VH(1),RES_VH(2)));  %%^TODO: Verify this on C side
- 
+    ROOT_DIR_TEMPLATE   = tan(ROOT_DIR_TEMPLATE);
+    
+    ROOT_DIR_TEMPLATE(ROOT_DIR_TEMPLATE>256)= 255;
+    ROOT_DIR_TEMPLATE(ROOT_DIR_TEMPLATE<-256)= -255;  
+    ROOT_DIR_TEMPLATE = int16(ROOT_DIR_TEMPLATE);
+    
+    
 %       figure(100)
 %       imshow(ROOT_DIR_TEMPLATE,[0 pi])
 %       colormap jet

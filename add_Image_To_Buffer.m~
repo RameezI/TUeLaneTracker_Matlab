@@ -17,41 +17,46 @@ VP_H = VanishingPt.H;
 %% Get Channels %%
 
     I       = rgb2gray(RGB);
-%     HSV     = rgb2hsv(RGB);
-%     H       = HSV(:,:,1);
-%     S       = HSV(:,:,2);
-%     V       = HSV(:,:,3);
+    HSV     = rgb2hsv(RGB);
+    H       = HSV(:,:,1);
+    S       = HSV(:,:,2);
+    V       = HSV(:,:,3);
     
     I  = im2single(I);
-%     V  = im2single(V);
+    V  = im2single(V);
     
 %%
 %% PreProcessing %%
-    
-    GRAD_SIGMA = 1.5; %% can be swept               
+    GRAD_SIGMA = 1.5; %% can be swept           
     I = imfilter( I, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );
+    V = imfilter( V, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );
+    S = imfilter( S, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );
+    H = imfilter( H, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );
     
-%      V = imfilter( V, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );
-%      S = imfilter( S, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );
-% %     H = imfilter( H, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );    
-
+%     BW = im2bw(H, 1);
+%     BW = 1-BW;
+    
     I_uint8 = im2uint8(I);
+    V_uint8 = im2uint8(V);
 
+    [Gx, Gy] = imgradientxy(I);
+    
+    
+    
+    
 
+    
 %%
-%% Get Gradients %%    
-%[MAGI, tanDIRI]   =  getGradientInfo( I_uint8  );
- [MAGI, tanDIRI]   =  getGradientInfo( I_uint8  );
-
-% % MAGI= single(MAGI).*BW;
-% MAGI =uint8(MAGI);
-
-% [MAGH, DIRH]    =  getGradientInfo(H_uint8); 
-
-% MAGI= BW.*single(MAGI);
+%% Get Gradients %%
+    
+%[MAGI, tanDIRI]  =  getGradientInfo( I_uint8  );
+[MAGI, tanDIRI]   =  getGradientInfo( V_uint8  );
+[MAGH, DIRH]      =  getGradientInfo(H_uint8); 
+BW = im2bw(H, 100);
+%MAGI= BW.*single(MAGI);
  
-%    figure(220);
-%    imshow(MAGI , [0, 255]);
+  figure(220);
+  imshow(BW , [0, 255]);
 
 
 %[MAGS, DIRS]   = getGradientInfo( S  ); 
@@ -71,13 +76,13 @@ Mask.FOCUS              = Templates.FOCUS_ROOT( start +1: start + span, : );
 Templates.GRADIENT_DIR  = Templates.GRADIENT_DIR_ROOT(  (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, (RES_VH(2)-VP_H+1)-320:RES_VH(2)-VP_H+320 );
 TemplateGradientDir_tangent = imcrop(Templates.GRADIENT_DIR, [1,RES_VH(1)-span+1,RES_VH(2), span]);
 
-Templates.DEPTH     = Templates.DEPTH_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, : ); 
+Templates.DEPTH         = Templates.DEPTH_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, : ); 
 Templates.DEPTH     = imcrop(Templates.DEPTH,        [1,RES_VH(1)-span+1,RES_VH(2), span]);   
 
 
 I_uint8  = imcrop (I_uint8,     [1,RES_VH(1)-span+1,RES_VH(2), span]);
 MAG      = imcrop (MAGI,        [1,RES_VH(1)-span+1,RES_VH(2), span]);    
-tanDIR   = imcrop  (tanDIRI,     [1,RES_VH(1)-span+1,RES_VH(2), span]);
+tanDIR  = imcrop  (tanDIRI,     [1,RES_VH(1)-span+1,RES_VH(2), span]);
 
 
 

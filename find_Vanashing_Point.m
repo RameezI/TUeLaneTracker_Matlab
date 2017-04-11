@@ -24,7 +24,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
     %%%%%%%%%%%%%%%%%%
     VP_FILTER = imfilter( VP_FILTER, VP_TRANSITION, 'Replicate' );
     VP_FILTER = VP_FILTER / sum(VP_FILTER(:),1);
-    %VP_FILTER = 0.5*VP_FILTER + 0.5*VP_PRIOR;
+%     VP_FILTER = 0.5*VP_FILTER + 0.5*VP_PRIOR;
 
     
 %     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

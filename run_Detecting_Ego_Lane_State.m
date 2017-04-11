@@ -27,8 +27,7 @@ function [msg, VanishingPt, Templates, Likelihoods, Mask] = run_Detecting_Ego_La
         %% Filter out Horizon based on Focus Mask %
         [IDX_FOC_TOT_P, Likelihoods] = filter_And_Focus(Likelihoods,Mask); 
         
-        
-        
+                
         %%
         %% Find Lane Candidatae in the ROI %%
         msg = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, Mask);
@@ -41,9 +40,8 @@ function [msg, VanishingPt, Templates, Likelihoods, Mask] = run_Detecting_Ego_La
         
         %%
         %% Update the center lane %%
-        find_Center_Lane();
-        
-        
+        find_Center_Lane();        
+     
         showResults( RGB, VanishingPt, msg );
                     
         %%
@@ -52,7 +50,6 @@ function [msg, VanishingPt, Templates, Likelihoods, Mask] = run_Detecting_Ego_La
             
                 msg = STATE_READY;
            
-
         end
         
         
