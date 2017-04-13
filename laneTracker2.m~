@@ -181,7 +181,8 @@ function [] = laneTracker2()
     LANE_WIDTH_DIFF_NOMIN = 2*LANE_WIDTH_DIFF_SIGMA^2;
     
     %%
-    %% The Sigma on the Lane Observation Probability Mass between the Lane Markings %%    
+    %% The Sigma on the Lane Observation Probability Mass between the lane markings %%
+    
     global OBS_NEG_SIFMA OBS_NEG_NOMIN OBS_NEG_NORMA
     OBS_NEG_SIFMA = 0.2;
     OBS_NEG_NOMIN = 2*OBS_NEG_SIFMA^2;

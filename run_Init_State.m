@@ -1,6 +1,10 @@
 function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, NBUFFER, VP_RANGE_V)
     
 
+global grayROI_buffer;
+
+
+
 
     Margin = 80; %% Note: Should be fitted using sweeps
     span   = floor(RES_VH(1)/2)-Margin +25; %best activation of pixels i.e. VP= -25
@@ -10,8 +14,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     DIR_ALL             = single(zeros( span, RES_VH(2), NBUFFER));   
     MASK_FOC_TOT_P      = single(zeros( span, RES_VH(2)));
     FOC_TOT_P           = single(zeros( span, RES_VH(2)));
-    
-    
+                        
     
     TOT_P               = single(zeros( span, RES_VH(2)));
     AVG_DIR_TOT_P       = single(zeros( span, RES_VH(2)));
@@ -25,7 +28,8 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     ROOT_DIR_TEMPLATE   = tan(ROOT_DIR_TEMPLATE);
     
     ROOT_DIR_TEMPLATE(ROOT_DIR_TEMPLATE>256)= 255;
-    ROOT_DIR_TEMPLATE(ROOT_DIR_TEMPLATE<-256)= -255;  
+    ROOT_DIR_TEMPLATE(ROOT_DIR_TEMPLATE<-256)= -255;
+    ROOT_DIR_TEMPLATE = ROOT_DIR_TEMPLATE *2^7;
     ROOT_DIR_TEMPLATE = int16(ROOT_DIR_TEMPLATE);
     
     

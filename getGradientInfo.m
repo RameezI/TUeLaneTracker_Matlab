@@ -47,6 +47,5 @@ tanDIR= dX*2^7./dY;
 
 tanDIR(tanDIR>255*2^7) =  255*2^7;
 tanDIR(tanDIR<-255*2^7)= -255*2^7;
-%tanDIR = tanDIR *2^7;
-tanDIR= floor(tanDIR);    
+tanDIR = int16(tanDIR);    
 end

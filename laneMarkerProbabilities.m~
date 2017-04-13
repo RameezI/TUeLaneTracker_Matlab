@@ -1,6 +1,6 @@
   function [PROB] = laneMarkerProbabilities(tippingPoint_gray, tippingPoint_gradMag, I, gradMAG , gradDIRTangent, gradDirTanget_template)
-
-
+  
+global I_last
   % This function computes the per pixel probability for a lane boundary
 % pixel. The result is a Probability Map of the focussed region. The
 % computed Proability MAP is represented by scaled integer in range [0 255]  
@@ -11,7 +11,6 @@
     GRAY_P= (255*x)./(1+ x);
     
     
-   
     
 %%    
 
@@ -37,9 +36,8 @@
 
 %% Compute Total Lane Marker Probability %
       PROB =  (uint16(tempProb) .* uint16(DIR_P)) /255;  %% prob with dir
-      
         
 %     
-%     figure(220);
-%     imshow(PROB, [0, 1]);
+    figure(220);
+    imshow(PROB, [0, 255]);
   end
