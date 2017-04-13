@@ -9,29 +9,21 @@
 %% 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, Mask)
+function [ msg, VanishingPt ] = find_Lane_Candidates( VanishingPt, IDX_FOC_TOT_P, Likelihoods, Templates, Mask)
 
 
 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% all required globals %%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%
-    global STATE_READY STATE_ERROR
-    global LANE_CONF_THRESHOLD C_V C_H RES_VH
-    global OBS_NEG_NOMIN OBS_NEG_NORMA OBS_L OBS_R OBS_N
-    global VP_BINS_HST VP_STEP_HST PX_STEP VP_RANGE_H LANE_BINS_H LANE_FILTER LANE_TRANSITION LANE_PRIOR LANE_FILTER_BINS_H LANE_FILTER_OFFSET_V VP_FILTER_OFFSET_V 
-    global CM_TO_PIXEL MIN_LANE_WIDTH MAX_LANE_WIDTH   LANE_WIDTH INT_HIST_LANE_PROB INT_HIST_VP_PROB %% the Lane intersection observations histograms
-    global LANE_BOUNDARIES    
+   
+%% All Globals 
     
-    
-    %% the 5XN lane boundary model
-                               %% 1,n left intersection with bottom wrt VP
-                               %% 2,n right intersection with bottom wrt VP (not used)
-                               %% 3,n intersection with horizon wrt VP left-side
-                               %% 4,n intersection with horizon wrt VP right-side (not used)
-                               %% 5,n total prob of peak
-    
+global STATE_READY STATE_ERROR
+global LANE_CONF_THRESHOLD C_V C_H RES_VH
+global OBS_NEG_NOMIN OBS_NEG_NORMA OBS_L OBS_R OBS_N
+global VP_BINS_HST VP_STEP_HST PX_STEP VP_RANGE_H LANE_BINS_H LANE_FILTER LANE_TRANSITION LANE_PRIOR LANE_FILTER_BINS_H LANE_FILTER_OFFSET_V VP_FILTER_OFFSET_V 
+global CM_TO_PIXEL MIN_LANE_WIDTH MAX_LANE_WIDTH LANE_WIDTH INT_HIST_LANE_PROB INT_HIST_VP_PROB
+global LANE_BOUNDARIES    
+
     
     %%
     %% Get All Active Pixles %%
@@ -323,6 +315,10 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     if LANE_BOUNDARIES(5,1) < LANE_CONF_THRESHOLD  || LANE_BOUNDARIES(5,2) < LANE_CONF_THRESHOLD
         msg = STATE_ERROR;
     else
+        
+        %% Update Vanishing Point %%
+        VanishingPt=find_Vanashing_Point(VanishingPt);
+        
         msg = STATE_READY;    
     end
     

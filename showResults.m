@@ -7,8 +7,8 @@ function [] = showResults( RGB, VanishingPt, message )
     %%%%%%%%%%%%%%%%%%%%%%%%%%
     %% all required globals %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%    
-    global LOGO VP_BINS_HST C_V C_H LANE_BINS_H INT_HIST_LANE_PROB INT_HIST_VP_PROB FILLING_BUFFERS STATE_COUNTER RES_VH DETECTING_EGO_LANE TRACKING_EGO_LANE_STABLE TRACKING_EGO_LANE CURRENT_STATE LANE_BOUNDARIES STATE_ERROR
-    global N_IMAGE START_END_FRAMES
+    global  VP_BINS_HST C_V C_H LANE_BINS_H INT_HIST_LANE_PROB INT_HIST_VP_PROB FILLING_BUFFERS STATE_COUNTER RES_VH DETECTING_EGO_LANE TRACKING_EGO_LANE_STABLE TRACKING_EGO_LANE CURRENT_STATE LANE_BOUNDARIES STATE_ERROR
+
     
     
 
@@ -20,8 +20,6 @@ function [] = showResults( RGB, VanishingPt, message )
     
     %%   
     %% show the image 
-    
-    RGB(1:75,end-74:end,:) = LOGO;
     imshow(RGB)
     axis([LANE_BINS_H(1)+320 LANE_BINS_H(end)+320 0 480] )
     hold on

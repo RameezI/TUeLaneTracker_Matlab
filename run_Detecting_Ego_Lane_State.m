@@ -30,14 +30,9 @@ function [msg, VanishingPt, Templates, Likelihoods, Mask] = run_Detecting_Ego_La
                 
         %%
         %% Find Lane Candidatae in the ROI %%
-        msg = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, Mask);
+        [msg, VanishingPt] = find_Lane_Candidates( VanishingPt, IDX_FOC_TOT_P, Likelihoods, Templates, Mask);
         
-
-        %%
-        %% Update Vanishing Point %%
-        VanishingPt=find_Vanashing_Point(VanishingPt);
-        
-        
+       
         %%
         %% Update the center lane %%
         find_Center_Lane();        
