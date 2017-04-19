@@ -1,8 +1,8 @@
 function  [] = startStateMachine()
 
-global LANE_FILTER LANE_PRIOR VP_FILTER VP_PRIOR  CENTER_OFFSET NBUFFER IMAGE_FILES INIT_STATE  STATE_READY  STEP_SIZE CURRENT_STATE PREV_INO STATE_COUNTER  FILLING_BUFFERS DETECTING_EGO_LANE RESET_STATE START_END_FRAMES STATE_ERROR 
-global VP_RANGE_V;
-global RES_VH
+global LANE_FILTER LANE_PRIOR VP_FILTER VP_PRIOR STEP_SIZE CENTER_OFFSET VP_RANGE_V
+global CURRENT_STATE FILLING_BUFFERS DETECTING_EGO_LANE RESET_STATE INIT_STATE STATE_READY STATE_ERROR  STATE_COUNTER    
+global RES_VH IMAGE_FILES
 
 NBUFFER       = 3;
 CENTER_OFFSET = 0.5;
@@ -13,12 +13,11 @@ CENTER_OFFSET = 0.5;
 %%  Obtain the number of Images, Start and End Index %%
 Number_Of_Images = size(IMAGE_FILES,1);
         
-                START = 500;
+                START = 1000;
                 END   = Number_Of_Images;
 
-START_END_FRAMES = [START END];
 
- 
+
 
 %% 
 %% Instantiate laneFilter and vpFilter structures %% 
@@ -42,7 +41,6 @@ START_END_FRAMES = [START END];
  
 CURRENT_STATE = INIT_STATE;
 N_IMAGE       = START;
-PREV_INO      = 0;
 STEP_SIZE     = 1;
 
 
@@ -86,7 +84,7 @@ STEP_SIZE     = 1;
                 
                 else
                     
-                 N_IMAGE =   N_IMAGE +1;
+                 N_IMAGE =   N_IMAGE +STEP_SIZE;
                  STATE_COUNTER = STATE_COUNTER +1;
                  
                 end
@@ -106,7 +104,7 @@ STEP_SIZE     = 1;
                      STATE_COUNTER = 0;
                      
                  else
-                         N_IMAGE =   N_IMAGE +1;
+                         N_IMAGE =   N_IMAGE +STEP_SIZE;
                          STATE_COUNTER = STATE_COUNTER +1;
                      
                  end
@@ -124,8 +122,10 @@ STEP_SIZE     = 1;
                          msg= STATE_READY;
                          %% check on transition
                          if msg == STATE_READY
+                             N_IMAGE =   N_IMAGE +STEP_SIZE;
                              CURRENT_STATE = DETECTING_EGO_LANE;
                              STATE_COUNTER = 0;
+                             
                          end
                   
         end
