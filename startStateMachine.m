@@ -87,7 +87,7 @@ while N_IMAGE < END
                     
         case FILLING_BUFFERS
                 
-             [msg, templates, likelihoods, FocusMask ]= run_Filling_Buffers_State(vanishingPt, templates, likelihoods, FocusMask);
+             [msg, templates, likelihoods, FocusMask ]= run_Filling_Buffers_State(N_IMAGE, NBUFFER, vanishingPt, templates, likelihoods, FocusMask);
              
             %%Transition
                      if msg == STATE_READY

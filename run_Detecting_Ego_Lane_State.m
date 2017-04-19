@@ -51,8 +51,7 @@ function [msg, VanishingPt, Templates, Likelihoods, Mask] = run_Detecting_Ego_La
         %% Update the center lane %%
         find_Center_Lane();        
      
-        showResults( RGB, VanishingPt, msg );
-                    
+        showResultsSimple( RGB, VanishingPt, msg );
 
         
         

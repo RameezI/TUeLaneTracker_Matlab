@@ -33,22 +33,26 @@ function [msg, VanishingPt, Templates, Likelihoods, Mask] = run_Detecting_Ego_La
         msg = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, Mask);
         
 
+ %% Update Vanishing Point %%
+       VanishingPt=find_Vanashing_Point(VanishingPt);     
+        
+        
+        
 %% State Staus Update %%
 
         if msg ~= STATE_ERROR
             msg = STATE_READY;             
         end
                 
-         %% Update Vanishing Point %%
-        VanishingPt=find_Vanashing_Point(VanishingPt);
+
         
         
         %%
         %% Update the center lane %%
         find_Center_Lane();        
      
-        showResults( RGB, VanishingPt, msg );
-                    
+        showResultsSimple( RGB, VanishingPt, msg );
+                    RGB, VanishingPt, message, C_V, C_H, LANE_BOUNDARIES, LANE_BINS_H, VP_BINS_HST, INT_HIST_LANE_PROB, INT_HIST_VP_PROB
 
         
         

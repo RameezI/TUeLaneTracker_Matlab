@@ -13,7 +13,7 @@
 %
 
 
-%% The Image Coordinate System (suffix _VH)
+%% The Image Coordinate System
 %              O -----> + H (2nd dim)
 %              |
 %              | 
@@ -23,7 +23,7 @@
 %
 
 
-%% The VP Coordinate System (suffix _VP)
+%% The VP Coordinate System 
 %              ^ + V (2nd dim)
 %              |
 %              |
@@ -33,7 +33,7 @@
 
 
 
-%% The Center Image Coordinate System (suffix _CVH)
+%% The Center Image Coordinate System
 %            
 %              
 %             C --> + H (2nd dim)
@@ -88,16 +88,18 @@ function [] = laneTracker2()
 
     global CM_TO_PIXEL RES_VH C_V C_H 
     
-    RES_VH          = [480 640];         %% resolution of camera
-    FOV             = [45 60];           %% field of view of camera
-    CAM_HEIGHT      = 1.5;               %% camera height in meters
-    CAM_FOCUS       = 6e-3;              %% camera focal length in meters
+    RES_VH     = [480 640];         %% resolution of camera
+ 
+    FOV        = [45 60];           %% field of view of camera
+    CAM_H      = 1.5;               %% camera height in meters
+    CAM_F      = 6e-3;              %% camera focal length in meters
     
     
     
     
 %% Car Properties %%
 
+    global CAR_WIDTH
     CAR_WIDTH = 170; %% cm - average according to Bovag
     
     
@@ -109,13 +111,13 @@ function [] = laneTracker2()
     H_FOV_H     = FOV(2)/2;     %% half horizontal field of view
     H_RES_H     = RES_VH(2)/2;  %% half horizontal resolution
     
-    PX_SIZE     = (tand(H_FOV_V)*CAM_FOCUS)/H_RES_V;                  %% (vertical) size of the pixels
-    PX_ANG      = atand( PX_SIZE * [1:(2*H_RES_V)]/CAM_FOCUS );       %% angles of each (virtual) pixel below middle line
-    DEPTH_P     = CAM_HEIGHT *tand( 90-PX_ANG );                       %% the depth at each (virtual) pixel below middle line
+    PX_SIZE     = (tand(H_FOV_V)*CAM_F)/H_RES_V;                  %% (vertical) size of the pixels
+    PX_ANG      = atand( PX_SIZE * [1:(2*H_RES_V)]/CAM_F );       %% angles of each (virtual) pixel below middle line
+    DEPTH_P     = CAM_H *tand( 90-PX_ANG );                       %% the depth at each (virtual) pixel below middle line
     CM_TO_PIXEL = H_RES_H/(100*tand(H_FOV_H)*DEPTH_P(H_RES_V-1)); %% the horizontal pixel to cm ratio at the bottom line of the image
     C_V         = RES_VH(1)/2;                                    %% verticel image center in image coordinate system
     C_H         = RES_VH(2)/2;                                    %% horizontal image center in image coordinate system
-    Center_VH  = [C_V, C_V];
+    Center_VH  = [C_V, ]
 
     
 

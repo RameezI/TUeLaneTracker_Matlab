@@ -1,11 +1,6 @@
 function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, NBUFFER, VP_RANGE_V)
     
 
-global grayROI_buffer;
-
-
-
-
     Margin = 80; %% Note: Should be fitted using sweeps
     span   = floor(RES_VH(1)/2)-Margin +25; %best activation of pixels i.e. VP= -25
 
