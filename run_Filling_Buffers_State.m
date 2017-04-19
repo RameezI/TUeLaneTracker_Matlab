@@ -8,26 +8,18 @@ global STATE_READY STATE_BUSY STATE_COUNTER
 
 msg = STATE_BUSY;
 
-
-while msg ~= STATE_READY  
-    
-
- 
+  
 %% Add Image Buffer %% 
     
    RGB = readImage( N_IMAGE );
    
    [Templates, Likelihoods, Masks] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Mask);
-     
-   STATE_COUNTER = STATE_COUNTER + 1;
-                
-    if  NBUFFER <= STATE_COUNTER
+                     
+   if  NBUFFER <= STATE_COUNTER
         msg = STATE_READY;
-    else
+   else
         msg = STATE_BUSY;
-    end
-    
-end
+   end
     
 end
             

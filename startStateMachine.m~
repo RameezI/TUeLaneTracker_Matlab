@@ -2,8 +2,6 @@ function  [] = startStateMachine()
 
 global LANE_FILTER LANE_PRIOR VP_FILTER VP_PRIOR  CENTER_OFFSET NBUFFER IMAGE_FILES INIT_STATE  STATE_READY  STEP_SIZE CURRENT_STATE PREV_INO STATE_COUNTER  FILLING_BUFFERS DETECTING_EGO_LANE RESET_STATE START_END_FRAMES STATE_ERROR 
 global VP_RANGE_V;
-global RES_VH
-
 NBUFFER       = 3;
 CENTER_OFFSET = 0.5;
 
@@ -73,12 +71,11 @@ STEP_SIZE     = 1;
             case FILLING_BUFFERS
 
                STATE_COUNTER = STATE_COUNTER + 1;
-               disp(['[STATE] FILLING_BUFFERS: ',num2str(STATE_COUNTER)])
                 
                [msg, templates, likelihoods, FocusMask ]= run_Filling_Buffers_State(N_IMAGE, NBUFFER, vanishingPt, templates, likelihoods, FocusMask);
              
                %%Transition
-               
+                
                 if msg == STATE_READY
                     
                  CURRENT_STATE = DETECTING_EGO_LANE;
@@ -86,29 +83,27 @@ STEP_SIZE     = 1;
                 
                 else
                     
-                 N_IMAGE =   N_IMAGE +1;
+                    N_IMAGE =   N_IMAGE +1;
                  STATE_COUNTER = STATE_COUNTER +1;
                  
                 end
 
-        %% Detecting Ego-Lane                     
+    %%                     
             case DETECTING_EGO_LANE
-                
-                 STATE_COUNTER = STATE_COUNTER + 1;
+
                  disp(['[STATE] DETECTING EGO LANE: ',num2str(STATE_COUNTER)])
 
-                 [msg, vanishingPt,templates, likelihoods, FocusMask] = run_Detecting_Ego_Lane_State(N_IMAGE, vanishingPt, templates, likelihoods, FocusMask);
+                 [msg, vanishingPt,templates, likelihoods, FocusMask]        = run_Detecting_Ego_Lane_State(vanishingPt, templates, likelihoods, FocusMask);
+
+                 disp(['[STATE] DETECTING EGO LANE: ',num2str(STATE_COUNTER)])
+
+
+
 
                  %%Transition
                  if msg == STATE_ERROR
-                     
                      CURRENT_STATE = RESET_STATE;
                      STATE_COUNTER = 0;
-                     
-                 else
-                         N_IMAGE =   N_IMAGE +1;
-                         STATE_COUNTER = STATE_COUNTER +1;
-                     
                  end
 
 
