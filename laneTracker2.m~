@@ -13,7 +13,7 @@
 %
 
 
-%% The Image Coordinate System
+%% The Image Coordinate System (suffix _VH)
 %              O -----> + H (2nd dim)
 %              |
 %              | 
@@ -23,7 +23,7 @@
 %
 
 
-%% The VP Coordinate System 
+%% The VP Coordinate System (suffix _VP)
 %              ^ + V (2nd dim)
 %              |
 %              |
@@ -33,7 +33,7 @@
 
 
 
-%% The Center Image Coordinate System
+%% The Center Image Coordinate System (suffix _CVH)
 %            
 %              
 %             C --> + H (2nd dim)
@@ -48,27 +48,30 @@
 function [] = laneTracker2()
 
 
+
+
 %% TUe DATASET %%
-    global DATASET IMAGE_FILES LOGO DisplayNumber
+    global DATASET IMAGE_FILES NBUFFER ImageOutCount STEP_SIZE CENTER_OFFSET
     DATASET = '/media/rameez/Linux-Extended/DataSet/eindhoven/PNG_imgs/';
+    
     LOGO = im2double(imread('tue.png'));
     DATASET
+    
     IMAGE_FILES= dir([DATASET,'*.png']); 
-    DisplayNumber =0;
-    
-    
+    ImageOutCount =0;
+    NBUFFER = 3;  
+    STEP_SIZE = 2;
+    CENTER_OFFSET = 0.5; %% ?? 
     
     
     
 %% System States %%
     
-    global INIT_STATE FILLING_BUFFERS DETECTING_EGO_LANE TRACKING_EGO_LANE TRACKING_EGO_LANE_STABLE CURRENT_STATE RESET_STATE   
+    global INIT_STATE FILLING_BUFFERS DETECTING_EGO_LANE RESET_STATE   
     INIT_STATE               = -1; %% this acts like a #define as in C/C++
     FILLING_BUFFERS          =  1;  %% this acts like a #define as in C/C++
     DETECTING_EGO_LANE       =  2;  %% this acts like a #define as in C/C++
     RESET_STATE              =  3;  %% this acts like a #define as in C/C++
-    CURRENT_STATE            = INIT_STATE;
-    
     
     
     
@@ -88,11 +91,10 @@ function [] = laneTracker2()
 
     global CM_TO_PIXEL RES_VH C_V C_H 
     
-    RES_VH     = [480 640];         %% resolution of camera
- 
-    FOV        = [45 60];           %% field of view of camera
-    CAM_H      = 1.5;               %% camera height in meters
-    CAM_F      = 6e-3;              %% camera focal length in meters
+    RES_VH          = [480 640];         %% resolution of camera
+    FOV             = [45 60];           %% field of view of camera
+    CAM_HEIGHT      = 1.5;               %% camera height in meters
+    CAM_FOCUS       = 6e-3;              %% camera focal length in meters
     
     
     
@@ -111,19 +113,20 @@ function [] = laneTracker2()
     H_FOV_H     = FOV(2)/2;     %% half horizontal field of view
     H_RES_H     = RES_VH(2)/2;  %% half horizontal resolution
     
-    PX_SIZE     = (tand(H_FOV_V)*CAM_F)/H_RES_V;                  %% (vertical) size of the pixels
-    PX_ANG      = atand( PX_SIZE * [1:(2*H_RES_V)]/CAM_F );       %% angles of each (virtual) pixel below middle line
-    DEPTH_P     = CAM_H *tand( 90-PX_ANG );                       %% the depth at each (virtual) pixel below middle line
-    CM_TO_PIXEL = H_RES_H/(100*tand(H_FOV_H)*DEPTH_P(H_RES_V-1)); %% the horizontal pixel to cm ratio at the bottom line of the image
-    C_V         = RES_VH(1)/2;                                    %% verticel image center in image coordinate system
-    C_H         = RES_VH(2)/2;                                    %% horizontal image center in image coordinate system
-    Center_VH  = [C_V, ]
+    
+    PX_SIZE     = (tand(H_FOV_V)*CAM_FOCUS)/H_RES_V;                   %% (vertical) size of the pixels
+    PX_ANG      = atand( PX_SIZE * [1:(2*H_RES_V)]/CAM_FOCUS );        %% angles of each (virtual) pixel below middle line
+    DEPTH_P     = CAM_HEIGHT *tand( 90-PX_ANG );                       %% the depth at each (virtual) pixel below middle line
+    
+    CM_TO_PIXEL = H_RES_H/(100*tand(H_FOV_H)*DEPTH_P(H_RES_V-1));      %% the horizontal pixel to cm ratio at the bottom line of the image
+    C_V         = RES_VH(1)/2;                                         %% verticel image center in image coordinate system
+    C_H         = RES_VH(2)/2;                                         %% horizontal image center in image coordinate system
 
     
 
 %% Lane Properties %%    
     
-    global MIN_LANE_WIDTH MAX_LANE_WIDTH
+    global MIN_LANE_WIDTH MAX_LANE_WIDTH AVG_LANE_WIDTH STD_LANE_WIDTH
     AVG_LANE_WIDTH = 300; %% cm
     STD_LANE_WIDTH = 50;  %% cm
     MIN_LANE_WIDTH = 250; %% cm
@@ -139,18 +142,19 @@ function [] = laneTracker2()
     
 %% The Lane Filter Expressed in the VP Coordinate System %%
    
-    global  LANE_CONF_THRESHOLD OBS_L OBS_R OBS_N PX_MAX LANE_FILTER_OFFSET_V
-    global  LANE_BINS_H LANE_FILTER_BINS_H PX_STEP LANE_PRIOR LANE_TRANSITION LANE_FILTER
+    global  LANE_CONF_THRESHOLD OBS_L OBS_R OBS_N  LANE_FILTER_OFFSET_V PX_STEP
+    global  LANE_HISTOGRAM_BINS LANE_OFFSETS_BINS LANE_PRIOR LANE_TRANSITION LANE_FILTER
     
     PX_STEP            = ceil((CM_STEP*CM_TO_PIXEL)/10)*10;                        %% CM_STEP translated to pixels at the bottom line of the Image
     PX_MAX             = round((MAX_LANE_WIDTH*CM_TO_PIXEL)/PX_STEP)*PX_STEP;      %% Maximum lane width in pixels at the bottom line of the Image 
-    LANE_BINS_H        = -PX_MAX:PX_STEP:PX_MAX;                                   %% the histogram bins for the lane observation model
-    LANE_FILTER_BINS_H = round([0:PX_STEP:PX_MAX]);                                %% the histogram bins for the 2D lane filter
+   
+    LANE_HISTOGRAM_BINS      = -PX_MAX:PX_STEP:PX_MAX;                             %% Histogram bins for the lane observation model
+    LANE_OFFSETS_BINS        = round([0:PX_STEP:PX_MAX]);                          %% Histogram bins for the 2D lane filter
     
-    [LANE_PRIOR, LANE_TRANSITION] = createLanePrior( LANE_FILTER_BINS_H, 1/CM_TO_PIXEL, AVG_LANE_WIDTH, MIN_LANE_WIDTH, MAX_LANE_WIDTH, STD_LANE_WIDTH );
-    LANE_FILTER        = LANE_PRIOR;
+    [LANE_PRIOR, LANE_TRANSITION] = createLanePrior( LANE_OFFSETS_BINS, 1/CM_TO_PIXEL, AVG_LANE_WIDTH, MIN_LANE_WIDTH, MAX_LANE_WIDTH, STD_LANE_WIDTH );
+    LANE_FILTER  = LANE_PRIOR;
       
-    [OBS_L, OBS_R, OBS_N] = createLaneObservationModel( LANE_FILTER_BINS_H, LANE_BINS_H, MIN_LANE_WIDTH, MAX_LANE_WIDTH, LANE_FILTER_BINS_H, CM_TO_PIXEL );
+    [OBS_L, OBS_R, OBS_N] = createLaneObservationModel( LANE_OFFSETS_BINS, LANE_HISTOGRAM_BINS, MIN_LANE_WIDTH, MAX_LANE_WIDTH, LANE_OFFSETS_BINS, CM_TO_PIXEL );
     LANE_FILTER_OFFSET_V  = -240;
     LANE_CONF_THRESHOLD   = 1;                                                      %% the minumum confidence required for a lane boundary. 
     
@@ -174,13 +178,16 @@ function [] = laneTracker2()
     
     VP_FILTER_OFFSET_V = -120;
     VP_LANE_RATIO      = VP_FILTER_OFFSET_V / LANE_FILTER_OFFSET_V;
-    VP_BINS_HST        = round(LANE_BINS_H * VP_LANE_RATIO);
+    VP_BINS_HST        = round(LANE_HISTOGRAM_BINS * VP_LANE_RATIO);
     VP_STEP_HST        = VP_BINS_HST(2)-VP_BINS_HST(1);
+    
     
     
     LANE_WIDTH_DIFF_SIGMA = 15; %% sigma in cm of difference in lane width between lane and vp filter
     LANE_WIDTH_DIFF_NORMA = 1/(sqrt(2*pi*LANE_WIDTH_DIFF_SIGMA^2));
     LANE_WIDTH_DIFF_NOMIN = 2*LANE_WIDTH_DIFF_SIGMA^2;
+    
+    
     
 
 %% The Sigma on the Lane Observation Probability Mass between the Lane Markings %%    

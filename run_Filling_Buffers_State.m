@@ -1,9 +1,9 @@
 %%
 %% state function
 %%
-function [msg, Templates, Likelihoods, Masks] = run_Filling_Buffers_State(N_IMAGE, NBUFFER, VanishingPt, Templates, Likelihoods, Mask)
+function [msg, Templates, Likelihoods, Masks] = run_Filling_Buffers_State(N_IMAGE, VanishingPt, Templates, Likelihoods, Mask)
 
-
+global NBUFFER
 global STATE_READY STATE_BUSY STATE_COUNTER   
 
 msg = STATE_BUSY;

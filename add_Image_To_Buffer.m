@@ -5,57 +5,29 @@ function [Templates, Likelihoods, Mask] = add_Image_To_Buffer( RGB, VanishingPt,
 
 
 %%Required Global Variables %%
-global   NBUFFER NGRAY NMAG NDIR  RES_VH  tippingPoint_gradMag tippingPoint_gray          
+global  NBUFFER RES_VH  tippingPoint_gradMag tippingPoint_gray          
  
 %%Local Variables Extracted from Arguments%%
 VP_V = VanishingPt.V;
 VP_H = VanishingPt.H;
 
 
-%%
-%% Get Channels %%
 
-    I       = rgb2gray(RGB);
-%     HSV     = rgb2hsv(RGB);
-%     H       = HSV(:,:,1);
-%     S       = HSV(:,:,2);
-%     V       = HSV(:,:,3);
-    
+    I = rgb2gray(RGB);   
     I  = im2single(I);
-%   V  = im2single(V);
+
     
 %%
 %% PreProcessing %%
     
     GRAD_SIGMA = 1.5; %% can be swept               
     I = imfilter( I, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );
-%   I  = medfilt2(I,[5,5]);
-    
-%      V = imfilter( V, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );
-%      S = imfilter( S, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );
-% %     H = imfilter( H, fspecial('gaussian',5,GRAD_SIGMA), 'replicate' );    
-
     I_uint8 = im2uint8(I);
 
 
-%%
+
 %% Get Gradients %%    
-%[MAGI, tanDIRI]   =  getGradientInfo( I_uint8  );
  [MAGI, tanDIRI]   =  getGradientInfo( I_uint8  );
-
-% % MAGI= single(MAGI).*BW;
-% MAGI =uint8(MAGI);
-
-% [MAGH, DIRH]    =  getGradientInfo(H_uint8); 
-
-% MAGI= BW.*single(MAGI);
- 
-%    figure(220);
-%    imshow(MAGI , [0, 255]);
-
-
-%[MAGS, DIRS]   = getGradientInfo( S  ); 
-%[MAGV, DIRV]   = getGradientInfo( V  ); 
 
 
 %%

@@ -9,7 +9,7 @@ function [] = showResultsSimple( RGB, VanishingPt, message )
     %%%%%%%%%%%%%%%%%%%%%%%%%%    
     global   C_V C_H  FILLING_BUFFERS STATE_COUNTER RES_VH DETECTING_EGO_LANE CURRENT_STATE LANE_BOUNDARIES STATE_ERROR
 
-    global   LANE_BINS_H VP_BINS_HST INT_HIST_LANE_PROB INT_HIST_VP_PROB 
+    global   LANE_HISTOGRAM_BINS VP_BINS_HST INT_HIST_LANE_PROB INT_HIST_VP_PROB 
     
 
     %%%%%%%%%%%%%%%%%%%
@@ -21,7 +21,7 @@ function [] = showResultsSimple( RGB, VanishingPt, message )
     %%   
     %% show the image 
     imshow(RGB)     
-    axis([LANE_BINS_H(1)+320 LANE_BINS_H(end)+320 0 480] )
+    axis([LANE_HISTOGRAM_BINS(1)+320 LANE_HISTOGRAM_BINS(end)+320 0 480] )
     hold on
 
 %% Print the State 
@@ -95,8 +95,8 @@ function [] = showResultsSimple( RGB, VanishingPt, message )
     %% plot the observation histogram %%
 
     if ~isempty(INT_HIST_LANE_PROB) && ~isempty(INT_HIST_VP_PROB)
-        plot( [[320+(LANE_BINS_H)]; [320+(LANE_BINS_H)]], [[240+240-(INT_HIST_LANE_PROB*600)]; [240+240-(INT_HIST_LANE_PROB*0)]], ['-',clr] )
-        plot( 320+(LANE_BINS_H), 240+240-(INT_HIST_LANE_PROB*0), ['x',clr] )  
+        plot( [[320+(LANE_HISTOGRAM_BINS)]; [320+(LANE_HISTOGRAM_BINS)]], [[240+240-(INT_HIST_LANE_PROB*600)]; [240+240-(INT_HIST_LANE_PROB*0)]], ['-',clr] )
+        plot( 320+(LANE_HISTOGRAM_BINS), 240+240-(INT_HIST_LANE_PROB*0), ['x',clr] )  
 
         plot( [VP_BINS_HST+320; VP_BINS_HST+320], [[240+120-(INT_HIST_VP_PROB*600)]; 240+120-(INT_HIST_VP_PROB*0)], ['-',clr] )
         plot( VP_BINS_HST+320, 240+120-(INT_HIST_VP_PROB*0), ['x',clr] )
@@ -111,7 +111,7 @@ global DisplayNumber;
         drawnow
         %pause(1);
 %         set(gcf,'units','pixels')
-%         set(gcf,'position',[500 500 LANE_BINS_H(end)-LANE_BINS_H(1) 480])
+%         set(gcf,'position',[500 500 LANE_HISTOGRAM_BINS(end)-LANE_HISTOGRAM_BINS(1) 480])
 %         set(gcf,'PaperPositionMode','auto')
 %         SAV = ['/home/rameez/Desktop/result_imgs/',sprintf('%06d',DisplayNumber),'.png'];
 %         saveas(gcf,SAV)

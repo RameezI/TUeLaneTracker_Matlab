@@ -1,11 +1,11 @@
 function  [] = startStateMachine()
 
-global LANE_FILTER LANE_PRIOR VP_FILTER VP_PRIOR STEP_SIZE CENTER_OFFSET VP_RANGE_V
-global CURRENT_STATE FILLING_BUFFERS DETECTING_EGO_LANE RESET_STATE INIT_STATE STATE_READY STATE_ERROR  STATE_COUNTER    
-global RES_VH IMAGE_FILES
 
-NBUFFER       = 3;
-CENTER_OFFSET = 0.5;
+global IMAGE_FILES RES_VH NBUFFER STEP_SIZE VP_RANGE_V
+global CURRENT_STATE FILLING_BUFFERS DETECTING_EGO_LANE RESET_STATE INIT_STATE STATE_READY STATE_ERROR  STATE_COUNTER    
+
+
+
 
 
 
@@ -13,27 +13,11 @@ CENTER_OFFSET = 0.5;
 %%  Obtain the number of Images, Start and End Index %%
 Number_Of_Images = size(IMAGE_FILES,1);
         
-                START = 1000;
+                START = 5000;
                 END   = Number_Of_Images;
 
 
 
-
-%% 
-%% Instantiate laneFilter and vpFilter structures %% 
- LANE_FILTER = single(LANE_FILTER);
- LANE_PRIOR  = single(LANE_PRIOR);
- VP_FILTER   = single(VP_FILTER);
- VP_PRIOR    = single(VP_PRIOR);    
-                    
-%  laneFilter=struct;
-%     laneFilter.mFilter =  LANE_FILTER;
-%     laneFilter.mPrior  =  LANE_PRIOR;
-%                     
-%                     
-%  vpFilter =struct;
-%     vpFilter.mFilter =  VP_FILTER;
-%     vpFilter.mPrior  =  VP_PRIOR;
 
     
 %%
@@ -41,7 +25,7 @@ Number_Of_Images = size(IMAGE_FILES,1);
  
 CURRENT_STATE = INIT_STATE;
 N_IMAGE       = START;
-STEP_SIZE     = 1;
+
 
 
 
@@ -73,7 +57,7 @@ STEP_SIZE     = 1;
                STATE_COUNTER = STATE_COUNTER + 1;
                disp(['[STATE] FILLING_BUFFERS: ',num2str(STATE_COUNTER)])
                 
-               [msg, templates, likelihoods, FocusMask ]= run_Filling_Buffers_State(N_IMAGE, NBUFFER, vanishingPt, templates, likelihoods, FocusMask);
+               [msg, templates, likelihoods, FocusMask ]= run_Filling_Buffers_State(N_IMAGE, vanishingPt, templates, likelihoods, FocusMask);
              
                %%Transition
                
