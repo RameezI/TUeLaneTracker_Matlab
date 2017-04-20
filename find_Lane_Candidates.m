@@ -17,12 +17,21 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %%%%%%%%%%%%%%%%%%%%%%%%%%
     %% all required globals %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%
-    global STATE_READY STATE_ERROR
-    global LANE_CONF_THRESHOLD C_V C_H RES_VH
-    global OBS_NEG_NOMIN OBS_NEG_NORMA OBS_L OBS_R OBS_N
     
-    global VP_BINS_HST VP_STEP_HST PX_STEP VP_RANGE_H LANE_HISTOGRAM_BINS LANE_FILTER LANE_TRANSITION LANE_PRIOR LANE_OFFSETS_BINS LANE_FILTER_OFFSET_V VP_FILTER_OFFSET_V 
-    global CM_TO_PIXEL MIN_LANE_WIDTH MAX_LANE_WIDTH   LANE_WIDTH INT_HIST_LANE_PROB INT_HIST_VP_PROB %% the Lane intersection observations histograms
+    
+    %% Required Interface
+    global STATE_READY STATE_ERROR
+    global LANE_CONF_THRESHOLD C_V C_H RES_VH CM_TO_PIXEL MIN_LANE_WIDTH MAX_LANE_WIDTH
+    global OBS_NEG_NOMIN OBS_NEG_NORMA OBS_L OBS_R OBS_N    
+    global HORIZON_HISTOGRAM_STEP HORIZON_HISTOGRAM_BINS  
+    global BASE_HISTOGRAM_STEP    BASE_HISTOGRAM_BINS
+    global VP_RANGE_H LANE_OFFSETS_BINS LANE_FILTER_OFFSET_V VP_FILTER_OFFSET_V
+    global LANE_FILTER LANE_TRANSITION LANE_PRIOR  
+    global LANE_WIDTH INT_HIST_LANE_PROB INT_HIST_VP_PROB %% the Lane intersection observations histograms
+    
+    
+    
+    %% Provided Interface
     global LANE_BOUNDARIES    
     
     
@@ -86,11 +95,10 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     Index =1;     
     for i= 1: size(IDX_LANE_PIX)
         
-        if ( Lane_Int_Bottom_tmp(i)>LANE_HISTOGRAM_BINS(1)-(PX_STEP/2)            &&           Lane_Int_Bottom_tmp(i) < LANE_HISTOGRAM_BINS(end)+(PX_STEP/2))
+      if ( Lane_Int_Bottom_tmp(i) > BASE_HISTOGRAM_BINS(1)-BASE_HISTOGRAM_STEP/2    &&   Lane_Int_Bottom_tmp(i) < BASE_HISTOGRAM_BINS(end)+ BASE_HISTOGRAM_STEP/2)
         
             
-            if (  Lane_Int_Horizon_tmp(i) > -VP_RANGE_H-VP_STEP_HST/2     &&           Lane_Int_Horizon_tmp(i) < VP_RANGE_H+VP_STEP_HST/2  )
-                
+      if (  Lane_Int_Horizon_tmp(i) > -VP_RANGE_H-HORIZON_HISTOGRAM_STEP/2   &&   Lane_Int_Horizon_tmp(i) < VP_RANGE_H+HORIZON_HISTOGRAM_STEP/2  )                
                 
                         Lane_Int_Bottom(Index)    = Lane_Int_Bottom_tmp(i);
                         Lane_Int_Horizon(Index)   = Lane_Int_Horizon_tmp(i);
@@ -98,9 +106,9 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
                         Lane_Depth_Int(Index)     = Lane_Depth(i);
                         
                         Index = Index+1;               
-            end
+      end
                
-        end
+      end
     
     end
 
@@ -121,11 +129,11 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     
-    firstDim  = ceil( (Lane_Int_Horizon - VP_BINS_HST(1)  + (VP_STEP_HST/2)) / VP_STEP_HST  );  %% horizon intersection
-    secondDim = ceil( (Lane_Int_Bottom  - LANE_HISTOGRAM_BINS(1)  + (PX_STEP/2)) / PX_STEP  );          %% bottom  intersection
+    firstDim  = ceil( (Lane_Int_Horizon - HORIZON_HISTOGRAM_BINS(1)  + (HORIZON_HISTOGRAM_STEP/2)) / HORIZON_HISTOGRAM_STEP  );  %% horizon intersection
+    secondDim = ceil( (Lane_Int_Bottom  - BASE_HISTOGRAM_BINS(1)  + (BASE_HISTOGRAM_STEP/2)) / BASE_HISTOGRAM_STEP  );          %% bottom  intersection
     
-    firstDim(size(firstDim)+1)      = size(VP_BINS_HST,2);
-    secondDim(size(secondDim)+1)    = size(LANE_HISTOGRAM_BINS,2);
+    firstDim(size(firstDim)+1)      = size(HORIZON_HISTOGRAM_BINS,2);
+    secondDim(size(secondDim)+1)    = size(BASE_HISTOGRAM_BINS,2);
     
     
     
@@ -261,7 +269,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% find the lane boundaries %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    LANE_BOUNDARIES = [ -LANE_MODEL(1)-PX_STEP/2 LANE_MODEL(2)-PX_STEP/2; -LANE_MODEL(1)+PX_STEP/2 LANE_MODEL(2)+PX_STEP/2; 0 0; 0 0; 100*LANE_MODEL(3) 100*LANE_MODEL(4)];
+    LANE_BOUNDARIES = [ -LANE_MODEL(1)-BASE_HISTOGRAM_STEP/2 LANE_MODEL(2)-BASE_HISTOGRAM_STEP/2; -LANE_MODEL(1)+BASE_HISTOGRAM_STEP/2 LANE_MODEL(2)+BASE_HISTOGRAM_STEP/2; 0 0; 0 0; 100*LANE_MODEL(3) 100*LANE_MODEL(4)];
     LANE_BOUNDARIES(3,1) = (LANE_BOUNDARIES(1,1)+LANE_BOUNDARIES(2,2))/2;
     LANE_BOUNDARIES(3,2) = LANE_BOUNDARIES(3,1);
     

@@ -143,43 +143,51 @@ function [] = laneTracker2()
 %% The Lane Filter Expressed in the VP Coordinate System %%
    
     global  LANE_CONF_THRESHOLD OBS_L OBS_R OBS_N  LANE_FILTER_OFFSET_V PX_STEP
-    global  LANE_HISTOGRAM_BINS LANE_OFFSETS_BINS LANE_PRIOR LANE_TRANSITION LANE_FILTER
+    global  BASE_HISTOGRAM_BINS LANE_OFFSETS_BINS LANE_PRIOR LANE_TRANSITION LANE_FILTER
     
     PX_STEP            = ceil((CM_STEP*CM_TO_PIXEL)/10)*10;                        %% CM_STEP translated to pixels at the bottom line of the Image
     PX_MAX             = round((MAX_LANE_WIDTH*CM_TO_PIXEL)/PX_STEP)*PX_STEP;      %% Maximum lane width in pixels at the bottom line of the Image 
    
-    LANE_HISTOGRAM_BINS      = -PX_MAX:PX_STEP:PX_MAX;                             %% Histogram bins for the lane observation model
+    BASE_HISTOGRAM_BINS      = -PX_MAX:PX_STEP:PX_MAX;                             %% Histogram bins for the lane observation model
     LANE_OFFSETS_BINS        = round([0:PX_STEP:PX_MAX]);                          %% Histogram bins for the 2D lane filter
     
     [LANE_PRIOR, LANE_TRANSITION] = createLanePrior( LANE_OFFSETS_BINS, 1/CM_TO_PIXEL, AVG_LANE_WIDTH, MIN_LANE_WIDTH, MAX_LANE_WIDTH, STD_LANE_WIDTH );
     LANE_FILTER  = LANE_PRIOR;
       
-    [OBS_L, OBS_R, OBS_N] = createLaneObservationModel( LANE_OFFSETS_BINS, LANE_HISTOGRAM_BINS, MIN_LANE_WIDTH, MAX_LANE_WIDTH, LANE_OFFSETS_BINS, CM_TO_PIXEL );
+    [OBS_L, OBS_R, OBS_N] = createLaneObservationModel( LANE_OFFSETS_BINS, BASE_HISTOGRAM_BINS, MIN_LANE_WIDTH, MAX_LANE_WIDTH, LANE_OFFSETS_BINS, CM_TO_PIXEL );
     LANE_FILTER_OFFSET_V  = -240;
     LANE_CONF_THRESHOLD   = 1;                                                      %% the minumum confidence required for a lane boundary. 
     
     
     
    
-%% The VP Filter Expressed in the Center Image Coordinate System %%
+%% The VP Filter  %%
     
     global LANE_WIDTH_DIFF_NORMA LANE_WIDTH_DIFF_NOMIN VP_LANE_RATIO VP_RANGE_H VP_RANGE_V VP_STEP VP_FILTER_OFFSET_V 
-    global  VP_PRIOR VP_FILTER VP_BINS_V VP_BINS_H  VP_TRANSITION VP_STEP_HST VP_BINS_HST
+    
+    global  VP_PRIOR VP_FILTER VP_BINS_V VP_BINS_H  VP_TRANSITION  HORIZON_HISTOGRAM_BINS STEP_HORIZON_HISTOGRAM
     
     VP_RANGE_V  = 25;                                                               %% the vertical +/- search range wrt image center for the VP
     VP_RANGE_H  = 300;                                                              %% the horizontal +/- search range wrt image center for the VP
     VP_STEP     = 10;                                                               %% the search step size
     
-    VP_BINS_V   = -VP_RANGE_V:VP_STEP:VP_RANGE_V + C_V;                             %% the VP vertical filter bins
-    VP_BINS_H   = -VP_RANGE_H:VP_STEP:VP_RANGE_H + C_H;                             %% the VP horizontal filter bins
+    VP_BINS_V   = -VP_RANGE_V:VP_STEP:VP_RANGE_V;                                   %% the VP vertical filter bins
+    VP_BINS_H   = -VP_RANGE_H:VP_STEP:VP_RANGE_H;                                   %% the VP horizontal filter bins
+    
+    % Tranforming to Image Coordinates
+    VP_BINS_V   =  VP_BINS_V  + C_V;
+    VP_BINS_H   =  VP_BINS_H  + C_H;
+    
     
     [VP_PRIOR, VP_TRANSITION] = createVPPrior( VP_BINS_V, VP_BINS_H, 20*VP_RANGE_V/VP_STEP );
     VP_FILTER   = VP_PRIOR;
     
+    
+    % OFFSET from Horizon
     VP_FILTER_OFFSET_V = -120;
     VP_LANE_RATIO      = VP_FILTER_OFFSET_V / LANE_FILTER_OFFSET_V;
-    VP_BINS_HST        = round(LANE_HISTOGRAM_BINS * VP_LANE_RATIO);
-    VP_STEP_HST        = VP_BINS_HST(2)-VP_BINS_HST(1);
+    HORIZON_HISTOGRAM_BINS        = round(BASE_HISTOGRAM_BINS * VP_LANE_RATIO);
+    HORIZON_HISTOGRAM        = HORIZON_HISTOGRAM_BINS(2)-HORIZON_HISTOGRAM_BINS(1);
     
     
     

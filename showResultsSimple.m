@@ -9,7 +9,7 @@ function [] = showResultsSimple( RGB, VanishingPt, message )
     %%%%%%%%%%%%%%%%%%%%%%%%%%    
     global   C_V C_H  FILLING_BUFFERS STATE_COUNTER RES_VH DETECTING_EGO_LANE CURRENT_STATE LANE_BOUNDARIES STATE_ERROR
 
-    global   LANE_HISTOGRAM_BINS VP_BINS_HST INT_HIST_LANE_PROB INT_HIST_VP_PROB 
+    global   BASE_HISTOGRAM_BINS HORIZON_HISTOGRAM_BINS INT_HIST_LANE_PROB INT_HIST_VP_PROB 
     
 
     %%%%%%%%%%%%%%%%%%%
@@ -21,7 +21,7 @@ function [] = showResultsSimple( RGB, VanishingPt, message )
     %%   
     %% show the image 
     imshow(RGB)     
-    axis([LANE_HISTOGRAM_BINS(1)+320 LANE_HISTOGRAM_BINS(end)+320 0 480] )
+    axis([BASE_HISTOGRAM_BINS(1)+320 BASE_HISTOGRAM_BINS(end)+320 0 480] )
     hold on
 
 %% Print the State 
@@ -95,11 +95,11 @@ function [] = showResultsSimple( RGB, VanishingPt, message )
     %% plot the observation histogram %%
 
     if ~isempty(INT_HIST_LANE_PROB) && ~isempty(INT_HIST_VP_PROB)
-        plot( [[320+(LANE_HISTOGRAM_BINS)]; [320+(LANE_HISTOGRAM_BINS)]], [[240+240-(INT_HIST_LANE_PROB*600)]; [240+240-(INT_HIST_LANE_PROB*0)]], ['-',clr] )
-        plot( 320+(LANE_HISTOGRAM_BINS), 240+240-(INT_HIST_LANE_PROB*0), ['x',clr] )  
+        plot( [[320+(BASE_HISTOGRAM_BINS)]; [320+(BASE_HISTOGRAM_BINS)]], [[240+240-(INT_HIST_LANE_PROB*600)]; [240+240-(INT_HIST_LANE_PROB*0)]], ['-',clr] )
+        plot( 320+(BASE_HISTOGRAM_BINS), 240+240-(INT_HIST_LANE_PROB*0), ['x',clr] )  
 
-        plot( [VP_BINS_HST+320; VP_BINS_HST+320], [[240+120-(INT_HIST_VP_PROB*600)]; 240+120-(INT_HIST_VP_PROB*0)], ['-',clr] )
-        plot( VP_BINS_HST+320, 240+120-(INT_HIST_VP_PROB*0), ['x',clr] )
+        plot( [HORIZON_HISTOGRAM_BINS+320; HORIZON_HISTOGRAM_BINS+320], [[240+120-(INT_HIST_VP_PROB*600)]; 240+120-(INT_HIST_VP_PROB*0)], ['-',clr] )
+        plot( HORIZON_HISTOGRAM_BINS+320, 240+120-(INT_HIST_VP_PROB*0), ['x',clr] )
     end
 
 
@@ -111,7 +111,7 @@ global DisplayNumber;
         drawnow
         %pause(1);
 %         set(gcf,'units','pixels')
-%         set(gcf,'position',[500 500 LANE_HISTOGRAM_BINS(end)-LANE_HISTOGRAM_BINS(1) 480])
+%         set(gcf,'position',[500 500 BASE_HISTOGRAM_BINS(end)-BASE_HISTOGRAM_BINS(1) 480])
 %         set(gcf,'PaperPositionMode','auto')
 %         SAV = ['/home/rameez/Desktop/result_imgs/',sprintf('%06d',DisplayNumber),'.png'];
 %         saveas(gcf,SAV)

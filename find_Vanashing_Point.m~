@@ -15,8 +15,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
     %%%%%%%%%%%%%%%%%%%%%%%%%%
     %% all required globals %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%
-    global LANE_WIDTH_DIFF_NORMA LANE_WIDTH_DIFF_NOMIN LANE_WIDTH VP_LANE_RATIO CM_TO_PIXEL OBS_NEG_NORMA OBS_NEG_NOMIN HORIZON_HISTOGRAM_BINS HORIZON_HISTOGRAM_STEP 
-    global VP_TRANSITION VP_FILTER_OFFSET_V VP_PRIOR VP_BINS_V VP_BINS_H LANE_BOUNDARIES INT_HIST_VP_PROB VP_FILTER SEGMENT_EDGE SEGMENT C_V C_H
+    global LANE_WIDTH_DIFF_NORMA LANE_WIDTH_DIFF_NOMIN LANE_WIDTH VP_LANE_RATIO CM_TO_PIXEL OBS_NEG_NORMA OBS_NEG_NOMIN VP_BINS_HST VP_STEP_HST VP_TRANSITION VP_FILTER_OFFSET_V VP_PRIOR VP_BINS_V VP_BINS_H LANE_BOUNDARIES INT_HIST_VP_PROB VP_FILTER SEGMENT_EDGE SEGMENT C_V C_H
 
         
     
@@ -66,7 +65,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% create the observation model %%
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            [model, modelN, width] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, HORIZON_HISTOGRAM_STEP, HORIZON_HISTOGRAM_BINS, VP_FILTER_OFFSET_V );
+            [model, modelN, width] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, VP_STEP_HST, VP_BINS_HST, VP_FILTER_OFFSET_V );
             width = (1/VP_LANE_RATIO) * width * (1/CM_TO_PIXEL);
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
