@@ -5,7 +5,7 @@
 %% All in the VP coordinate system
 %%
 %%
-function [LaneBoundaryModel, NegLaneBoundaryModel, Width ] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, VP_STEP_HST, VP_BINS_HST, OFFSET )
+function [LaneBoundaryModel, ObsN, Width ] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, VP_STEP_HST, VP_BINS_HST, OFFSET )
        
 
 
@@ -67,62 +67,85 @@ function [LaneBoundaryModel, NegLaneBoundaryModel, Width ] = createVPObservation
 %     idxR = find( IR == VP_BINS_HST );
         
     
-%% Create Expected Models %%
+%% Create the Observation Model %%
 
 
-    Width = IR-IL;
-
-
+LaneBoundaryModel= struct;
+    LaneBoundaryModel.BinID = ones(6,1);
+    LaneBoundaryModel.Value = zeros(6,1);
     
     
     
-    LaneBoundaryModel= struct;
-        LaneBoundaryModel.BinID = ones(6,1);
-        LaneBoundaryModel.Value = zeros(6,1);
+    
+ NegLaneBoundaryModel= struct;
+    NegLaneBoundaryModel.BinID = ones(nbNonBoundaryBins,  1);
+    NegLaneBoundaryModel.Value = zeros(nbNonBoundaryBins, 1);    
     
     
+%     ObsN = zeros( nbBins, 1 );
     
-    %Note Value member is needed only for the Lane Boundary Model
-    %     This is because in case of illegitimate intersections the lane
-    %     boundary probability will become 'zero' and so does the overall
-    %     probability.
-    
-    NegLaneBoundaryModel= struct;
-        NegLaneBoundaryModel.BinID = ones(nbNonBoundaryBins,  1);
-
 
     if 2 <= idxL && idxR <= nbBins-1
         
-          LaneBoundaryModel.BinID(1,1) = idxL-1;
-          LaneBoundaryModel.BinID(2,1) = idxL;
-          LaneBoundaryModel.BinID(3,1) = idxL+1;
-
-          LaneBoundaryModel.BinID(4,1) = idxR-1;
-          LaneBoundaryModel.BinID(5,1) = idxR;
-          LaneBoundaryModel.BinID(6,1) = idxR+1;
-
-
-
-          LaneBoundaryModel.Value(1,1) = 0.25;
-          LaneBoundaryModel.Value(2,1) = 1;
-          LaneBoundaryModel.Value(3,1) = 0.25;
-
-          LaneBoundaryModel.Value(4,1) = 0.25;
-          LaneBoundaryModel.Value(5,1) = 1;
-          LaneBoundaryModel.Value(6,1) = 0.25;
-
-
-         for i= 0: nbLeftNonBoundaryBins-1
-              NegLaneBoundaryModel.BinID(i+1)= (idxL +2) +i;
-         end
-
-         for i= 0: nbRightNonBoundaryBins-1
-              NegLaneBoundaryModel.BinID(nbLeftNonBoundaryBins+i+1)= (idxM + 4) +i;
-         end
+      LaneBoundaryModel.BinID(1,1) = idxL-1;
+      LaneBoundaryModel.BinID(2,1) = idxL;
+      LaneBoundaryModel.BinID(3,1) = idxL+1;
       
- 
+      LaneBoundaryModel.BinID(4,1) = idxR-1;
+      LaneBoundaryModel.BinID(5,1) = idxR;
+      LaneBoundaryModel.BinID(6,1) = idxR+1;
+      
+      
+      
+      LaneBoundaryModel.Value(1,1) = 0.25;
+      LaneBoundaryModel.Value(2,1) = 1;
+      LaneBoundaryModel.Value(3,1) = 0.25;
+      
+      LaneBoundaryModel.Value(4,1) = 0.25;
+      LaneBoundaryModel.Value(5,1) = 1;
+      LaneBoundaryModel.Value(6,1) = 0.25;
+      
+      
+      
+
+      
+      
+     for i= 0: nbLeftNonBoundaryBins-1
+      NegLaneBoundaryModel.BinID(i+1)= (idxL +2) +i;
+      NegLaneBoundaryModel.Value(i+1)= 1;
+     end
+     
+     for i= 0: nbNonBoundaryBins-1
+      NegLaneBoundaryModel.BinID(i+1)= (idxM + 4) +i;
+      NegLaneBoundaryModel.Value(i+1)= 1;
+     end
+      
+      
          
     end
+
+
+    
+ %% Create the Observation Model %%
+
+
+    ObsL = zeros( nbBins, 1 );
+    ObsR = zeros( nbBins, 1 );
+    ObsN = zeros( nbBins, 1 );
+    
+
+    if ~isempty(idxL) && ~isempty(idxR) && 2 <= idxL && idxR <= nbBins-1
+        ObsL(idxL+[-1:1])= [0.25 1 0.25];
+        ObsR(idxR+[-1:1])= [0.25 1 0.25];
+        ObsN(idxL+2:idxR-2) = 1;
+        
+        
+        idxM                = round((idxL+idxR)/2);
+        ObsN(idxM+[-4:4])   = 0; 
+   
+    end
+    Obs   = ObsL+ObsR;
+    Width = IR-IL;    
     
     
     

@@ -10,13 +10,6 @@
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, Mask)
-
-
-
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% all required globals %%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%
     
     
     %% Required Interface
@@ -130,6 +123,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     
     
     firstDim  = ceil( (Lane_Int_Horizon - HORIZON_HISTOGRAM_BINS(1)  + (HORIZON_HISTOGRAM_STEP/2)) / HORIZON_HISTOGRAM_STEP  );  %% horizon intersection
+    
     secondDim = ceil( (Lane_Int_Bottom  - BASE_HISTOGRAM_BINS(1)  + (BASE_HISTOGRAM_STEP/2)) / BASE_HISTOGRAM_STEP  );          %% bottom  intersection
     
     firstDim(size(firstDim)+1)      = size(HORIZON_HISTOGRAM_BINS,2);

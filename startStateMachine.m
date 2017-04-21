@@ -13,7 +13,7 @@ global CURRENT_STATE FILLING_BUFFERS DETECTING_EGO_LANE RESET_STATE INIT_STATE S
 %%  Obtain the number of Images, Start and End Index %%
 Number_Of_Images = size(IMAGE_FILES,1);
         
-                START = 5000;
+                START = 244;
                 END   = Number_Of_Images;
 
 
