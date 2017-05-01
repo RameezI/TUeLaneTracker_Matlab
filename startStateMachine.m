@@ -5,30 +5,19 @@ global IMAGE_FILES RES_VH NBUFFER STEP_SIZE VP_RANGE_V
 global CURRENT_STATE FILLING_BUFFERS DETECTING_EGO_LANE RESET_STATE INIT_STATE STATE_READY STATE_ERROR  STATE_COUNTER    
 
 
-
-
-
-
 %% 
 %%  Obtain the number of Images, Start and End Index %%
 Number_Of_Images = size(IMAGE_FILES,1);
         
-                START = 244;
+                START = 4580;
                 END   = Number_Of_Images;
 
-
-
-
-    
+   
 %%
-%%  Statrt From the InitState %%
+%%  Start From the InitState %%
  
 CURRENT_STATE = INIT_STATE;
 N_IMAGE       = START;
-
-
-
-
 
     while N_IMAGE < END
            
@@ -49,6 +38,8 @@ N_IMAGE       = START;
                 %%Transition
                 CURRENT_STATE = FILLING_BUFFERS;
                 STATE_COUNTER = 0;
+                
+                
 
         %% Filling Buffers
         
@@ -72,6 +63,8 @@ N_IMAGE       = START;
                  STATE_COUNTER = STATE_COUNTER +1;
                  
                 end
+                
+                
 
         %% Detecting Ego-Lane                     
             case DETECTING_EGO_LANE

@@ -1,16 +1,8 @@
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-%%   Estimate the VP using a filter
-%%   This is not yet that advanced        
-%%          
-%%              
-%%       
-%%
-%% 
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%   Estimate the VP using a filter %%
+
 function VanishingPt = find_Vanashing_Point(VanishingPt)
+
 
 
 %% Required Interface
@@ -28,40 +20,27 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
     global VP_TRANSITION VP_PRIOR
     
     
-%% Provided Interface    
+
+    
+    %% Provided/Updated Interface    
     global VP_FILTER 
 
-
-%% Predict Step
-
+   
+    %% Predict Step
     VP_FILTER = imfilter( VP_FILTER, VP_TRANSITION, 'Replicate' );
     VP_FILTER = VP_FILTER / sum(VP_FILTER(:),1);
-    VP_FILTER = 1*VP_FILTER + 0*VP_PRIOR;
+    VP_FILTER = 0.9*VP_FILTER + 0*VP_PRIOR;
 
     
-%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     %% show histogram and model %%
-%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%     sfigure(136);
-%     clf           
-%     h = bar3( VP_FILTER );               
-%     hold on    
-%     set(h,'EdgeColor','none');
-%     axis vis3d
-%     view(135,35);
-%     title('VP FILTER PREDICT')
-%     drawnow
-    
-    
-    
 
-%% Update %%
+    %% Update Step %%
 
-    O_V = C_V;      %% + VP_V; %% center is VP in image coordinates
-    O_H = C_H;      %% + VP_H; %% center is VP in image coordinates
+    O_V = C_V;      %center is VP in image coordinates
+    O_H = C_H;      %center is VP in image coordinates
     
     
     
+    best  = 0;
     
     for nv = 1:size(VP_BINS_V,2)
         for nh = 1:size(VP_BINS_H,2)
@@ -87,19 +66,19 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
             
              % Probability of the Lane according to Lane Widith
             
-                WidthPx       = (1/VP_LANE_RATIO) * WidthPx * (1/CM_TO_PIXEL);
-                WidhtP      = LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-WidthPx)^2 / LANE_WIDTH_DIFF_NOMIN );
+                Width       = (1/VP_LANE_RATIO) * WidthPx * (1/CM_TO_PIXEL);
+                WidhtProb      = LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-Width)^2 / LANE_WIDTH_DIFF_NOMIN );
             
 
              % Probability of Boundary Segments of the Lane
                 BoundaryProb     = 0;
-
-
+                
                   ObservedHistogramHorizon = INT_HIST_VP_PROB';
 
                 for idx=1:size(LaneBoundaryModel.BinID,1)
                      ID           = LaneBoundaryModel.BinID(idx);
-                     BoundaryProb = BoundaryProb + ObservedHistogramHorizon(ID);               
+                     Value        = LaneBoundaryModel.Value(idx);
+                     BoundaryProb = BoundaryProb + ObservedHistogramHorizon(ID)*Value;               
                 end
             
 
@@ -116,63 +95,37 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
                 
                 
                 
-            % Combined Probabability
-                update_prob = BoundaryProb * NegBoundaryProb * WidhtP;
+            % Combined Conditional Probabability
+                conditional_prob = BoundaryProb * NegBoundaryProb * WidhtProb;
                 
-            
-            
-%             sfigure(562);
-%             bar([1:size(model,1)],model)
-%             drawnow
-            
-%% Update the Filter %%
 
-            VP_FILTER(nv,nh) = VP_FILTER(nv,nh) * update_prob;
+            
+            %Update the Filter %%
+
+            VP_FILTER(nv,nh) = VP_FILTER(nv,nh) * conditional_prob;
+            
+            
+            
+            % Already keep Track of Max Probable State
+           
+            if best < VP_FILTER(nv,nh)
+                UPD_VP_V  = -TMP_VP_V;  %% to center image coordinate system
+                UPD_VP_H  =  TMP_VP_H;   %% to center image coordinate system
+                best = VP_FILTER(nv,nh);
+            end
+            
             
 
         end
     end
 
 
+    %% Normalize %%
 
-    %%%%%%%%%%%%%%%
-    %% normalize %%
-    %%%%%%%%%%%%%%%
     VP_FILTER = VP_FILTER / sum( sum(VP_FILTER) );
 
-
-
-%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     %% show histogram and model %%
-%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%     sfigure(137);
-%     clf           
-%     h = bar3( VP_FILTER );               
-%     hold on    
-%     set(h,'EdgeColor','none');
-%     axis vis3d
-%     view(135,35);
-%     title('VP FILTER UPDATE')
-%     drawnow
-
-        
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %% get the max probable state %%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    [mx idx]    = max(VP_FILTER(:),[],1);
-    [idxV idxH] = ind2sub( size(VP_FILTER), idx );
-    TMP_VP_V    = VP_BINS_V(idxV); %% from index to bin in center coordinate system
-    TMP_VP_H    = VP_BINS_H(idxH); %% from index to bin in center coordinate system
-    TMP_VP_V    = -C_V + TMP_VP_V; %% to center image coordinate system
-    TMP_VP_H    = -C_H + TMP_VP_H; %% to center image coordinate system
-    UPD_VP_V    = TMP_VP_V;
-    UPD_VP_H    = TMP_VP_H;
-
-    
-    %%%%%%%%%%%%%%%%%%%%%%
-    %% asign the new VP %%
-    %%%%%%%%%%%%%%%%%%%%%%
+    %% Assign the new VP %%
     VanishingPt.V_prev = VanishingPt.V;
     VanishingPt.H_prev = VanishingPt.H;
     VanishingPt.V = UPD_VP_V;

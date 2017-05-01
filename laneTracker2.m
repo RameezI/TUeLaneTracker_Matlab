@@ -142,7 +142,7 @@ function [] = laneTracker2()
     
 %% The Lane Filter Expressed in the VP Coordinate System %%
    
-    global  LANE_CONF_THRESHOLD OBS_L OBS_R OBS_N  LANE_FILTER_OFFSET_V BASE_HISTOGRAM_STEP
+    global  LANE_CONF_THRESHOLD OBS_L OBS_R   LANE_FILTER_OFFSET_V BASE_HISTOGRAM_STEP LaneBoundaryModel_Left LaneBoundaryModel_Right  laneBoundaryModel NegLaneBoundaryModel 
     global  BASE_HISTOGRAM_BINS LANE_OFFSETS_BINS LANE_PRIOR LANE_TRANSITION LANE_FILTER
     
     % CM_STEP translated to pixels at the bottom line of the Image
@@ -151,16 +151,15 @@ function [] = laneTracker2()
     LANE_OFFSETS_BINS        = round([0:BASE_HISTOGRAM_STEP:PX_MAX]);
      
     BASE_HISTOGRAM_BINS      = -PX_MAX:BASE_HISTOGRAM_STEP:PX_MAX;    %% Histogram bins for the lane observation model
-   
-    
-   
+      
     [LANE_PRIOR, LANE_TRANSITION] = createLanePrior( LANE_OFFSETS_BINS, 1/CM_TO_PIXEL, AVG_LANE_WIDTH, MIN_LANE_WIDTH, MAX_LANE_WIDTH, STD_LANE_WIDTH );
     LANE_FILTER  = LANE_PRIOR;
-      
+       
+    [LaneBoundaryModel_Left, LaneBoundaryModel_Right, laneBoundaryModel, NegLaneBoundaryModel] = createLaneObservationModel( LANE_OFFSETS_BINS, BASE_HISTOGRAM_BINS, MIN_LANE_WIDTH, MAX_LANE_WIDTH, CM_TO_PIXEL );
     
-    [OBS_L, OBS_R, OBS_N] = createLaneObservationModel( LANE_OFFSETS_BINS, BASE_HISTOGRAM_BINS, MIN_LANE_WIDTH, MAX_LANE_WIDTH, LANE_OFFSETS_BINS, CM_TO_PIXEL );
+    
     LANE_FILTER_OFFSET_V  = -240;
-    LANE_CONF_THRESHOLD   = 1;                                                      %% the minumum confidence required for a lane boundary. 
+    LANE_CONF_THRESHOLD   = 1;      %% the minumum confidence required for a lane boundary. 
     
     
     

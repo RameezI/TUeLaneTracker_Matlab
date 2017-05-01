@@ -185,36 +185,19 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
                   modelLaneBoundary_Right   =  LaneBoundaryModel_Right(left,:,right);
                   modelNegLaneBoundary      =  NegLaneBoundaryModel   (left,:,right);
 
-% 
-%                  likelihood_leftLaneBoundary_old   =     sum( modelLaneBoundary_Left.*INT_HIST_LANE_PROB, 2 );
-%                  likelihood_rightLaneBoundary_old  =     sum( modelLaneBoundary_Right.*INT_HIST_LANE_PROB, 2 );
-                  
-                  likelihood_leftLaneBoundary =0;
 
-                   for idx=1:  size(laneBoundaryModel(left,right).LeftBinID,1)
-                       
-                     ID           = laneBoundaryModel(left,right).LeftBinID(idx);
-                     Value        = laneBoundaryModel(left,right).LeftValue(idx);
-                     likelihood_leftLaneBoundary = likelihood_leftLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;               
-                   
-                   end
-                                                       
+%                   likelihood_leftLaneBoundary   =     sum( modelLaneBoundary_Left.*INT_HIST_LANE_PROB, 2 );
+                  
                   
 
-                        
-                  likelihood_rightLaneBoundary =0;
-
-                   for idx=1:size(laneBoundaryModel(left,right).RightBinID,1)
-                   
-                       ID           = laneBoundaryModel(left,right).RightBinID(idx);
-                       Value        = laneBoundaryModel(left,right).RightValue(idx);
-                       likelihood_rightLaneBoundary = likelihood_rightLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;
-                     
+                   for idx=1:size(laneBoundaryModel.LeftBinID,1)
+                     ID           = LaneBoundaryModel.LeftBinID(idx);
+                     BoundaryProb = BoundaryProb + ObservedHistogramHorizon(ID);               
                    end
-                   
-
-
-
+                  
+                  
+                  
+                  likelihood_rightLaneBoundary  =     sum( modelLaneBoundary_Right.*INT_HIST_LANE_PROB, 2 );
                   likelihood_NegLaneBoundary    =     OBS_NEG_NORMA * exp( -sum( modelNegLaneBoundary.*INT_HIST_LANE_PROB, 2 )^2/OBS_NEG_NOMIN );
                   
                   conditional_prob              =    likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary;

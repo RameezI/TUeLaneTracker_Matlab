@@ -41,13 +41,13 @@ function [ Prior, Trans] = createLanePrior( LANE_OFFSETS_BINS, Pix_To_Cm, MeanL,
                 width = LANE_OFFSETS_BINS(leftOffset)+LANE_OFFSETS_BINS(rightOffset);
 
 
-                if MinL <= width && width <= MaxL            
+                 if MinL <= width && width <= MaxL            
                     Prior(leftOffset,rightOffset) = pL*pR;
                     validRightOffsets{leftOffset,1}= [validRightOffsets{leftOffset,1}, rightOffset];          
 
-                else
+                        else
                             Prior(leftOffset,rightOffset) = 0;                
-                end
+                        end
 
             
         end

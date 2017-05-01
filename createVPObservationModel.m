@@ -5,53 +5,42 @@
 %% All in the VP coordinate system
 %%
 %%
-function [LaneBoundaryModel, NegLaneBoundaryModel, Width ] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, VP_STEP_HST, VP_BINS_HST, OFFSET )
+function [LaneBoundaryModel, NegLaneBoundaryModel, Width ] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, HORIZON_HISTOGRAM_STEP, HORIZON_HISTOGRAM_BINS, VP_FILTER_OFFSET_V )
        
 
 
     %% Compute Intersection With Current Horizon %%
     
     L  = (LANE_BOUNDARIES(1,1) + LANE_BOUNDARIES(2,1))/2; %% in VP coordiante system
+     
+   
+    
     DX = TMP_VP_H - L;
     DY = TMP_VP_V + 240;
-    IL = (DX/DY) * (OFFSET - TMP_VP_V) + TMP_VP_H;
+    IL = (DX/DY) * (VP_FILTER_OFFSET_V - TMP_VP_V) + TMP_VP_H;
     
     R  = (LANE_BOUNDARIES(1,2) + LANE_BOUNDARIES(2,2))/2; %% in VP coordiante system
+    
+
+    
     DX = TMP_VP_H - R;
     DY = TMP_VP_V + 240;
-    IR = (DX/DY) * (OFFSET - TMP_VP_V) + TMP_VP_H;
+    IR = (DX/DY) * (VP_FILTER_OFFSET_V - TMP_VP_V) + TMP_VP_H;
     
-%     figure(800)
-%     clf
-%     hold on
-%     plot( [L TMP_VP_H], [-240 TMP_VP_V], 'b' )
-%     plot( [TMP_VP_H TMP_VP_H], [TMP_VP_V TMP_VP_V], 'ob' )
-%     plot( [TMP_VP_H R], [TMP_VP_V -240], 'r' )
-%     plot( [TMP_VP_H TMP_VP_H], [TMP_VP_V TMP_VP_V], 'xr' )
-%     plot( [-320 320], [OFFSET OFFSET], 'k' )
-%     plot( [-320 320], [-240 -240], 'k' )
-%     plot( [IL IL], [OFFSET OFFSET], 'ob' )
-%     plot( [IR IR], [OFFSET OFFSET], 'xr' )
-%     axis([-320 320 -240 240]);
-%     axis equal    
-%     grid on
-%     drawnow
-%     pause
-    
-    
+
  
     %% To Histogram Bins %%
     
-    IL   = VP_STEP_HST * round( IL/VP_STEP_HST );
-    IR   = VP_STEP_HST * round( IR/VP_STEP_HST );
-    nbBins = size(VP_BINS_HST,2);
+    IL   = HORIZON_HISTOGRAM_STEP * round( IL/HORIZON_HISTOGRAM_STEP );
+    IR   = HORIZON_HISTOGRAM_STEP * round( IR/HORIZON_HISTOGRAM_STEP );
+    nbBins = size(HORIZON_HISTOGRAM_BINS,2);
     
     
     
     %% To Histogram Bins-ID
-    idxL  = ( (IL - VP_BINS_HST(1,1) )/VP_STEP_HST ) +1;
+    idxL  = ( (IL - HORIZON_HISTOGRAM_BINS(1,1) )/HORIZON_HISTOGRAM_STEP ) +1;
     
-    idxR  = ( (VP_BINS_HST(1,nbBins) - IR)/VP_STEP_HST );
+    idxR  = ( (HORIZON_HISTOGRAM_BINS(1,nbBins) - IR)/HORIZON_HISTOGRAM_STEP );
     idxR  = nbBins- idxR;
     
     idxM  = round((idxL+idxR)/2);
@@ -62,9 +51,7 @@ function [LaneBoundaryModel, NegLaneBoundaryModel, Width ] = createVPObservation
     nbRightNonBoundaryBins = (idxR-2) - (idxM+3);
     
     nbNonBoundaryBins      = nbLeftNonBoundaryBins + nbRightNonBoundaryBins;
-    
-%     idxL = find( IL == VP_BINS_HST );
-%     idxR = find( IR == VP_BINS_HST );
+
         
     
 %% Create Expected Models %%
@@ -72,15 +59,9 @@ function [LaneBoundaryModel, NegLaneBoundaryModel, Width ] = createVPObservation
 
     Width = IR-IL;
 
-
-    
-    
-    
     LaneBoundaryModel= struct;
         LaneBoundaryModel.BinID = ones(6,1);
-        LaneBoundaryModel.Value = zeros(6,1);
-    
-    
+        LaneBoundaryModel.Value = zeros(6,1);   
     
     %Note Value member is needed only for the Lane Boundary Model
     %     This is because in case of illegitimate intersections the lane
@@ -123,7 +104,5 @@ function [LaneBoundaryModel, NegLaneBoundaryModel, Width ] = createVPObservation
  
          
     end
-    
-    
     
 end
