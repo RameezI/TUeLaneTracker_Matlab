@@ -60,8 +60,8 @@ function [LaneBoundaryModel, NegLaneBoundaryModel, Width ] = createVPObservation
     Width = IR-IL;
 
     LaneBoundaryModel= struct;
-        LaneBoundaryModel.BinID = ones(6,1);
-        LaneBoundaryModel.Value = zeros(6,1);   
+        LaneBoundaryModel.BinID = ones(1,6);
+        LaneBoundaryModel.Value = zeros(1,6);   
     
     %Note Value member is needed only for the Lane Boundary Model
     %     This is because in case of illegitimate intersections the lane
@@ -69,28 +69,16 @@ function [LaneBoundaryModel, NegLaneBoundaryModel, Width ] = createVPObservation
     %     probability.
     
     NegLaneBoundaryModel= struct;
-        NegLaneBoundaryModel.BinID = ones(nbNonBoundaryBins,  1);
+        NegLaneBoundaryModel.BinID = ones(1, nbNonBoundaryBins);
 
 
     if 2 <= idxL && idxR <= nbBins-1
         
-          LaneBoundaryModel.BinID(1,1) = idxL-1;
-          LaneBoundaryModel.BinID(2,1) = idxL;
-          LaneBoundaryModel.BinID(3,1) = idxL+1;
-
-          LaneBoundaryModel.BinID(4,1) = idxR-1;
-          LaneBoundaryModel.BinID(5,1) = idxR;
-          LaneBoundaryModel.BinID(6,1) = idxR+1;
+          LaneBoundaryModel.BinID = [idxL-1, idxL, idxL+1, idxR-1, idxR, idxR+1];
 
 
+          LaneBoundaryModel.Value = [0.25, 1, 0.25, 0.25, 1, 0.25];
 
-          LaneBoundaryModel.Value(1,1) = 0.25;
-          LaneBoundaryModel.Value(2,1) = 1;
-          LaneBoundaryModel.Value(3,1) = 0.25;
-
-          LaneBoundaryModel.Value(4,1) = 0.25;
-          LaneBoundaryModel.Value(5,1) = 1;
-          LaneBoundaryModel.Value(6,1) = 0.25;
 
 
          for i= 0: nbLeftNonBoundaryBins-1

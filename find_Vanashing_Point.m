@@ -29,15 +29,15 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
     %% Predict Step
     VP_FILTER = imfilter( VP_FILTER, VP_TRANSITION, 'Replicate' );
     VP_FILTER = VP_FILTER / sum(VP_FILTER(:),1);
-    VP_FILTER = 0.9*VP_FILTER + 0*VP_PRIOR;
+    VP_FILTER = 0.5*VP_FILTER + 0.5*VP_PRIOR;
 
     
 
     %% Update Step %%
 
-    O_V = C_V;      %center is VP in image coordinates
-    O_H = C_H;      %center is VP in image coordinates
-    
+%     O_V = C_V;      %center is VP in image coordinates
+%     O_H = C_H;      %center is VP in image coordinates
+%     
     
     
     best  = 0;
@@ -47,15 +47,16 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
 
 
             %Get Expected VP%
-            
-            TMP_VP_V = VP_BINS_V(nv); 
-            TMP_VP_H = VP_BINS_H(nh);
+             %Transnformation to Current VP-Coordinate System %
+            TMP_VP_V = -VP_BINS_V(nv); %% V axis is reversed for VP coordinate system 
+            TMP_VP_H =  VP_BINS_H(nh);
             
 
             %Transnformation to Current VP-Coordinate System %
-
-            TMP_VP_V = -(TMP_VP_V - O_V);       %% V axis is reversed for VP coordinate system 
-            TMP_VP_H =  TMP_VP_H - O_H;         %% H axis has the same orientation
+% 
+%             TMP_VP_V = -(TMP_VP_V - O_V);       %% V axis is reversed for VP coordinate system 
+%             TMP_VP_H =  TMP_VP_H - O_H;         %% H axis has the same orientation
+            
             
             
             
@@ -75,7 +76,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
                 
                   ObservedHistogramHorizon = INT_HIST_VP_PROB';
 
-                for idx=1:size(LaneBoundaryModel.BinID,1)
+                for idx=1:size(LaneBoundaryModel.BinID,2)
                      ID           = LaneBoundaryModel.BinID(idx);
                      Value        = LaneBoundaryModel.Value(idx);
                      BoundaryProb = BoundaryProb + ObservedHistogramHorizon(ID)*Value;               
@@ -86,7 +87,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
             % Probability of Non-Boundary Segments of the Lane
                 x= 0;
 
-                for idx=1:size(NegLaneBoundaryModel.BinID,1)
+                for idx=1:size(NegLaneBoundaryModel.BinID,2)
                      ID           = NegLaneBoundaryModel.BinID(idx);
                      x = x+ ObservedHistogramHorizon(ID);               
                 end

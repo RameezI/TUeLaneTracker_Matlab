@@ -14,8 +14,8 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     
     %% Required Interface
     global STATE_READY STATE_ERROR
-    global LANE_CONF_THRESHOLD C_V C_H RES_VH CM_TO_PIXEL MIN_LANE_WIDTH MAX_LANE_WIDTH
-    global OBS_NEG_NOMIN OBS_NEG_NORMA LaneBoundaryModel_Left LaneBoundaryModel_Right laneBoundaryModel NegLaneBoundaryModel    
+    global LANE_CONF_THRESHOLD C_V C_H RES_VH CM_TO_PIXEL 
+    global OBS_NEG_NOMIN OBS_NEG_NORMA LaneBoundaryModels NegLaneBoundaryModel   
     global HORIZON_HISTOGRAM_STEP HORIZON_HISTOGRAM_BINS  
     global BASE_HISTOGRAM_STEP    BASE_HISTOGRAM_BINS
     global VP_RANGE_H LANE_OFFSETS_BINS LANE_FILTER_OFFSET_V VP_FILTER_OFFSET_V
@@ -45,6 +45,9 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     O_H = C_H; %%+ VP_H; %% VP to image coordinate system
     
     
+    % Structure Required to Extract same (location wise)information from different sources using a for example using a for loop
+    
+    
     Lane_Points     = [ HC-(O_H) -( VC-(O_V) ) ]; %% lane pixels to VP coordinate system
     
     Lane_Props      = Likelihoods.TOT_MAX_FOCUSED(IDX_LANE_PIX);
@@ -54,7 +57,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     Tan_Lane_Angle= Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX);
 
              
-    bottom  = LANE_FILTER_OFFSET_V; %% keep fixed regardless of the FOV or use, keeps the cm-to-pixel ratio more stable
+    bottom  = LANE_FILTER_OFFSET_V ; %% keep fixed regardless of the FOV or use, keeps the cm-to-pixel ratio more stable
     
     horizon = VP_FILTER_OFFSET_V; %% use an offest from horizon to make intersections more pronounced
 
@@ -84,7 +87,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
       if ( Lane_Int_Bottom_tmp(i) > BASE_HISTOGRAM_BINS(1)-BASE_HISTOGRAM_STEP/2    &&   Lane_Int_Bottom_tmp(i) < BASE_HISTOGRAM_BINS(end)+ BASE_HISTOGRAM_STEP/2)
         
             
-      if (  Lane_Int_Horizon_tmp(i) > -VP_RANGE_H-HORIZON_HISTOGRAM_STEP/2   &&   Lane_Int_Horizon_tmp(i) < VP_RANGE_H+HORIZON_HISTOGRAM_STEP/2  )                
+      if (  Lane_Int_Horizon_tmp(i) > -VP_RANGE_H-HORIZON_HISTOGRAM_STEP/2          &&   Lane_Int_Horizon_tmp(i) < VP_RANGE_H+HORIZON_HISTOGRAM_STEP/2  )                
                 
                         Lane_Int_Bottom(Index)    = Lane_Int_Bottom_tmp(i);
                         Lane_Int_Horizon(Index)   = Lane_Int_Horizon_tmp(i);
@@ -149,105 +152,191 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     
       TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
       TEMP = TEMP / sum(sum(TEMP));
-      LANE_FILTER = 0.9*TEMP +0*LANE_PRIOR ; 
-
+      LANE_FILTER_TRANSITIONED = 0.5*TEMP +0.5*LANE_PRIOR ; 
+      
     
 
-    %% Update Step %%
+    % Update Step %%
  
     best  = 0;
-    for left = 1:size(LANE_OFFSETS_BINS,2)
+    for modelIdx = 1:size(LaneBoundaryModels,2)
         
-        for right = 1:size(LANE_OFFSETS_BINS,2)
 
-     
-            
-            width = (LANE_OFFSETS_BINS(left)+LANE_OFFSETS_BINS(right)) * 1/CM_TO_PIXEL;
-            if MIN_LANE_WIDTH <= width && width <= MAX_LANE_WIDTH
-                
-                left_offset  = LANE_OFFSETS_BINS(left);
-                right_offset = LANE_OFFSETS_BINS(right);
-                
-                
-                
-                           
-%                 modelL = OBS_L(left,:,right);  
-%                 modelR = OBS_R(left,:,right);
-%                 obsNeg = OBS_N(left,:,right);  
-   
+        
+              left  = LaneBoundaryModels(modelIdx).leftOffsetIdx;
+              right = LaneBoundaryModels(modelIdx).rightOffsetIdx;
+              
+              
+              
+                if left == 50
+                    a= 3;
+                end
+
+              width = (LANE_OFFSETS_BINS(left)+LANE_OFFSETS_BINS(right)) * 1/CM_TO_PIXEL;
+
+              %  if MIN_LANE_WIDTH <= width && width <= MAX_LANE_WIDTH
+
+                    left_offset  = LANE_OFFSETS_BINS(left);
+                    right_offset = LANE_OFFSETS_BINS(right);
+
                     
-%                 likelihood_left  = sum( modelL.*INT_HIST_LANE_PROB, 2 ); 
-%                 likelihood_right = sum( modelR.*INT_HIST_LANE_PROB, 2 );
-%                 likelihood_Neg    = OBS_NEG_NORMA * exp( -sum( obsNeg.*INT_HIST_LANE_PROB, 2 )^2/OBS_NEG_NOMIN );
-%                 conditional_prob  = likelihood_left * likelihood_right * likelihood_Neg;
+                    
+                    
 
-                  modelLaneBoundary_Left    =  LaneBoundaryModel_Left (left,:,right);
-                  modelLaneBoundary_Right   =  LaneBoundaryModel_Right(left,:,right);
-                  modelNegLaneBoundary      =  NegLaneBoundaryModel   (left,:,right);
+                      likelihood_leftLaneBoundary =0;
 
-% 
-%                  likelihood_leftLaneBoundary_old   =     sum( modelLaneBoundary_Left.*INT_HIST_LANE_PROB, 2 );
-%                  likelihood_rightLaneBoundary_old  =     sum( modelLaneBoundary_Right.*INT_HIST_LANE_PROB, 2 );
-                  
-                  likelihood_leftLaneBoundary =0;
+                       for idx=1:  size(LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary,2)
 
-                   for idx=1:  size(laneBoundaryModel(left,right).LeftBinID,1)
+                         ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary(idx);
+                         Value        = LaneBoundaryModels(modelIdx).histogramWeights_leftBoundary(idx);
+                         likelihood_leftLaneBoundary = likelihood_leftLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;               
+
+                       end
+
+
+                      likelihood_rightLaneBoundary =0;
+
+                       for idx=1:size(LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary,2)
+
+                           ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary(idx);
+                           Value        = LaneBoundaryModels(modelIdx).histogramWeights_rightBoundary(idx);
+                           likelihood_rightLaneBoundary = likelihood_rightLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;
+
+                       end
+
                        
-                     ID           = laneBoundaryModel(left,right).LeftBinID(idx);
-                     Value        = laneBoundaryModel(left,right).LeftValue(idx);
-                     likelihood_leftLaneBoundary = likelihood_leftLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;               
-                   
-                   end
-                                                       
-                  
+                       
+                       
+                       
 
+                      NegLaneCorrelation= 0; 
+
+                      for idx=1:size(NegLaneBoundaryModel(modelIdx).histogramBinsID,2)
+                          ID  = NegLaneBoundaryModel(modelIdx).histogramBinsID(idx);
+                          NegLaneCorrelation = NegLaneCorrelation + INT_HIST_LANE_PROB(ID);                  
+                      end
+
+                      likelihood_NegLaneBoundary    =     OBS_NEG_NORMA * exp( -NegLaneCorrelation^2/OBS_NEG_NOMIN );
+
+
+                      conditional_prob              =    likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary;
+
+
+                    
+                      % Update Lane Filter (only legitimate states)
+
+                      LANE_FILTER(left,right) = LANE_FILTER_TRANSITIONED(left,right) * conditional_prob;
+
+
+                
+                      
+                      % Already keep Track of Max Probable State
+
+                        if best < LANE_FILTER(left,right)
+                            
+                            
+                            bestState_new= modelIdx;
+                            
+                            best       = LANE_FILTER(left,right);
+                            LANE_MODEL = [left_offset right_offset likelihood_leftLaneBoundary likelihood_rightLaneBoundary];
+                            LANE_WIDTH = width;
+                            
                         
-                  likelihood_rightLaneBoundary =0;
-
-                   for idx=1:size(laneBoundaryModel(left,right).RightBinID,1)
-                   
-                       ID           = laneBoundaryModel(left,right).RightBinID(idx);
-                       Value        = laneBoundaryModel(left,right).RightValue(idx);
-                       likelihood_rightLaneBoundary = likelihood_rightLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;
-                     
-                   end
-                   
-
-
-
-                  likelihood_NegLaneBoundary    =     OBS_NEG_NORMA * exp( -sum( modelNegLaneBoundary.*INT_HIST_LANE_PROB, 2 )^2/OBS_NEG_NOMIN );
-                  
-                  conditional_prob              =    likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary;
-
-                                             
-
-
-            else
-
-                  conditional_prob = 0;
-
-            end
-            
-            
-            LANE_FILTER(left,right) = LANE_FILTER(left,right) * conditional_prob;
-
-           
-            % Already keep Track of Max Probable State
-           
-            if best < LANE_FILTER(left,right)
-                best       = LANE_FILTER(left,right);
-                LANE_MODEL = [left_offset right_offset likelihood_leftLaneBoundary likelihood_rightLaneBoundary];
-                LANE_WIDTH = width;
-            end
-
-        end
+                        end
     end
-    
+     
     LANE_MODEL
     LANE_WIDTH
+      
+      
+      
 
     
+
+%     % Update Step %%
+%  
+%     best  = 0;
+%     for left = 1:size(LANE_OFFSETS_BINS,2)
+%         
+%         for right = 1:size(LANE_OFFSETS_BINS,2)
+% 
+% 
+%             width = (LANE_OFFSETS_BINS(left)+LANE_OFFSETS_BINS(right)) * 1/CM_TO_PIXEL;
+%             if MIN_LANE_WIDTH <= width && width <= MAX_LANE_WIDTH
+%                 
+%                 left_offset  = LANE_OFFSETS_BINS(left);
+%                 right_offset = LANE_OFFSETS_BINS(right);
+% 
+%                   
+%                   likelihood_leftLaneBoundary =0;
+% 
+%                    for idx=1:  size(laneBoundaryModel(left,right).LeftBinID,1)
+%                        
+%                      ID           = laneBoundaryModel(left,right).LeftBinID(idx);
+%                      Value        = laneBoundaryModel(left,right).LeftValue(idx);
+%                      likelihood_leftLaneBoundary = likelihood_leftLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;               
+%                    
+%                    end
+%                                                       
+%                         
+%                   likelihood_rightLaneBoundary =0;
+% 
+%                    for idx=1:size(laneBoundaryModel(left,right).RightBinID,1)
+%                    
+%                        ID           = laneBoundaryModel(left,right).RightBinID(idx);
+%                        Value        = laneBoundaryModel(left,right).RightValue(idx);
+%                        likelihood_rightLaneBoundary = likelihood_rightLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;
+%                      
+%                    end
+%                    
+% 
+%                   NegLaneCorrelation= 0; 
+%                   
+%                   for idx=1:size(negLaneBoundaryModel(left,right).BinID,1)
+%                       ID  = negLaneBoundaryModel(left,right).BinID(idx);
+%                       NegLaneCorrelation = NegLaneCorrelation + INT_HIST_LANE_PROB(ID);                  
+%                   end
+% 
+%                   likelihood_NegLaneBoundary    =     OBS_NEG_NORMA * exp( -NegLaneCorrelation^2/OBS_NEG_NOMIN );
+%                   
+%                   
+%                   conditional_prob              =    likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary;
+% 
+%                                              
+% 
+% 
+%             else
+% 
+%                   conditional_prob = 0;
+% 
+%             end
+%             
+%             
+%             LANE_FILTER(left,right) = LANE_FILTER(left,right) * conditional_prob;
+% 
+%            
+%             % Already keep Track of Max Probable State
+%            
+%             if best < LANE_FILTER(left,right)
+%                 bestState = [left right];
+%                 best       = LANE_FILTER(left,right);
+%                 LANE_MODEL = [left_offset right_offset likelihood_leftLaneBoundary likelihood_rightLaneBoundary];
+%                 LANE_WIDTH = width;
+%             end
+% 
+%         end
+%     end
+%     
+%     LANE_MODEL
+%     LANE_WIDTH
+
     
+%     if (LANE_MODEL ~=  LANE_MODEL_new)  || (LANE_WIDTH ~= LANE_WIDTH_new) || (LANE_FILTER ~= LANE_FILTER_new)
+%         
+% 
+%         a =3;   
+%         
+%     end
 
     %% Normalize Lane Filter
     LANE_FILTER = LANE_FILTER / sum(sum(LANE_FILTER));

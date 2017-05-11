@@ -54,7 +54,7 @@ function [] = laneTracker2()
     global DATASET IMAGE_FILES NBUFFER ImageOutCount STEP_SIZE CENTER_OFFSET
     DATASET = '/media/rameez/Linux-Extended/DataSet/eindhoven/PNG_imgs/';
     
-    LOGO = im2double(imread('tue.png'));
+%     LOGO = im2double(imread('tue.png'));
     DATASET
     
     IMAGE_FILES= dir([DATASET,'*.png']); 
@@ -136,50 +136,75 @@ function [] = laneTracker2()
 
 
     global tippingPoint_gray tippingPoint_gradMag;
-    tippingPoint_gray= uint8(100);
-    tippingPoint_gradMag= uint8(40);
+    tippingPoint_gray    = uint8(100);
+    tippingPoint_gradMag = uint8(40);
+    
+    
+    
+     global LANE_WIDTH_DIFF_NORMA LANE_WIDTH_DIFF_NOMIN
+    
+    LANE_WIDTH_DIFF_SIGMA = 15; % Lane Width Standard Deviation
+    
+    LANE_WIDTH_DIFF_NORMA = 1/(sqrt(2*pi*LANE_WIDTH_DIFF_SIGMA^2)); 
+    LANE_WIDTH_DIFF_NOMIN = 2*LANE_WIDTH_DIFF_SIGMA^2;
+    
+    
+
+    global  OBS_NEG_NOMIN OBS_NEG_NORMA
+    
+    OBS_NEG_SIFMA = 0.2;
+    OBS_NEG_NOMIN = 2*OBS_NEG_SIFMA^2;
+    OBS_NEG_NORMA = 2/(sqrt(2*pi*OBS_NEG_SIFMA^2)); %% only positive side of x-axis, so half a Gaussian
+    
      
     
-%% The Lane Filter Expressed in the VP Coordinate System %%
+%% The Lane Filter Expressed in the VP Coordinate System %% 
    
-    global  LANE_CONF_THRESHOLD OBS_L OBS_R   LANE_FILTER_OFFSET_V BASE_HISTOGRAM_STEP LaneBoundaryModel_Left LaneBoundaryModel_Right  laneBoundaryModel NegLaneBoundaryModel 
-    global  BASE_HISTOGRAM_BINS LANE_OFFSETS_BINS LANE_PRIOR LANE_TRANSITION LANE_FILTER
+
+    global  LaneBoundaryModels NegLaneBoundaryModel 
+    global  BASE_HISTOGRAM_BINS  LANE_OFFSETS_BINS LANE_PRIOR LANE_TRANSITION LANE_FILTER 
+    global  BASE_HISTOGRAM_STEP LANE_CONF_THRESHOLD LANE_FILTER_OFFSET_V
     
-    % CM_STEP translated to pixels at the bottom line of the Image
-    BASE_HISTOGRAM_STEP     = ceil((CM_STEP*CM_TO_PIXEL)/10)*10;   
-    PX_MAX                  = round((MAX_LANE_WIDTH*CM_TO_PIXEL)/BASE_HISTOGRAM_STEP)*BASE_HISTOGRAM_STEP;
-    LANE_OFFSETS_BINS        = round([0:BASE_HISTOGRAM_STEP:PX_MAX]);
-     
-    BASE_HISTOGRAM_BINS      = -PX_MAX:BASE_HISTOGRAM_STEP:PX_MAX;    %% Histogram bins for the lane observation model
+    
+    % CM_STEP translated to pixels at the bottom line of the Image    
+    BASE_HISTOGRAM_STEP           = ceil((CM_STEP*CM_TO_PIXEL)/10)*10;   
+    PX_MAX                        = round((MAX_LANE_WIDTH*CM_TO_PIXEL)/BASE_HISTOGRAM_STEP)*BASE_HISTOGRAM_STEP;
+    LANE_OFFSETS_BINS             = round([0:BASE_HISTOGRAM_STEP:PX_MAX]);
       
-    [LANE_PRIOR, LANE_TRANSITION] = createLanePrior( LANE_OFFSETS_BINS, 1/CM_TO_PIXEL, AVG_LANE_WIDTH, MIN_LANE_WIDTH, MAX_LANE_WIDTH, STD_LANE_WIDTH );
+     
+    BASE_HISTOGRAM_BINS           = -PX_MAX:BASE_HISTOGRAM_STEP:PX_MAX;    %% Histogram bins for the lane observation model
+      
+    [LANE_PRIOR, LANE_TRANSITION, LaneBoundaryModels, NegLaneBoundaryModel] = createLanePrior( LANE_OFFSETS_BINS, BASE_HISTOGRAM_BINS, 1/CM_TO_PIXEL, AVG_LANE_WIDTH, MIN_LANE_WIDTH, MAX_LANE_WIDTH, STD_LANE_WIDTH );
+    
     LANE_FILTER  = LANE_PRIOR;
        
-    [LaneBoundaryModel_Left, LaneBoundaryModel_Right, laneBoundaryModel, NegLaneBoundaryModel] = createLaneObservationModel( LANE_OFFSETS_BINS, BASE_HISTOGRAM_BINS, MIN_LANE_WIDTH, MAX_LANE_WIDTH, CM_TO_PIXEL );
-    
     
     LANE_FILTER_OFFSET_V  = -240;
-    LANE_CONF_THRESHOLD   = 1;      %% the minumum confidence required for a lane boundary. 
+    LANE_CONF_THRESHOLD   =  1;      %% the minumum confidence required for a lane boundary. 
     
     
     
    
 %% The VP Filter  %%
     
-    global LANE_WIDTH_DIFF_NORMA LANE_WIDTH_DIFF_NOMIN VP_LANE_RATIO VP_RANGE_H VP_RANGE_V VP_STEP VP_FILTER_OFFSET_V 
     
-    global  VP_PRIOR VP_FILTER VP_BINS_V VP_BINS_H  VP_TRANSITION  HORIZON_HISTOGRAM_BINS HORIZON_HISTOGRAM_STEP
+    global VP_LANE_RATIO VP_RANGE_H VP_RANGE_V  VP_FILTER_OFFSET_V HORIZON_HISTOGRAM_STEP
+    
+    global  VP_BINS_V VP_BINS_H  VP_PRIOR VP_FILTER  VP_TRANSITION  HORIZON_HISTOGRAM_BINS 
     
     VP_RANGE_V  = 25;                                                               %% the vertical +/- search range wrt image center for the VP
     VP_RANGE_H  = 300;                                                              %% the horizontal +/- search range wrt image center for the VP
     VP_STEP     = 10;                                                               %% the search step size
     
+    
+    
     VP_BINS_V   = -VP_RANGE_V:VP_STEP:VP_RANGE_V;                                   %% the VP vertical filter bins
     VP_BINS_H   = -VP_RANGE_H:VP_STEP:VP_RANGE_H;                                   %% the VP horizontal filter bins
     
+  
     % Tranforming to Image Coordinates
-    VP_BINS_V   =  VP_BINS_V  + C_V;
-    VP_BINS_H   =  VP_BINS_H  + C_H;
+%     VP_BINS_V   =  VP_BINS_V  + C_V;
+%     VP_BINS_H   =  VP_BINS_H  + C_H;
     
     
     [VP_PRIOR, VP_TRANSITION] = createVPPrior( VP_BINS_V, VP_BINS_H, 20*VP_RANGE_V/VP_STEP );
@@ -191,22 +216,6 @@ function [] = laneTracker2()
     VP_LANE_RATIO      = VP_FILTER_OFFSET_V / LANE_FILTER_OFFSET_V;
     HORIZON_HISTOGRAM_BINS        = round(BASE_HISTOGRAM_BINS * VP_LANE_RATIO);
     HORIZON_HISTOGRAM_STEP        = HORIZON_HISTOGRAM_BINS(2)-HORIZON_HISTOGRAM_BINS(1);
-    
-    
-    
-    LANE_WIDTH_DIFF_SIGMA = 15; %% sigma in cm of difference in lane width between lane and vp filter
-    LANE_WIDTH_DIFF_NORMA = 1/(sqrt(2*pi*LANE_WIDTH_DIFF_SIGMA^2));
-    LANE_WIDTH_DIFF_NOMIN = 2*LANE_WIDTH_DIFF_SIGMA^2;
-    
-    
-    
-
-%% The Sigma on the Lane Observation Probability Mass between the Lane Markings %%    
-
-    global OBS_NEG_SIFMA OBS_NEG_NOMIN OBS_NEG_NORMA
-    OBS_NEG_SIFMA = 0.2;
-    OBS_NEG_NOMIN = 2*OBS_NEG_SIFMA^2;
-    OBS_NEG_NORMA = 2/(sqrt(2*pi*OBS_NEG_SIFMA^2)); %% only positive side of x-axis, so half a Gaussian
     
 
 %%
