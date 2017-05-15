@@ -27,9 +27,14 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
 
    
     %% Predict Step
-    VP_FILTER = imfilter( VP_FILTER, VP_TRANSITION, 'Replicate' );
-    VP_FILTER = VP_FILTER / sum(VP_FILTER(:),1);
-    VP_FILTER = 0.5*VP_FILTER + 0.5*VP_PRIOR;
+%     VP_FILTER = imfilter( VP_FILTER, VP_TRANSITION, 'Replicate' );
+%     VP_FILTER = VP_FILTER / sum(VP_FILTER(:),1);
+%     VP_FILTER = 0.5*VP_FILTER + 0.5*VP_PRIOR;
+    
+    
+      TEMP = imfilter( VP_FILTER, VP_TRANSITION, 'Replicate' );
+      TEMP = int32( (single(TEMP) / single(sum(sum(TEMP))) ) *2^15);
+      VP_FILTER_TRANSITIONED = 0.5*TEMP +0.5*VP_PRIOR ; 
 
     
 
@@ -97,13 +102,13 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
                 
                 
             % Combined Conditional Probabability
-                conditional_prob = BoundaryProb * NegBoundaryProb * WidhtProb;
+                conditional_prob = int32(BoundaryProb * NegBoundaryProb * WidhtProb * 2^15 );
                 
 
             
             %Update the Filter %%
 
-            VP_FILTER(nv,nh) = VP_FILTER(nv,nh) * conditional_prob;
+            VP_FILTER(nv,nh) = VP_FILTER_TRANSITIONED(nv,nh) * conditional_prob;
             
             
             
@@ -123,7 +128,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
 
     %% Normalize %%
 
-    VP_FILTER = VP_FILTER / sum( sum(VP_FILTER) );
+    VP_FILTER = int32( (single(VP_FILTER) / single( sum(sum(VP_FILTER)) )   )*2^15);
 
     
     %% Assign the new VP %%

@@ -151,7 +151,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %% Predict Step %%
     
       TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
-      TEMP = TEMP / sum(sum(TEMP));
+      TEMP = int32( (single(TEMP) / single(sum(sum(TEMP))) ) *2^15);
       LANE_FILTER_TRANSITIONED = 0.5*TEMP +0.5*LANE_PRIOR ; 
       
     
@@ -219,7 +219,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
                       likelihood_NegLaneBoundary    =     OBS_NEG_NORMA * exp( -NegLaneCorrelation^2/OBS_NEG_NOMIN );
 
 
-                      conditional_prob              =    likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary;
+                      conditional_prob              =    int32(likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary * 2^15);
 
 
                     
@@ -233,9 +233,6 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
                       % Already keep Track of Max Probable State
 
                         if best < LANE_FILTER(left,right)
-                            
-                            
-                            bestState_new= modelIdx;
                             
                             best       = LANE_FILTER(left,right);
                             LANE_MODEL = [left_offset right_offset likelihood_leftLaneBoundary likelihood_rightLaneBoundary];
@@ -339,7 +336,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
 %     end
 
     %% Normalize Lane Filter
-    LANE_FILTER = LANE_FILTER / sum(sum(LANE_FILTER));
+    LANE_FILTER = int32( (single(LANE_FILTER) / single( sum(sum(LANE_FILTER)) )   )*2^15);
 
 
     %% Find the Lane Boundaries

@@ -13,10 +13,10 @@ function [ Prior, Trans ] = createVPPrior( VP_BINS_V, VP_BINS_H, Sigma  )
     Prior = ones(sv,sh);
     for v = 1:sv
         for h = 1:sh 
-            Prior(v,h) = exp(-((v-sv/2)^2)/(Sigma^2) ) * exp(-((h-sh/2)^2)/(Sigma^2) );
+            Prior(v,h) = int32(exp(-((v-sv/2)^2)/(Sigma^2) ) * exp(-((h-sh/2)^2)/(Sigma^2) ) *2^15);
         end
     end        
-    Prior = Prior/sum(sum(Prior));
+    Prior = int32(( single(Prior) /  single(sum(sum(Prior))) )*2^15);
     
     %% uniform over 3x3 bin grid
     Trans = ones(3,3);

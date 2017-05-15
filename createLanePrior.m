@@ -17,7 +17,7 @@ function [ Prior, Trans, LaneBoundaryModels, NegLaneBoundaryModels] = createLane
         nbBaseHistogramBins      = size(binsBaseHistogram,2);
         
         
-        Prior         = zeros(nbOffsetBins, nbOffsetBins );
+        Prior         = int32(zeros(nbOffsetBins, nbOffsetBins ));
        
         
         hmean  = MeanL/2;  %% half lane width
@@ -52,8 +52,8 @@ function [ Prior, Trans, LaneBoundaryModels, NegLaneBoundaryModels] = createLane
             
 
                  % Prior on Location
-                    pL = exp( -(hmean-binsLaneOffsets_cm(leftOffsetIdx))^2 / (2*(8*SigmaL)^2) ) / ( sqrt(2*pi)*8*SigmaL );     
-                    pR = exp( -(hmean-binsLaneOffsets_cm(rightOffsetIdx))^2 / (2*(8*SigmaL)^2) ) / ( sqrt(2*pi)*8*SigmaL );
+                    pL = exp( -(hmean-binsLaneOffsets_cm(leftOffsetIdx))^2 / (2*(8*SigmaL)^2) ) / ( sqrt(2*pi)*8*SigmaL ) * (2^15);     
+                    pR = exp( -(hmean-binsLaneOffsets_cm(rightOffsetIdx))^2 / (2*(8*SigmaL)^2) ) / ( sqrt(2*pi)*8*SigmaL )* (2^15);
                     
                     
 
@@ -103,15 +103,10 @@ function [ Prior, Trans, LaneBoundaryModels, NegLaneBoundaryModels] = createLane
                                             NegLaneBoundaryModels(ModelsCount).histogramBinsID(nbLeftNonBoundaryBins+i+1)= (idxM + 4) +i;
                                   end
                                   
-                                  Prior(leftOffsetIdx,rightOffsetIdx) = pL*pR;
+                                  a= int32(pL*pR);
+                                  Prior(leftOffsetIdx,rightOffsetIdx) = int32(pL*pR);
 
-
-                              end  
-                                  
-
-                    %else
-                        
-                        %Prior(leftOffsetIdx,rightOffsetIdx) = 0;                
+                              end                
                     
                     end
 
@@ -121,7 +116,9 @@ function [ Prior, Trans, LaneBoundaryModels, NegLaneBoundaryModels] = createLane
     end
     
     % Normalize
-    Prior = Prior / sum(sum(Prior));
+    Prior = int32 ( round(( single(Prior) / single(sum(sum(Prior)) ) )* 2^15)) ;
+    
+%     Prior = int32(Prior *2^15);
 
     
     % Transition

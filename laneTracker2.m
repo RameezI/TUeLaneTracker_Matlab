@@ -192,7 +192,7 @@ function [] = laneTracker2()
     
     global  VP_BINS_V VP_BINS_H  VP_PRIOR VP_FILTER  VP_TRANSITION  HORIZON_HISTOGRAM_BINS 
     
-    VP_RANGE_V  = 25;                                                               %% the vertical +/- search range wrt image center for the VP
+    VP_RANGE_V  = 25;                                                               %% the vertical   +/- search range wrt image center for the VP
     VP_RANGE_H  = 300;                                                              %% the horizontal +/- search range wrt image center for the VP
     VP_STEP     = 10;                                                               %% the search step size
     
