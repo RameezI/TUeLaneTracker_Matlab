@@ -2,7 +2,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     
 
     Margin = 80; %% Note: Should be fitted using sweeps
-    span   = floor(RES_VH(1)/2)-Margin + VP_RANGE_V; %best activation of pixels i.e. VP= -25
+    span   = floor(RES_VH(1)/2)-Margin +VP_RANGE_V; %best activation of pixels i.e. VP= -25
 
 
     TOT_P_ALL           = single(zeros( span, RES_VH(2), NBUFFER));

@@ -202,7 +202,7 @@ function [] = laneTracker2()
     VP_BINS_H   = -VP_RANGE_H:VP_STEP:VP_RANGE_H;                                   %% the VP horizontal filter bins
 
     
-    [VP_PRIOR, VP_TRANSITION] = createVPPrior( VP_BINS_V, VP_BINS_H, 5*VP_RANGE_V/VP_STEP );
+    [VP_PRIOR, VP_TRANSITION] = createVPPrior( VP_BINS_V, VP_BINS_H, 20*VP_RANGE_V/VP_STEP );
     VP_FILTER   = VP_PRIOR;
     
     
