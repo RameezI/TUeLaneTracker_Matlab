@@ -30,7 +30,7 @@ function [IDX_FOC_TOT_P, Likelihoods] = filter_And_Focus(Likelihoods, MASKS)
     %%
     %% Apply the focus maks to the probs %%
     % Masks out certain distances %
-    Likelihoods.TOT_MAX_FOCUSED = MASKS.FOCUS .* Likelihoods.TOT_MAX;
+    Likelihoods.TOT_MAX_FOCUSED = single(MASKS.FOCUS) .* Likelihoods.TOT_MAX;
     
     Likelihoods.TOT_MAX_FOCUSED = floor((Likelihoods.TOT_MAX_FOCUSED+1)/256);
     

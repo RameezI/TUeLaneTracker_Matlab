@@ -108,7 +108,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     Lane_Props_Int     = Lane_Props_Int(1:Index);
     Lane_Depth_Int     = Lane_Depth_Int(1:Index);
     
-    Lane_Scaled_Props_Int =  ((Lane_Props_Int+1).*(Lane_Depth_Int.^2)) * 2^-8;
+    Lane_Scaled_Props_Int =  ((Lane_Props_Int).*(Lane_Depth_Int.^2)) * 2^-7;
     Lane_Scaled_Props_Int =  floor(Lane_Scaled_Props_Int);
 
     

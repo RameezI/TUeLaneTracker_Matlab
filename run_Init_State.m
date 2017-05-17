@@ -39,7 +39,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     %%Masks out parts above horizon + margin%%    
         ROOT_FOCUS_TEMPLATE     = single(zeros(span + 2*VP_RANGE_V, RES_VH(2)));
         ROOT_FOCUS_TEMPLATE(2*VP_RANGE_V +1:end,:) = 1;        
-        ROOT_FOCUS_TEMPLATE = floor(ROOT_FOCUS_TEMPLATE*255);
+        ROOT_FOCUS_TEMPLATE = int16(ROOT_FOCUS_TEMPLATE*255);
         
    
     %%
@@ -58,7 +58,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
             angle                     = angle-step;
         end
         
-         ROOT_IDEPTH_TEMPLATE = floor(ROOT_IDEPTH_TEMPLATE);
+         ROOT_IDEPTH_TEMPLATE = int16(ROOT_IDEPTH_TEMPLATE * 2^7);
 
          
          

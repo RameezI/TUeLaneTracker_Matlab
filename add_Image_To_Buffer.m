@@ -43,7 +43,8 @@ VP_H = VanishingPt.H;
 
     Templates.GRADIENT_DIR      = Templates.GRADIENT_DIR_ROOT(  (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, (RES_VH(2)-VP_H+1)-320:RES_VH(2)-VP_H+320 );
     TemplateGradientDir_tangent = imcrop(Templates.GRADIENT_DIR, [1,RES_VH(1)-span+1,RES_VH(2), span]);
-
+    
+    
     Templates.DEPTH     = Templates.DEPTH_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, : ); 
     Templates.DEPTH     = imcrop(Templates.DEPTH,        [1,RES_VH(1)-span+1,RES_VH(2), span]);   
 
