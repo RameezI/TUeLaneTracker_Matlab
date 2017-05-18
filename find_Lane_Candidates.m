@@ -33,7 +33,9 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
 
     %% Get All Active Pixles and Transform to VP Coordinate System %%
   
-    IDX_LANE_PIX = IDX_FOC_TOT_P;
+    IDX_LANE_PIX = (IDX_FOC_TOT_P);
+    
+    
     rows = C_V + Mask.VP_RANGE_V - Mask.Margin;
     
     [VC, HC] = ind2sub([rows RES_VH(2)],IDX_LANE_PIX);
@@ -49,6 +51,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     
     
     Lane_Points     = [ HC-(O_H) -( VC-(O_V) ) ]; %% lane pixels to VP coordinate system
+    Lane_Points     = int16 (Lane_Points);
     
     Lane_Props      = Likelihoods.TOT_MAX_FOCUSED(IDX_LANE_PIX);
     
@@ -57,17 +60,17 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     Tan_Lane_Angle= Likelihoods.GRADIENT_DIR_TOT_MAX(IDX_LANE_PIX);
 
              
-    bottom  = LANE_FILTER_OFFSET_V ; %% keep fixed regardless of the FOV or use, keeps the cm-to-pixel ratio more stable
+    bottom  = int16(LANE_FILTER_OFFSET_V) ; %% keep fixed regardless of the FOV or use, keeps the cm-to-pixel ratio more stable
     
-    horizon = VP_FILTER_OFFSET_V; %% use an offest from horizon to make intersections more pronounced
+    horizon = int16(VP_FILTER_OFFSET_V);    %% use an offest from horizon to make intersections more pronounced
 
    
       
     %%
     %% Compute Intersections with Offseted Horizon  and Botton%%
     
-    Lane_Int_Bottom_tmp   = floor(  ((bottom-Lane_Points(:,2)) *2^7  )./Tan_Lane_Angle) + Lane_Points(:,1);                            
-    Lane_Int_Horizon_tmp  = floor(  ((horizon-Lane_Points(:,2))*2^7  )./Tan_Lane_Angle) + Lane_Points(:,1);    
+    Lane_Int_Bottom_tmp   =     ( double(bottom- Lane_Points(:,2)) *2^7  )./single(Tan_Lane_Angle)        +  single(Lane_Points(:,1));                            
+    Lane_Int_Horizon_tmp  =     ( double(horizon-Lane_Points(:,2)) *2^7  )./single(Tan_Lane_Angle)        +  single(Lane_Points(:,1));    
 
     
  
@@ -111,7 +114,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     Lane_Scaled_Props_Int =  ((Lane_Props_Int).*(Lane_Depth_Int.^2)) * 2^-7;
     Lane_Scaled_Props_Int =  floor(Lane_Scaled_Props_Int);
 
-    
+    VP_V
     
     
     
@@ -122,7 +125,7 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     
     firstDim  = ceil( (Lane_Int_Horizon - HORIZON_HISTOGRAM_BINS(1)  + (HORIZON_HISTOGRAM_STEP/2)) / HORIZON_HISTOGRAM_STEP  );  %% horizon intersection
     
-    secondDim = ceil( (Lane_Int_Bottom  - BASE_HISTOGRAM_BINS(1)  + (BASE_HISTOGRAM_STEP/2)) / BASE_HISTOGRAM_STEP  );          %% bottom  intersection
+    secondDim = ceil( (Lane_Int_Bottom  - BASE_HISTOGRAM_BINS(1)  + (BASE_HISTOGRAM_STEP/2)) / BASE_HISTOGRAM_STEP  );           %% bottom  intersection
     
     firstDim(size(firstDim)+1)      = size(HORIZON_HISTOGRAM_BINS,2);
     secondDim(size(secondDim)+1)    = size(BASE_HISTOGRAM_BINS,2);

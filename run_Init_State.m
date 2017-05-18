@@ -5,14 +5,14 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     span   = floor(RES_VH(1)/2)-Margin + VP_RANGE_V; %best activation of pixels i.e. VP= -25
 
 
-    TOT_P_ALL           = single(zeros( span, RES_VH(2), NBUFFER));
-    DIR_ALL             = single(zeros( span, RES_VH(2), NBUFFER));   
-    MASK_FOC_TOT_P      = single(zeros( span, RES_VH(2)));
-    FOC_TOT_P           = single(zeros( span, RES_VH(2)));
+    TOT_P_ALL           = uint8(zeros( span, RES_VH(2), NBUFFER));
+    DIR_ALL             = int16(zeros( span, RES_VH(2), NBUFFER));   
+    MASK_FOC_TOT_P      = uint8(zeros( span, RES_VH(2)));
+    FOC_TOT_P           = uint8(zeros( span, RES_VH(2)));
                         
     
-    TOT_P               = single(zeros( span, RES_VH(2)));
-    AVG_DIR_TOT_P       = single(zeros( span, RES_VH(2)));
+    TOT_P               = uint8(zeros( span, RES_VH(2)));
+    AVG_DIR_TOT_P       = int16(zeros( span, RES_VH(2)));
 
 
     
@@ -38,8 +38,8 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     %% Create Focus Template %%
     %%Masks out parts above horizon + margin%%    
         ROOT_FOCUS_TEMPLATE     = single(zeros(span + 2*VP_RANGE_V, RES_VH(2)));
-        ROOT_FOCUS_TEMPLATE(2*VP_RANGE_V +1:end,:) = 1;        
-        ROOT_FOCUS_TEMPLATE = int16(ROOT_FOCUS_TEMPLATE*255);
+        ROOT_FOCUS_TEMPLATE(2*VP_RANGE_V +1:end,:) = 255;        
+        ROOT_FOCUS_TEMPLATE = uint8(ROOT_FOCUS_TEMPLATE);
         
    
     %%
@@ -55,10 +55,10 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
             end
             ROOT_IDEPTH_TEMPLATE(n,:) =x;
             
-            angle                     = angle-step;
+            angle = angle-step;
         end
         
-         ROOT_IDEPTH_TEMPLATE = int16(ROOT_IDEPTH_TEMPLATE * 2^7);
+         %%ROOT_IDEPTH_TEMPLATE = (ROOT_IDEPTH_TEMPLATE);
 
          
          
@@ -92,9 +92,9 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
 
 
                             masks =struct;
-                            masks.FOCUS                            = MASK_FOC_TOT_P;
-                            masks.Margin                           = Margin;
-                            masks.VP_RANGE_V                       = VP_RANGE_V;
+                            masks.FOCUS                             = MASK_FOC_TOT_P;
+                            masks.Margin                            = Margin;
+                            masks.VP_RANGE_V                        = VP_RANGE_V;
 
                                 
                                 
