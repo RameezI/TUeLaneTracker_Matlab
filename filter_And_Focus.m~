@@ -36,7 +36,12 @@ function  Likelihoods = filter_And_Focus(Likelihoods, MASKS)
     TOT_MAX_FOCUSED = uint16(uint16(MASKS.FOCUS) .* uint16(Likelihoods.TOT_MAX));
     
     Likelihoods.TOT_MAX_FOCUSED = uint8(TOT_MAX_FOCUSED/255);
-     
+    
+
+    %%
+    %% Get the Active Pixels %%
+    IDX_FOC_TOT_P  = find( 0 <  Likelihoods.TOT_MAX_FOCUSED );
+    
 end
 
 

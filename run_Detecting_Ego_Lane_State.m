@@ -18,11 +18,11 @@ function [msg, VanishingPt, Templates, Likelihoods, Mask] = run_Detecting_Ego_La
        
           
     %% Filter out Horizon based on Focus Maaccumarraysk %
-       [IDX_FOC_TOT_P, Likelihoods] = filter_And_Focus(Likelihoods,Mask); 
+       Likelihoods = filter_And_Focus(Likelihoods,Mask); 
         
                 
     %% Find Lane Candidatae in the ROI %%
-        msg = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, Mask, VanishingPt);
+        msg = find_Lane_Candidates(Likelihoods, Templates);
         
 
     %% Update Vanishing Point %%
