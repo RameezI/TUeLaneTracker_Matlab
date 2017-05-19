@@ -27,8 +27,8 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
 
    
     %% Predict Step
+
     
-      %% APEX PROCESS %%
       TEMP = imfilter( VP_FILTER, VP_TRANSITION, 'Replicate' );
       TEMP = int32( (single(TEMP) / single(sum(sum(TEMP))) ) *2^15);
       VP_FILTER_TRANSITIONED = 0.5*TEMP +0.5*VP_PRIOR ; 
@@ -36,7 +36,11 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
     
 
     %% Update Step %%
-      %% ARM LOOP %%
+
+%     O_V = C_V;      %center is VP in image coordinates
+%     O_H = C_H;      %center is VP in image coordinates
+%     
+    
     
     best  = 0;
     
@@ -44,24 +48,35 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
         for nh = 1:size(VP_BINS_H,2)
 
 
-         %Get Expected VP%
+            %Get Expected VP%
+             %Transnformation to Current VP-Coordinate System %
             TMP_VP_V = -VP_BINS_V(nv); %% V axis is reversed for VP coordinate system 
             TMP_VP_H =  VP_BINS_H(nh);
             
+
+            %Transnformation to Current VP-Coordinate System %
+% 
+%             TMP_VP_V = -(TMP_VP_V - O_V);       %% V axis is reversed for VP coordinate system 
+%             TMP_VP_H =  TMP_VP_H - O_H;         %% H axis has the same orientation
             
-          [LaneBoundaryModel,NegLaneBoundaryModel, WidthPx] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, HORIZON_HISTOGRAM_STEP, HORIZON_HISTOGRAM_BINS, VP_FILTER_OFFSET_V );
             
             
-         % Probability of the Lane according to Lane Widith
             
-            Width       = (1/VP_LANE_RATIO) * WidthPx * (1/CM_TO_PIXEL);
-            WidhtProb   = LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-Width)^2 / LANE_WIDTH_DIFF_NOMIN );
+            % Create observation Model %
+            
+            [LaneBoundaryModel,NegLaneBoundaryModel, WidthPx] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, HORIZON_HISTOGRAM_STEP, HORIZON_HISTOGRAM_BINS, VP_FILTER_OFFSET_V );
+            
+            
+             % Probability of the Lane according to Lane Widith
+            
+                Width       = (1/VP_LANE_RATIO) * WidthPx * (1/CM_TO_PIXEL);
+                WidhtProb      = LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-Width)^2 / LANE_WIDTH_DIFF_NOMIN );
             
 
-          % Probability of Boundary Segments of the Lane
+             % Probability of Boundary Segments of the Lane
                 BoundaryProb     = 0;
                 
-                ObservedHistogramHorizon = INT_HIST_VP_PROB';
+                  ObservedHistogramHorizon = INT_HIST_VP_PROB';
 
                 for idx=1:size(LaneBoundaryModel.BinID,2)
                      ID           = LaneBoundaryModel.BinID(idx);
@@ -90,7 +105,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
             
             %Update the Filter %%
 
-                VP_FILTER(nv,nh) = VP_FILTER_TRANSITIONED(nv,nh) * conditional_prob;
+            VP_FILTER(nv,nh) = VP_FILTER_TRANSITIONED(nv,nh) * conditional_prob;
             
             
             
@@ -109,7 +124,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
 
 
     %% Normalize %%
-        %% APEX Process %%
+
     VP_FILTER = int32( (single(VP_FILTER) / single( sum(sum(VP_FILTER)) )   )*2^15);
 
     

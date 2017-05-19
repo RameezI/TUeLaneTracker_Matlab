@@ -24,26 +24,22 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     
     
     
-    %% Provided Interface
+    %% Provided Interface 
+    %%  ARM LOOP %%
     global LANE_BOUNDARIES    
      
     
-    halfImage = RES_VH(1)/2;
+    halfImage = int16(RES_VH(1)/2);
                  
     bottom  = int16(LANE_FILTER_OFFSET_V);     %% keep fixed regardless of the FOV or use, keeps the cm-to-pixel ratio more stable
     
     horizon = int16(VP_FILTER_OFFSET_V);       %% use an offest from horizon to make intersections more pronounced
-
-
-    
-    %% Get All Active Pixles and Transform to VP Coordinate System %%
-    
-    
+   
    Focussed_TOT_P=  Likelihoods.TOT_MAX_FOCUSED;
 
    %%In center coordinate System
     start_row =   halfImage - size(Focussed_TOT_P,1);
-    start_col  = -320;
+    start_col  = int16(-320);
     
 
     Lane_Int_Base     = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
@@ -103,16 +99,15 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
 
     
 
-    %% Weighted Histogram over both Intersections   
+    %% Weighted Histogram over both dicretised Intersections
+    %% APEX Process %%
     
-    firstDim  = ceil( (Lane_Int_Purview - HORIZON_HISTOGRAM_BINS(1)  + (HORIZON_HISTOGRAM_STEP/2)) / HORIZON_HISTOGRAM_STEP  );  %% horizon intersection
+    firstDim  = ceil( (Lane_Int_Purview - HORIZON_HISTOGRAM_BINS(1)  + (HORIZON_HISTOGRAM_STEP/2)) / HORIZON_HISTOGRAM_STEP  );  %% Purvew intersection discretised
     
-    secondDim = ceil( (Lane_Int_Base  - BASE_HISTOGRAM_BINS(1)  + (BASE_HISTOGRAM_STEP/2)) / BASE_HISTOGRAM_STEP  );           %% bottom  intersection
+    secondDim = ceil( (Lane_Int_Base  - BASE_HISTOGRAM_BINS(1)  + (BASE_HISTOGRAM_STEP/2)) / BASE_HISTOGRAM_STEP  );             %% Bottom intersection discretised
 
     firstDim(size(firstDim)+1)      = size(HORIZON_HISTOGRAM_BINS,2);
     secondDim(size(secondDim)+1)    = size(BASE_HISTOGRAM_BINS,2);
-    
-    
     
     INT_HIST_LANE_PROB =   accumarray( secondDim, [Lane_Int_Weights; 0] );
     
@@ -122,7 +117,8 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     
 
     %% Normalize for Further Computation %%
-   
+    %% APEX Process %%
+    
      INT_HIST_LANE_PROB = INT_HIST_LANE_PROB';
      INT_HIST_VP_PROB   = INT_HIST_VP_PROB';
      
@@ -134,7 +130,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
      
 
     %% Predict Step %%
-    
+    %% APEX Process %%
       TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
       TEMP = int32( (single(TEMP) / single(sum(sum(TEMP))) ) *2^15);
       LANE_FILTER_TRANSITIONED = 0.5*TEMP +0.5*LANE_PRIOR ; 
@@ -142,11 +138,10 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     
 
     %% Update Step %%
- 
+    %% ARM LOOP %%
+    
     best  = 0;
     for modelIdx = 1:size(LaneBoundaryModels,2)
-        
-
         
               left  = LaneBoundaryModels(modelIdx).leftOffsetIdx;
               right = LaneBoundaryModels(modelIdx).rightOffsetIdx;
@@ -156,9 +151,6 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
               left_offset  = LANE_OFFSETS_BINS(left);
               right_offset = LANE_OFFSETS_BINS(right);
 
-                    
-                    
-                    
 
               likelihood_leftLaneBoundary =0;
 
@@ -179,7 +171,6 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
                     Value        = LaneBoundaryModels(modelIdx).histogramWeights_rightBoundary(idx);
                     likelihood_rightLaneBoundary = likelihood_rightLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;
                 end
-
                 
                 NegLaneCorrelation= 0; 
 
@@ -191,9 +182,6 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
                 
                 likelihood_NegLaneBoundary    =     OBS_NEG_NORMA * exp( -NegLaneCorrelation^2/OBS_NEG_NOMIN );
                 conditional_prob              =    int32(likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary * 2^15);
-
-
-                    
 
                 % Update Lane Filter (only legitimate states)
 
@@ -213,22 +201,23 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     LANE_MODEL
     LANE_WIDTH
       
-
-
+    
     %% Normalize Lane Filter
-    LANE_FILTER = int32( (single(LANE_FILTER) / single( sum(sum(LANE_FILTER)) )   )*2^15);
+       %% APEX PROCESS %%
+        LANE_FILTER = int32( (single(LANE_FILTER) / single( sum(sum(LANE_FILTER)) )   )*2^15);
 
 
     %% Find the Lane Boundaries
-    
-    LANE_BOUNDARIES = [ -LANE_MODEL(1)-BASE_HISTOGRAM_STEP/2 LANE_MODEL(2)-BASE_HISTOGRAM_STEP/2; -LANE_MODEL(1)+BASE_HISTOGRAM_STEP/2 LANE_MODEL(2)+BASE_HISTOGRAM_STEP/2; 0 0; 0 0; 100*LANE_MODEL(3) 100*LANE_MODEL(4)];
-    LANE_BOUNDARIES(3,1) = (LANE_BOUNDARIES(1,1)+LANE_BOUNDARIES(2,2))/2;
-    LANE_BOUNDARIES(3,2) = LANE_BOUNDARIES(3,1);
+       %% ARM %%
+        LANE_BOUNDARIES = [ -LANE_MODEL(1)-BASE_HISTOGRAM_STEP/2 LANE_MODEL(2)-BASE_HISTOGRAM_STEP/2; -LANE_MODEL(1)+BASE_HISTOGRAM_STEP/2 LANE_MODEL(2)+BASE_HISTOGRAM_STEP/2; 0 0; 0 0; 100*LANE_MODEL(3) 100*LANE_MODEL(4)];
+        LANE_BOUNDARIES(3,1) = (LANE_BOUNDARIES(1,1)+LANE_BOUNDARIES(2,2))/2;
+        LANE_BOUNDARIES(3,2) = LANE_BOUNDARIES(3,1);
     
     
         
     
     %% Unstable Track ?
+       %% ARM %%
     
     LANE_BOUNDARIES
     
