@@ -50,7 +50,7 @@ VP_H = VanishingPt.H;
 
     I_uint8             = imcrop  (I_uint8,     [1,RES_VH(1)-span+1,RES_VH(2), span]);
     MAG                 = imcrop  (MAGI,        [1,RES_VH(1)-span+1,RES_VH(2), span]);    
-    tanDIR              = imcrop  (tanDIRI,    [1,RES_VH(1)-span+1,RES_VH(2), span]);
+    tanDIR              = imcrop  (tanDIRI,     [1,RES_VH(1)-span+1,RES_VH(2), span]);
 
 
 

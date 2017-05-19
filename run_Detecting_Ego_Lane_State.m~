@@ -18,7 +18,7 @@ function [msg, VanishingPt, Templates, Likelihoods, Mask] = run_Detecting_Ego_La
        
           
     %% Filter out Horizon based on Focus Maaccumarraysk %
-       Likelihoods = filter_And_Focus(Likelihoods,Mask, VanishingPt); 
+       Likelihoods = filter_And_Focus(Likelihoods,Mask); 
         
                 
     %% Find Lane Candidatae in the ROI %%

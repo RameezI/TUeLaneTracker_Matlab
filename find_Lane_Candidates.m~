@@ -46,14 +46,16 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     start_col  = -320;
     
 
-    Lane_Int_Base_tmp     = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
+    Lane_Int_Base     = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
     
-    Lane_Int_Purview_tmp  = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
+    Lane_Int_Purview  = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
     
-    Lane_Int_Weights_tmp  = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
+    Lane_Int_Weights  = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
      
     Templates.DEPTHSqr= Templates.DEPTH.^2;
    
+    Index =1;
+    
     
     
     for row_current = 0: (size(Focussed_TOT_P,1)-1)
@@ -71,53 +73,35 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
 
                 tanGradient = Likelihoods.GRADIENT_DIR_TOT_MAX(row_current+1, col_current+1);
                 
-                lane_Int_Base_tmp   (row_current*size(Focussed_TOT_P,2) + (col_current +1))    =  ( double(bottom- y) *2^7  )./single(tanGradient)  +  single(x);
-                lane_Int_Purview_tmp(row_current*size(Focussed_TOT_P,2) + (col_current +1))    =  ( double(horizon-y) *2^7  )./single(tanGradient)  +  single(x);
+                Lane_Int_Base_tmp     =  ( double(bottom- y) *2^7  )./single(tanGradient)  +  single(x);
+                Lane_Int_Purview_tmp  =  ( double(horizon-y) *2^7  )./single(tanGradient)  +  single(x);                
+                Lane_Int_Weights_tmp  =   single(prob)*depthSqr* 2^-7;
                 
-                Lane_Int_Weights_tmp(row_current*size(Focussed_TOT_P,2) + (col_current +1))          =  single(prob)*depthSqr* 2^-7;
+                
+                if ( Lane_Int_Base_tmp > BASE_HISTOGRAM_BINS(1)-BASE_HISTOGRAM_STEP/2    &&   Lane_Int_Base_tmp < BASE_HISTOGRAM_BINS(end)+ BASE_HISTOGRAM_STEP/2)
+                 
+                    if (  Lane_Int_Purview_tmp > -VP_RANGE_H-HORIZON_HISTOGRAM_STEP/2    &&   Lane_Int_Purview_tmp < VP_RANGE_H+HORIZON_HISTOGRAM_STEP/2  )                
+
+                             Lane_Int_Base(Index)      = Lane_Int_Base_tmp;                        
+                             Lane_Int_Purview(Index)   = Lane_Int_Purview_tmp;
+                             Lane_Int_Weights(Index)   = Lane_Int_Weights_tmp;
+
+                             Index = Index+1;               
+                    end
+                end  
                
             end
             
             
         end
-      
-
-    end
-
-     Lane_Int_Base      =   single(zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1)  );
-     Lane_Int_Purview   =   single(zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1)  );
-     Lane_Int_Weights   =   single(  zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1));
-   
-    
-    
-     Index =1;     
-    for i= 1: size(Lane_Int_Base_tmp)
-
-        if (Lane_Int_Weights_tmp(i) > 0)
-
-            if ( Lane_Int_Base_tmp(i) > BASE_HISTOGRAM_BINS(1)-BASE_HISTOGRAM_STEP/2    &&   Lane_Int_Base_tmp(i)    < BASE_HISTOGRAM_BINS(end)+ BASE_HISTOGRAM_STEP/2)
-
-
-              if (  Lane_Int_Purview_tmp(i) > -VP_RANGE_H-HORIZON_HISTOGRAM_STEP/2        &&   Lane_Int_Purview_tmp(i) < VP_RANGE_H+HORIZON_HISTOGRAM_STEP/2  )                
-
-                                Lane_Int_Base(Index)      = Lane_Int_Base_tmp(i);                        
-                                Lane_Int_Purview(Index)   = Lane_Int_Purview_tmp(i);
-                                Lane_Int_Weights(Index)   = Lane_Int_Weights_tmp(i);
-
-
-                                Index = Index+1;               
-              end
-
-            end
-       end  
-    
     end
     
-    
+    % Keep only valid Intersections
     Lane_Int_Purview   = Lane_Int_Purview(1:Index);
     Lane_Int_Base      = Lane_Int_Base(1:Index);
     Lane_Int_Weights   = Lane_Int_Weights(1:Index);
 
+    
 
     %% Weighted Histogram over both Intersections   
     
@@ -128,9 +112,13 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     firstDim(size(firstDim)+1)      = size(HORIZON_HISTOGRAM_BINS,2);
     secondDim(size(secondDim)+1)    = size(BASE_HISTOGRAM_BINS,2);
     
+    
+    
     INT_HIST_LANE_PROB =   accumarray( secondDim, [Lane_Int_Weights; 0] );
     
     INT_HIST_VP_PROB   =   accumarray( firstDim,  [Lane_Int_Weights; 0] );
+    
+    
     
 
     %% Normalize for Further Computation %%
@@ -140,6 +128,8 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
      
      INT_HIST_LANE_PROB = INT_HIST_LANE_PROB / sum(INT_HIST_LANE_PROB,2);        
      INT_HIST_VP_PROB   = INT_HIST_VP_PROB   / sum(INT_HIST_VP_PROB,2);
+     
+     
      
      
 
@@ -160,70 +150,55 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
         
               left  = LaneBoundaryModels(modelIdx).leftOffsetIdx;
               right = LaneBoundaryModels(modelIdx).rightOffsetIdx;
-              
-              
-              
-                if left == 50
-                    a= 3;
-                end
-
               width = (LANE_OFFSETS_BINS(left)+LANE_OFFSETS_BINS(right)) * 1/CM_TO_PIXEL;
 
 
-                    left_offset  = LANE_OFFSETS_BINS(left);
-                    right_offset = LANE_OFFSETS_BINS(right);
+              left_offset  = LANE_OFFSETS_BINS(left);
+              right_offset = LANE_OFFSETS_BINS(right);
 
                     
                     
                     
 
-                      likelihood_leftLaneBoundary =0;
+              likelihood_leftLaneBoundary =0;
 
-                       for idx=1:  size(LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary,2)
+                for idx=1:  size(LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary,2)
 
-                         ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary(idx);
-                         Value        = LaneBoundaryModels(modelIdx).histogramWeights_leftBoundary(idx);
-                         likelihood_leftLaneBoundary = likelihood_leftLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;               
+                    ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary(idx);
+                    Value        = LaneBoundaryModels(modelIdx).histogramWeights_leftBoundary(idx);
+                    likelihood_leftLaneBoundary = likelihood_leftLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;               
 
-                       end
+                end
+                
+                
+               likelihood_rightLaneBoundary =0;
 
-                      likelihood_rightLaneBoundary =0;
+                for idx=1:size(LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary,2)
 
-                       for idx=1:size(LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary,2)
-
-                           ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary(idx);
-                           Value        = LaneBoundaryModels(modelIdx).histogramWeights_rightBoundary(idx);
-                           likelihood_rightLaneBoundary = likelihood_rightLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;
-
-                       end
-
-                       
-                       
-                       
-                       
-
-                      NegLaneCorrelation= 0; 
-
-                      for idx=1:size(NegLaneBoundaryModel(modelIdx).histogramBinsID,2)
-                          ID  = NegLaneBoundaryModel(modelIdx).histogramBinsID(idx);
-                          NegLaneCorrelation = NegLaneCorrelation + INT_HIST_LANE_PROB(ID);                  
-                      end
-
-                      likelihood_NegLaneBoundary    =     OBS_NEG_NORMA * exp( -NegLaneCorrelation^2/OBS_NEG_NOMIN );
-
-
-                      conditional_prob              =    int32(likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary * 2^15);
-
-
-                    
-
-                      % Update Lane Filter (only legitimate states)
-
-                      LANE_FILTER(left,right) = LANE_FILTER_TRANSITIONED(left,right) * conditional_prob;
-
+                    ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary(idx);
+                    Value        = LaneBoundaryModels(modelIdx).histogramWeights_rightBoundary(idx);
+                    likelihood_rightLaneBoundary = likelihood_rightLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;
+                end
 
                 
-                      
+                NegLaneCorrelation= 0; 
+
+                for idx=1:size(NegLaneBoundaryModel(modelIdx).histogramBinsID,2)
+                     ID  = NegLaneBoundaryModel(modelIdx).histogramBinsID(idx);
+                     NegLaneCorrelation = NegLaneCorrelation + INT_HIST_LANE_PROB(ID);                  
+                end
+                
+                
+                likelihood_NegLaneBoundary    =     OBS_NEG_NORMA * exp( -NegLaneCorrelation^2/OBS_NEG_NOMIN );
+                conditional_prob              =    int32(likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary * 2^15);
+
+
+                    
+
+                % Update Lane Filter (only legitimate states)
+
+                  LANE_FILTER(left,right) = LANE_FILTER_TRANSITIONED(left,right) * conditional_prob;
+    
                       % Already keep Track of Max Probable State
 
                         if best < LANE_FILTER(left,right)
