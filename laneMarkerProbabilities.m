@@ -10,10 +10,7 @@
     x(x<0)=0; % All values below the tippingPoint will have zero probability.
     GRAY_P= (255*x)./(10+ x);
     
-    
-   
-    
-%%    
+
 
 %% GradientMagnitude Probabilities %%
      x= int16(gradMAG)-int16(tippingPoint_gradMag);

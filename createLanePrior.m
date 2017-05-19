@@ -52,7 +52,7 @@ function [ Prior, Trans, LaneBoundaryModels, NegLaneBoundaryModels] = createLane
             
 
                  % Prior on Location
-                    pL = exp( -(hmean-binsLaneOffsets_cm(leftOffsetIdx))^2 / (2*(8*SigmaL)^2) ) / ( sqrt(2*pi)*8*SigmaL ) * (2^15);     
+                    pL = exp( -(hmean-binsLaneOffsets_cm(leftOffsetIdx))^2 / (2*(8*SigmaL)^2) ) /  ( sqrt(2*pi)*8*SigmaL ) * (2^15);     
                     pR = exp( -(hmean-binsLaneOffsets_cm(rightOffsetIdx))^2 / (2*(8*SigmaL)^2) ) / ( sqrt(2*pi)*8*SigmaL )* (2^15);
                     
                     

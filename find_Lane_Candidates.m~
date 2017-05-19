@@ -69,21 +69,22 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
                 y        = -int16(start_row +row_current);
 
 
-                prob        =  Focussed_TOT_P(row_current+1, col_current+1);
-                depthSqr    =  Templates.DEPTHSqr(row_current+1, col_current+1);
+                prob     =  Focussed_TOT_P(row_current+1, col_current+1);
+                depthSqr =  Templates.DEPTHSqr(row_current+1, col_current+1);
 
                 tanGradient = Likelihoods.GRADIENT_DIR_TOT_MAX(row_current+1, col_current+1);
                 
                 Lane_Int_Base_tmp   (row_current*size(Focussed_TOT_P,2) + (col_current +1))    =  ( double(bottom- y) *2^7  )./single(tanGradient)  +  single(x);
-                Lane_Int_Purview_tmp(row_current*size(Focussed_TOT_P,2) + (col_current +1))    =  ( double(horizon-y) *2^7  )./single(tanGradient)  +  single(x);
+                Lane_Int_Purview_tmp(row_current*size(Focussed_TOT_P,2) + (col_current +1)) =  ( double(horizon-y) *2^7  )./single(tanGradient)  +  single(x);
                 
-                Lane_Int_Weights_tmp(row_current*size(Focussed_TOT_P,2) + (col_current +1))          =  single(prob)*depthSqr* 2^-7;
+%%                Lane_Int_Weights_tmp(row_current*size(Focussed_TOT_P,2) + (col_current +1))          =  prob*depthSqr* 2^-7;
                
             end
             
             
         end
-      
+        
+          
 
     end
     
@@ -217,28 +218,31 @@ function [ msg ] = find_Lane_Candidates( IDX_FOC_TOT_P, Likelihoods, Templates, 
     %% Weighted Histogram over both Intersections   
     % The weight is pixel surface (i.e. depth squared) times per-pixel probability 
     
-    firstDim  = ceil( (Lane_Int_Purview - HORIZON_HISTOGRAM_BINS(1)  + (HORIZON_HISTOGRAM_STEP/2)) / HORIZON_HISTOGRAM_STEP  );  %% horizon intersection
+%     firstDim  = ceil( (Lane_Int_Purview - HORIZON_HISTOGRAM_BINS(1)  + (HORIZON_HISTOGRAM_STEP/2)) / HORIZON_HISTOGRAM_STEP  );  %% horizon intersection
+%     
+%     secondDim = ceil( (Lane_Int_Base  - BASE_HISTOGRAM_BINS(1)  + (BASE_HISTOGRAM_STEP/2)) / BASE_HISTOGRAM_STEP  );           %% bottom  intersection
     
-    secondDim = ceil( (Lane_Int_Base  - BASE_HISTOGRAM_BINS(1)  + (BASE_HISTOGRAM_STEP/2)) / BASE_HISTOGRAM_STEP  );           %% bottom  intersection
-
+    
+    
+    
+    firstDim  = ceil( (Lane_Int_Horizon - HORIZON_HISTOGRAM_BINS(1)  + (HORIZON_HISTOGRAM_STEP/2)) / HORIZON_HISTOGRAM_STEP  );  %% horizon intersection
+    
+    secondDim = ceil( (Lane_Int_Bottom  - BASE_HISTOGRAM_BINS(1)  + (BASE_HISTOGRAM_STEP/2)) / BASE_HISTOGRAM_STEP  );           %% bottom  intersection
+    
     firstDim(size(firstDim)+1)      = size(HORIZON_HISTOGRAM_BINS,2);
     secondDim(size(secondDim)+1)    = size(BASE_HISTOGRAM_BINS,2);
     
-    INT_HIST_LANE_PROB =   accumarray( secondDim, [Lane_Int_Weights; 0] );
-    
-    INT_HIST_VP_PROB   =   accumarray( firstDim,  [Lane_Int_Weights; 0] );
     
     
-%     firstDim  = ceil( (Lane_Int_Horizon - HORIZON_HISTOGRAM_BINS(1)  + (HORIZON_HISTOGRAM_STEP/2)) / HORIZON_HISTOGRAM_STEP  );  %% horizon intersection
+%     INT_HIST_LANE_PROB =   accumarray( secondDim, [Lane_Int_Weights; 0] );
 %     
-%     secondDim = ceil( (Lane_Int_Bottom  - BASE_HISTOGRAM_BINS(1)  + (BASE_HISTOGRAM_STEP/2)) / BASE_HISTOGRAM_STEP  );           %% bottom  intersection
-%     
-%     firstDim(size(firstDim)+1)      = size(HORIZON_HISTOGRAM_BINS,2);
-%     secondDim(size(secondDim)+1)    = size(BASE_HISTOGRAM_BINS,2);
-       
-%     INT_HIST_LANE_PROB =   accumarray( secondDim, [Lane_Scaled_Props_Int; 0] );
-%     
-%     INT_HIST_VP_PROB   =   accumarray( firstDim,  [Lane_Scaled_Props_Int; 0] );
+%     INT_HIST_VP_PROB   =   accumarray( firstDim,  [Lane_Int_Weights; 0] );
+    
+    
+        
+    INT_HIST_LANE_PROB =   accumarray( secondDim, [Lane_Scaled_Props_Int; 0] );
+    
+    INT_HIST_VP_PROB   =   accumarray( firstDim,  [Lane_Scaled_Props_Int; 0] );
   
     
 
