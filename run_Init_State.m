@@ -45,10 +45,10 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     %%
     %% Create Depth Template %%
 
-        ROOT_IDEPTH_TEMPLATE = single(zeros(2*RES_VH(1)+1,RES_VH(2)));
+        ROOT_IDEPTH_TEMPLATE = single(zeros(RES_VH(1),RES_VH(2)));
         step  = 45/RES_VH(1);
         angle = 90-step;
-        for n = RES_VH(1)+1:2*RES_VH(1)+1
+        for n = 1:RES_VH(1)
             x=  1.75*tand(angle);
             if x > 100
                 x=100;
@@ -58,7 +58,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
             angle = angle-step;
         end
         
-         %%ROOT_IDEPTH_TEMPLATE = (ROOT_IDEPTH_TEMPLATE);
+        ROOT_IDEPTH_TEMPLATE = int16(ROOT_IDEPTH_TEMPLATE);
 
          
          

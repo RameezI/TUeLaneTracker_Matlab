@@ -33,7 +33,12 @@ VP_H = VanishingPt.H;
 %%
 %% Extract From Templates %%
 
-    start= Mask.VP_RANGE_V-VP_V; %% VP_V must be in center coordinate system
+
+    % By Changing the sigh 0f VP_V, the logic for selecting less or more
+    % pixels could be altereed.The + signs implies that if VP moves up,
+    % more pixels will be activated at the bottom.
+    
+    start= Mask.VP_RANGE_V+VP_V; %% VP_V must be in center coordinate system
     
     span= floor(RES_VH(1)/2)-Mask.Margin + Mask.VP_RANGE_V;
 
@@ -44,9 +49,8 @@ VP_H = VanishingPt.H;
     Templates.GRADIENT_DIR      = Templates.GRADIENT_DIR_ROOT(  (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, (RES_VH(2)-VP_H+1)-320:RES_VH(2)-VP_H+320 );
     TemplateGradientDir_tangent = imcrop(Templates.GRADIENT_DIR, [1,RES_VH(1)-span+1,RES_VH(2), span]);
     
-    
-    Templates.DEPTH     = Templates.DEPTH_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, : ); 
-    Templates.DEPTH     = imcrop(Templates.DEPTH,        [1,RES_VH(1)-span+1,RES_VH(2), span]);   
+    %Templates.DEPTH     = Templates.DEPTH_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, : ); 
+    Templates.DEPTH     = imcrop(Templates.DEPTH_ROOT, [1,RES_VH(1)-span+1,RES_VH(2), span]);   
 
     I_uint8             = imcrop  (I_uint8,     [1,RES_VH(1)-span+1,RES_VH(2), span]);
     MAG                 = imcrop  (MAGI,        [1,RES_VH(1)-span+1,RES_VH(2), span]);    

@@ -71,7 +71,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
                 
                 Lane_Int_Base_tmp     =  ( double(bottom- y) *2^7  )./single(tanGradient)  +  single(x);
                 Lane_Int_Purview_tmp  =  ( double(horizon-y) *2^7  )./single(tanGradient)  +  single(x);                
-                Lane_Int_Weights_tmp  =   single(prob)*depthSqr* 2^-7;
+                Lane_Int_Weights_tmp  =   single(prob)*single(depthSqr)* 2^-7;
                 
                 
                 if ( Lane_Int_Base_tmp > BASE_HISTOGRAM_BINS(1)-BASE_HISTOGRAM_STEP/2    &&   Lane_Int_Base_tmp < BASE_HISTOGRAM_BINS(end)+ BASE_HISTOGRAM_STEP/2)

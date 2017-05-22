@@ -33,7 +33,7 @@ function  Likelihoods = filter_And_Focus(Likelihoods, MASKS, VanishingPt)
     %%
     %% Apply the focus maks to the probs %%
     % Masks out certain distances %
-    TOT_MAX_FOCUSED = uint16(uint16(MASKS.FOCUS) .* uint16(Likelihoods.TOT_MAX));
+    TOT_MAX_FOCUSED = uint16(int16(MASKS.FOCUS) .* int16(Likelihoods.TOT_MAX));
     
     Likelihoods.TOT_MAX_FOCUSED = uint8(TOT_MAX_FOCUSED/255);
          
