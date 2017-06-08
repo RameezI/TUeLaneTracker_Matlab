@@ -29,17 +29,17 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     global LANE_BOUNDARIES    
      
     
-    halfImage = int16(RES_VH(1)/2);
+    halfImage       = int16(RES_VH(1)/2);
                  
-    bottom  = int16(LANE_FILTER_OFFSET_V);     %% keep fixed regardless of the FOV or use, keeps the cm-to-pixel ratio more stable
+    bottom          = int16(LANE_FILTER_OFFSET_V);     %% keep fixed regardless of the FOV or use, keeps the cm-to-pixel ratio more stable
     
-    horizon = int16(VP_FILTER_OFFSET_V);       %% use an offest from horizon to make intersections more pronounced
+    horizon         = int16(VP_FILTER_OFFSET_V);       %% use an offest from horizon to make intersections more pronounced
    
-   Focussed_TOT_P=  Likelihoods.TOT_MAX_FOCUSED;
+    Focussed_TOT_P  =  Likelihoods.TOT_MAX_FOCUSED;
 
    %%In center coordinate System
-    start_row =   halfImage - size(Focussed_TOT_P,1);
-    start_col  = int16(-320);
+    start_row   =   halfImage - size(Focussed_TOT_P,1);
+    start_col   =   int16(-320);
     
 
     Lane_Int_Base     = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
@@ -69,8 +69,8 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
 
                 tanGradient = Likelihoods.GRADIENT_DIR_TOT_MAX(row_current+1, col_current+1);
                 
-                Lane_Int_Base_tmp     =  ( double(bottom- y) *2^7  )./single(tanGradient)  +  single(x);
-                Lane_Int_Purview_tmp  =  ( double(horizon-y) *2^7  )./single(tanGradient)  +  single(x);                
+                Lane_Int_Base_tmp     =  ( single(bottom- y) *2^7  )./single(tanGradient)  +  single(x);
+                Lane_Int_Purview_tmp  =  ( single(horizon-y) *2^7  )./single(tanGradient)  +  single(x);                
                 Lane_Int_Weights_tmp  =   single(prob)*single(depthSqr)* 2^-7;
                 
                 
@@ -91,6 +91,8 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
             
         end
     end
+  
+    
     
     % Keep only valid Intersections
     Lane_Int_Purview   = Lane_Int_Purview(1:Index);

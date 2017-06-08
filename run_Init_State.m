@@ -22,8 +22,8 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     ROOT_DIR_TEMPLATE   = single(createTemplate(RES_VH(1),RES_VH(2)));  %%^TODO: Verify this on C side
     ROOT_DIR_TEMPLATE   = tan(ROOT_DIR_TEMPLATE);
     
-    ROOT_DIR_TEMPLATE(ROOT_DIR_TEMPLATE>256)= 255;
-    ROOT_DIR_TEMPLATE(ROOT_DIR_TEMPLATE<-256)= -255;
+    ROOT_DIR_TEMPLATE(ROOT_DIR_TEMPLATE>255)= 255;
+    ROOT_DIR_TEMPLATE(ROOT_DIR_TEMPLATE<-255)= -255;
     ROOT_DIR_TEMPLATE = ROOT_DIR_TEMPLATE *2^7;
     ROOT_DIR_TEMPLATE = int16(ROOT_DIR_TEMPLATE);
     
@@ -58,7 +58,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
             angle = angle-step;
         end
         
-        ROOT_IDEPTH_TEMPLATE = int16(ROOT_IDEPTH_TEMPLATE);
+        ROOT_IDEPTH_TEMPLATE = uint8(ROOT_IDEPTH_TEMPLATE);
 
          
          

@@ -10,6 +10,7 @@ global CURRENT_STATE FILLING_BUFFERS DETECTING_EGO_LANE RESET_STATE INIT_STATE S
 Number_Of_Images = size(IMAGE_FILES,1);
         
                 START = 4500;
+                %START = 1;
                 END   = Number_Of_Images;
 
    

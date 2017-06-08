@@ -39,6 +39,7 @@ VP_H = VanishingPt.H;
     % more pixels will be activated.
     
     %Note: VP is -ve when moved up
+    
     start= Mask.VP_RANGE_V-VP_V; %% VP_V must be in center coordinate system
     
     span= floor(RES_VH(1)/2)-Mask.Margin + Mask.VP_RANGE_V;

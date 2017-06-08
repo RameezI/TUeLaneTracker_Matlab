@@ -44,8 +44,5 @@ function [ magnitude, tanDIR] = getGradientInfo( IN )
 
 dY(dY==0)= 1;
 tanDIR= dX*2^7./dY;
-
-tanDIR(tanDIR>255*2^7) =  255*2^7;
-tanDIR(tanDIR<-255*2^7)= -255*2^7;
 tanDIR = int16(tanDIR);    
 end

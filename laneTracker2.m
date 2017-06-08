@@ -52,9 +52,11 @@ function [] = laneTracker2()
 
 %% TUe DATASET %%
     global DATASET IMAGE_FILES NBUFFER ImageOutCount STEP_SIZE CENTER_OFFSET
-    DATASET = '/media/rameez/Linux-Extended/DataSet/eindhoven/PNG_imgs/';
+   
     
-%     LOGO = im2double(imread('tue.png'));
+    DATASET = '/media/rameez/Linux-Extended/DataSet/eindhoven/PNG_imgs/';
+    %DATASET = '/home/rameez/TestDataBackup/';
+    
     DATASET
     
     IMAGE_FILES= dir([DATASET,'*.png']); 
