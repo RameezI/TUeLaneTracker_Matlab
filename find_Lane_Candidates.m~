@@ -70,8 +70,8 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
 
                 tanGradient = Likelihoods.GRADIENT_DIR_TOT_MAX(row_current+1, col_current+1);
                 
-                Lane_Int_Base_tmp     =  ( single(bottom- y) *2^7  )./single(tanGradient)  +  single(x);
-                Lane_Int_Purview_tmp  =  ( single(horizon-y) *2^7  )./single(tanGradient)  +  single(x);                
+                Lane_Int_Base_tmp     =  ( int32(bottom- y) *2^7 * SCALE_EXP_10  )./int32(tanGradient)  +  int32(x)*SCALE_EXP_10;
+                Lane_Int_Purview_tmp  =  ( int32(horizon-y) *2^7 * SCALE_EXP_10  )./int32(tanGradient)  +  int32(x)*SCALE_EXP_10;                
                 
                 Lane_Int_Weights_tmp  =   (int32(prob)* int32(depthSqr) )* 2^-7;
                 
@@ -115,10 +115,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     firstDim  = (Lane_Int_Purview -HORIZON_HISTOGRAM_BINS(1)  + HORIZON_HISTOGRAM_STEP/2 ) / HORIZON_HISTOGRAM_STEP;
     
     %Bottom intersection discretised
-    secondDim = (Lane_Int_Base    - BASE_HISTOGRAM_BINS(1)  + BASE_HISTOGRAM_STEP/2 ) / BASE_HISTOGRAM_STEP; 
-    
-    firstDim   = ceil(firstDim);
-    secondDim  = ceil(secondDim);
+    secondDim = (Lane_Int_Base    - BASE_HISTOGRAM_BINS(1)  + BASE_HISTOGRAM_STEP/2 ) / BASE_HISTOGRAM_STEP;             
 
     firstDim(size(firstDim)+1)      = size(HORIZON_HISTOGRAM_BINS,2);
     secondDim(size(secondDim)+1)    = size(BASE_HISTOGRAM_BINS,2);
