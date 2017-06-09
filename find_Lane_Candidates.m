@@ -28,7 +28,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     %%  ARM LOOP %%
     global LANE_BOUNDARIES    
      
-    
+
     halfImage       = int16(RES_VH(1)/2);
                  
     bottom          = int16(LANE_FILTER_OFFSET_V);     %% keep fixed regardless of the FOV or use, keeps the cm-to-pixel ratio more stable
@@ -71,7 +71,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
                 
                 Lane_Int_Base_tmp     =  ( single(bottom- y) *2^7  )./single(tanGradient)  +  single(x);
                 Lane_Int_Purview_tmp  =  ( single(horizon-y) *2^7  )./single(tanGradient)  +  single(x);                
-                Lane_Int_Weights_tmp  =   single(prob)*single(depthSqr)* 2^-7;
+                Lane_Int_Weights_tmp  =   uint16(prob)*depthSqr* 2^-7;
                 
                 
                 if ( Lane_Int_Base_tmp > BASE_HISTOGRAM_BINS(1)-BASE_HISTOGRAM_STEP/2    &&   Lane_Int_Base_tmp < BASE_HISTOGRAM_BINS(end)+ BASE_HISTOGRAM_STEP/2)

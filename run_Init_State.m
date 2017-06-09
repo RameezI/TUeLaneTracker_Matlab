@@ -44,7 +44,6 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
    
     %%
     %% Create Depth Template %%
-
        ROOT_IDEPTH_TEMPLATE = single(zeros(2*RES_VH(1)+1,RES_VH(2)));
         step  = 45/RES_VH(1);
         angle = 90-step;
@@ -58,7 +57,7 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
             angle = angle-step;
         end
         
-        ROOT_IDEPTH_TEMPLATE = uint8(ROOT_IDEPTH_TEMPLATE);
+        ROOT_IDEPTH_TEMPLATE = uint16(ROOT_IDEPTH_TEMPLATE);
 
          
          
@@ -66,35 +65,35 @@ function [likelihoods, templates, vanishingPt, masks] = run_Init_State(RES_VH, N
     %% Assign Matrices to corresponding structures %%
 
 
-                         templates = struct;
+     templates = struct;
 
-                              templates.GRADIENT_DIR_ROOT  = ROOT_DIR_TEMPLATE;
-                              templates.FOCUS_ROOT         = ROOT_FOCUS_TEMPLATE;
-                              templates.DEPTH_ROOT         = ROOT_IDEPTH_TEMPLATE;
-
-
-                         vanishingPt = struct;
-
-                             vanishingPt.V = 0;
-                             vanishingPt.H = 0;
-                             vanishingPt.V_prev = 0;
-                             vanishingPt.H_prev = 0;
+          templates.GRADIENT_DIR_ROOT  = ROOT_DIR_TEMPLATE;
+          templates.FOCUS_ROOT         = ROOT_FOCUS_TEMPLATE;
+          templates.DEPTH_ROOT         = ROOT_IDEPTH_TEMPLATE;
 
 
+     vanishingPt = struct;
 
-                          likelihoods =struct;
-
-                              likelihoods.TOT_ALL                      = TOT_P_ALL;
-                              likelihoods.GRADIENT_DIR_ALL             = DIR_ALL;
-                              likelihoods.TOT_MAX                      = TOT_P;
-                              likelihoods.GRADIENT_DIR_TOT_MAX         = AVG_DIR_TOT_P;
-                              likelihoods.TOT_MAX_FOCUSED              = FOC_TOT_P;
+         vanishingPt.V = 0;
+         vanishingPt.H = 0;
+         vanishingPt.V_prev = 0;
+         vanishingPt.H_prev = 0;
 
 
-                            masks =struct;
-                            masks.FOCUS                             = MASK_FOC_TOT_P;
-                            masks.Margin                            = Margin;
-                            masks.VP_RANGE_V                        = VP_RANGE_V;
+
+      likelihoods =struct;
+
+          likelihoods.TOT_ALL                      = TOT_P_ALL;
+          likelihoods.GRADIENT_DIR_ALL             = DIR_ALL;
+          likelihoods.TOT_MAX                      = TOT_P;
+          likelihoods.GRADIENT_DIR_TOT_MAX         = AVG_DIR_TOT_P;
+          likelihoods.TOT_MAX_FOCUSED              = FOC_TOT_P;
+
+
+        masks =struct;
+        masks.FOCUS                             = MASK_FOC_TOT_P;
+        masks.Margin                            = Margin;
+        masks.VP_RANGE_V                        = VP_RANGE_V;
 
                                 
                                 
