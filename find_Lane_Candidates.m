@@ -43,15 +43,15 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     start_col   =   int16(-320);
     
 
-    Lane_Int_Base     = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
+    Lane_Int_Base     = int32( zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1) );
     
-    Lane_Int_Purview  = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
+    Lane_Int_Purview  = int32( zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1) );
     
     Lane_Int_Weights  = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
      
     Templates.DEPTHSqr= Templates.DEPTH.^2;
    
-    Index =1;
+    Index =0;
     
     
     
@@ -60,36 +60,36 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
         for col_current = 0: (size(Focussed_TOT_P,2)-1)
             
             prob        =  Focussed_TOT_P(row_current+1, col_current+1);
+            tanGradient = Likelihoods.GRADIENT_DIR_TOT_MAX(row_current+1, col_current+1);
         
-            if(prob>0)
-
+            if(prob>0 && tanGradient~=0)
+                
                 x        =  int16(start_col +col_current);
                 y        = -int16(start_row +row_current);
        
                 depthSqr    =  Templates.DEPTHSqr(row_current+1, col_current+1);
 
-                tanGradient = Likelihoods.GRADIENT_DIR_TOT_MAX(row_current+1, col_current+1);
-                
-                Lane_Int_Base_tmp     =  ( single(bottom- y) *2^7  )./single(tanGradient)  +  single(x);
-                Lane_Int_Purview_tmp  =  ( single(horizon-y) *2^7  )./single(tanGradient)  +  single(x);                
+                Lane_Int_Base_tmp     =  idivide( int32(bottom- y) *2^7 * SCALE_EXP_10, int32(tanGradient) ) +  int32(x)*SCALE_EXP_10;
+                Lane_Int_Purview_tmp  =  idivide( int32(horizon-y) *2^7 * SCALE_EXP_10, int32(tanGradient) ) +  int32(x)*SCALE_EXP_10;                
                 
                 Lane_Int_Weights_tmp  =   (int32(prob)* int32(depthSqr) )* 2^-7;
                 
                 
-                if (     Lane_Int_Base_tmp >  BASE_HISTOGRAM_BINS(1)   - BASE_HISTOGRAM_STEP/2  ...
-                   &&   Lane_Int_Base_tmp <   BASE_HISTOGRAM_BINS(end)  + BASE_HISTOGRAM_STEP/2  ...  
+                if (     Lane_Int_Base_tmp > SCALE_EXP_10*int32( BASE_HISTOGRAM_BINS(1) )   - idivide(SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP), 2) ...
+                   &&    Lane_Int_Base_tmp < SCALE_EXP_10*int32( BASE_HISTOGRAM_BINS(end) ) + idivide(SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP), 2)  ...  
                    )
                  
-                    if (    Lane_Int_Purview_tmp > -VP_RANGE_H  - HORIZON_HISTOGRAM_STEP/2 ...   
-                       &&   Lane_Int_Purview_tmp < VP_RANGE_H   + HORIZON_HISTOGRAM_STEP/2 ...
-                       )                
-
+                if (    Lane_Int_Purview_tmp > SCALE_EXP_10*int32(-VP_RANGE_H)  - idivide(SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP) , 2) ...   
+                   &&   Lane_Int_Purview_tmp < SCALE_EXP_10*int32(VP_RANGE_H)   + idivide(SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP) , 2) ...
+                   )                
+                             Index = Index+1;
+                             
                              Lane_Int_Base(Index)      = Lane_Int_Base_tmp;                        
                              Lane_Int_Purview(Index)   = Lane_Int_Purview_tmp;
                              Lane_Int_Weights(Index)   = Lane_Int_Weights_tmp;
 
-                             Index = Index+1;               
-                    end
+                                           
+                end
                 end  
                
             end
@@ -111,14 +111,18 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     %% APEX Process %%
     
     
-    %Purvew intersection discretised
-    firstDim  = (Lane_Int_Purview -HORIZON_HISTOGRAM_BINS(1)  + HORIZON_HISTOGRAM_STEP/2 ) / HORIZON_HISTOGRAM_STEP;
+    %Purview intersection discretised
+    firstDim_N  =  Lane_Int_Purview - SCALE_EXP_10*int32( HORIZON_HISTOGRAM_BINS(1) )  + idivide( SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP), 2) ;
+    firstDim_D   =  SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP);
+    firstDim     = idivide(firstDim_N, firstDim_D);
     
     %Bottom intersection discretised
-    secondDim = (Lane_Int_Base    - BASE_HISTOGRAM_BINS(1)  + BASE_HISTOGRAM_STEP/2 ) / BASE_HISTOGRAM_STEP; 
+    secondDim_N =  Lane_Int_Base -  SCALE_EXP_10*int32(BASE_HISTOGRAM_BINS(1)) + idivide( SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP), 2) ;
+    secondDim_D =  SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP);
+    secondDim   =  idivide(secondDim_N, secondDim_D);
     
-    firstDim   = ceil(firstDim);
-    secondDim  = ceil(secondDim);
+    firstDim   = firstDim + 1;
+    secondDim  = secondDim +1; 
 
     firstDim(size(firstDim)+1)      = size(HORIZON_HISTOGRAM_BINS,2);
     secondDim(size(secondDim)+1)    = size(BASE_HISTOGRAM_BINS,2);
