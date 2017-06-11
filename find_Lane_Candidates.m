@@ -51,7 +51,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
      
     Templates.DEPTHSqr= Templates.DEPTH.^2;
    
-    Index =1;
+    Index =0;
     
     
     
@@ -82,13 +82,15 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
                  
                     if (    Lane_Int_Purview_tmp > -VP_RANGE_H  - HORIZON_HISTOGRAM_STEP/2 ...   
                        &&   Lane_Int_Purview_tmp < VP_RANGE_H   + HORIZON_HISTOGRAM_STEP/2 ...
-                       )                
+                       )              
+                   
+                            Index = Index+1;
 
                              Lane_Int_Base(Index)      = Lane_Int_Base_tmp;                        
                              Lane_Int_Purview(Index)   = Lane_Int_Purview_tmp;
                              Lane_Int_Weights(Index)   = Lane_Int_Weights_tmp;
 
-                             Index = Index+1;               
+                                            
                     end
                 end  
                
