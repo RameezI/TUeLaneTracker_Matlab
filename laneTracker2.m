@@ -90,7 +90,7 @@ function [] = laneTracker2()
     
     
 %% Camera Properties %%
-
+	
     global CM_TO_PIXEL RES_VH C_V C_H 
     
     RES_VH          = [480 640];         %% resolution of camera
@@ -194,14 +194,14 @@ function [] = laneTracker2()
     
     global  VP_BINS_V VP_BINS_H  VP_PRIOR VP_FILTER  VP_TRANSITION  HORIZON_HISTOGRAM_BINS 
     
-    VP_RANGE_V  = 25;                                                               %% the vertical   +/- search range wrt image center for the VP
-    VP_RANGE_H  = 300;                                                              %% the horizontal +/- search range wrt image center for the VP
-    VP_STEP     = 10;                                                               %% the search step size
+    VP_RANGE_V  = 25;           %% the vertical   +/- search range wrt image center for the VP
+    VP_RANGE_H  = 300;          %% the horizontal +/- search range wrt image center for the VP
+    VP_STEP     = 10;           %% the search step size
     
     
     
-    VP_BINS_V   = -VP_RANGE_V:VP_STEP:VP_RANGE_V;                                   %% the VP vertical filter bins
-    VP_BINS_H   = -VP_RANGE_H:VP_STEP:VP_RANGE_H;                                   %% the VP horizontal filter bins
+    VP_BINS_V   = -VP_RANGE_V:VP_STEP:VP_RANGE_V;       %% the VP vertical filter bins
+    VP_BINS_H   = -VP_RANGE_H:VP_STEP:VP_RANGE_H;       %% the VP horizontal filter bins
 
     
     [VP_PRIOR, VP_TRANSITION] = createVPPrior( VP_BINS_V, VP_BINS_H, 5*VP_RANGE_V/VP_STEP );

@@ -48,11 +48,9 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     Lane_Int_Purview  = int32( zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1) );
     
     Lane_Int_Weights  = zeros(size(Focussed_TOT_P,1)*size(Focussed_TOT_P,2),1);
-     
-    Templates.DEPTHSqr= Templates.DEPTH.^2;
    
     Index =0;
-    
+    	
     
     
     for row_current = 0: (size(Focussed_TOT_P,1)-1)
@@ -61,18 +59,18 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
             
             prob        =  Focussed_TOT_P(row_current+1, col_current+1);
             tanGradient = Likelihoods.GRADIENT_DIR_TOT_MAX(row_current+1, col_current+1);
-        
+        	
             if(prob>0 && tanGradient~=0)
                 
                 x        =  int16(start_col +col_current);
                 y        = -int16(start_row +row_current);
        
-                depthSqr    =  Templates.DEPTHSqr(row_current+1, col_current+1);
+                depthSqr    =  Templates.DEPTH(row_current+1, col_current+1);
 
                 Lane_Int_Base_tmp     =  idivide( int32(bottom- y) *2^7 * SCALE_EXP_10, int32(tanGradient) ) +  int32(x)*SCALE_EXP_10;
                 Lane_Int_Purview_tmp  =  idivide( int32(horizon-y) *2^7 * SCALE_EXP_10, int32(tanGradient) ) +  int32(x)*SCALE_EXP_10;                
                 
-                Lane_Int_Weights_tmp  =   (int32(prob)* int32(depthSqr) )* 2^-7;
+                Lane_Int_Weights_tmp  =   (int32(prob)* int32(depthSqr) );
                 
                 
                 if (     Lane_Int_Base_tmp > SCALE_EXP_10*int32( BASE_HISTOGRAM_BINS(1) )   - idivide(SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP), 2) ...
@@ -101,9 +99,9 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     
     
     % Keep only valid Intersections
-    Lane_Int_Purview   = Lane_Int_Purview(1:Index);
-    Lane_Int_Base      = Lane_Int_Base(1:Index);
-    Lane_Int_Weights   = Lane_Int_Weights(1:Index);
+    Lane_Int_Purview   = int32(Lane_Int_Purview(1:Index));
+    Lane_Int_Base      = int32(Lane_Int_Base(1:Index));
+    Lane_Int_Weights   = int32(Lane_Int_Weights(1:Index));
 
     
 
@@ -124,8 +122,8 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     firstDim   = firstDim + 1;
     secondDim  = secondDim +1; 
 
-    firstDim(size(firstDim)+1)      = size(HORIZON_HISTOGRAM_BINS,2);
-    secondDim(size(secondDim)+1)    = size(BASE_HISTOGRAM_BINS,2);
+    firstDim(end+1)      = size(HORIZON_HISTOGRAM_BINS,2);
+    secondDim(end+1)    = size(BASE_HISTOGRAM_BINS,2);
     
     INT_HIST_LANE_PROB =   accumarray( secondDim, [Lane_Int_Weights; 0] );
     
@@ -138,27 +136,32 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     %% APEX Process %%
     
      INT_HIST_LANE_PROB = INT_HIST_LANE_PROB';
-     INT_HIST_VP_PROB   = INT_HIST_VP_PROB';
-     
-     INT_HIST_LANE_PROB = INT_HIST_LANE_PROB / sum(INT_HIST_LANE_PROB,2);        
-     INT_HIST_VP_PROB   = INT_HIST_VP_PROB   / sum(INT_HIST_VP_PROB,2);
-     
-     
-     
-     
+     INT_HIST_VP_PROB   = INT_HIST_VP_PROB';   
 
     %% Predict Step %%
     %% APEX Process %%
-      TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'Replicate' );
-      TEMP = int32( (single(TEMP) / single(sum(sum(TEMP))) ) *2^15);
+      TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'replicate' );
+      TEMP = int64(TEMP);
+      TEMP = int32( (TEMP*2^16) /sum(sum(TEMP) ) );
       LANE_FILTER_TRANSITIONED = 0.5*TEMP +0.5*LANE_PRIOR ; 
       
     
+      
+
+      
 
     %% Update Step %%
-    %% ARM LOOP %%
+    %% ARM LOOP %%      
+     
+     INT_HIST_LANE_PROB_int32 = int32( (int64(INT_HIST_LANE_PROB)*2^16) / sum(int64(INT_HIST_LANE_PROB),2) );        
+     INT_HIST_VP_PROB_int32   = int32( (int64(INT_HIST_VP_PROB)  *2^16) / sum(int64(INT_HIST_VP_PROB),2)   );     
+     
     
+     INT_HIST_LANE_PROB = INT_HIST_LANE_PROB / sum(INT_HIST_LANE_PROB,2);        
+     INT_HIST_VP_PROB   = INT_HIST_VP_PROB   / sum(INT_HIST_VP_PROB,2);
+     
     best  = 0;
+    
     for modelIdx = 1:size(LaneBoundaryModels,2)
         
               left  = LaneBoundaryModels(modelIdx).leftOffsetIdx;
@@ -171,39 +174,53 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
 
 
               likelihood_leftLaneBoundary =0;
+              likelihood_leftLaneBoundary_int32 = int32(0);
 
                 for idx=1:  size(LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary,2)
 
                     ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary(idx);
                     Value        = LaneBoundaryModels(modelIdx).histogramWeights_leftBoundary(idx);
-                    likelihood_leftLaneBoundary = likelihood_leftLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;               
-
+                    likelihood_leftLaneBoundary = likelihood_leftLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;
+                    likelihood_leftLaneBoundary_int32 = likelihood_leftLaneBoundary_int32 + INT_HIST_LANE_PROB_int32(ID)*Value;
                 end
                 
                 
                likelihood_rightLaneBoundary =0;
+               likelihood_rightLaneBoundary_int32 =int32(0);
 
                 for idx=1:size(LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary,2)
 
                     ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary(idx);
                     Value        = LaneBoundaryModels(modelIdx).histogramWeights_rightBoundary(idx);
                     likelihood_rightLaneBoundary = likelihood_rightLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;
+                    likelihood_rightLaneBoundary_int32 =likelihood_rightLaneBoundary_int32 + INT_HIST_LANE_PROB_int32(ID)*Value;
                 end
                 
-                NegLaneCorrelation= 0; 
+                NegLaneCorrelation= 0;
+                NegLaneCorrelation_int32 = int32(0);
 
                 for idx=1:size(NegLaneBoundaryModel(modelIdx).histogramBinsID,2)
                      ID  = NegLaneBoundaryModel(modelIdx).histogramBinsID(idx);
-                     NegLaneCorrelation = NegLaneCorrelation + INT_HIST_LANE_PROB(ID);                  
+                     NegLaneCorrelation         = NegLaneCorrelation + INT_HIST_LANE_PROB(ID);
+                     NegLaneCorrelation_int32   = NegLaneCorrelation_int32 + INT_HIST_LANE_PROB_int32(ID);
                 end
                 
+                x = single(NegLaneCorrelation_int32)/2^16;     
+                likelihood_NegLaneBoundary    =     OBS_NEG_NORMA * exp( - x^2/OBS_NEG_NOMIN );
+                likelihood_NegLaneBoundary_int32 =   int32(likelihood_NegLaneBoundary * 2^16);
                 
-                likelihood_NegLaneBoundary    =     OBS_NEG_NORMA * exp( -NegLaneCorrelation^2/OBS_NEG_NOMIN );
-                conditional_prob              =    int32(likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary * 2^15);
+                conditional_prob       = int32(likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary * 2^16);
+                
+                conditional_prob_int64 = int64(likelihood_leftLaneBoundary_int32);
+                conditional_prob_int64 = (conditional_prob_int64 * int64(likelihood_rightLaneBoundary_int32) ) *2^-16;
+                conditional_prob_int64 = (conditional_prob_int64 * int64(likelihood_NegLaneBoundary_int32)   )*2^-16;
+                conditional_prob_int32 = int32(conditional_prob_int64);
 
+                
+                
                 % Update Lane Filter (only legitimate states)
 
-                  LANE_FILTER(left,right) = LANE_FILTER_TRANSITIONED(left,right) * conditional_prob;
+                  LANE_FILTER(left,right) = LANE_FILTER_TRANSITIONED(left,right) * conditional_prob_int32;
     
                 % Already keep Track of Max Probable State
 
@@ -222,7 +239,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     
     %% Normalize Lane Filter
        %% APEX PROCESS %%
-        LANE_FILTER = int32( (single(LANE_FILTER) / single( sum(sum(LANE_FILTER)) )   )*2^15);
+  
 
 
     %% Find the Lane Boundaries

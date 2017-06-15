@@ -14,15 +14,16 @@ function [ Prior, Trans ] = createVPPrior( VP_BINS_V, VP_BINS_H, Sigma  )
     
     for v = 1:sv
         for h = 1:sh 
-            pv=  exp(-((v-sv/2)^2)/(Sigma^2) );
-            ph=  exp(-((h-sh/2)^2)/(Sigma^2) );
+            pv=  exp(-((v-sv/2)^2)/(Sigma^2) ) *2^7;
+            ph=  exp(-((h-sh/2)^2)/(Sigma^2) ) *2^7;
             
-            Prior(v,h) = int32( pv*ph*2^15);
+            Prior(v,h) = int32( pv*ph);
             
         end
     end
     
-    Prior = int32(( single(Prior) /  single(sum(sum(Prior))) )*2^15);
+    Prior = (Prior*2^16)/sum(sum(Prior));
+    Prior = int32(Prior);
     
     %% uniform over 3x3 bin grid
     Trans = ones(3,3);

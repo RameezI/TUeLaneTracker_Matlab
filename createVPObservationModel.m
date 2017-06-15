@@ -8,53 +8,35 @@
 function [LaneBoundaryModel, NegLaneBoundaryModel, Width ] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, HORIZON_HISTOGRAM_STEP, HORIZON_HISTOGRAM_BINS, VP_FILTER_OFFSET_V )
        
 
+    nbBins = size(HORIZON_HISTOGRAM_BINS,2);
 
-    %% Compute Intersection With Current Horizon %%
-    
+%%
     L  = (LANE_BOUNDARIES(1,1) + LANE_BOUNDARIES(2,1))/2; %% in VP coordiante system
-     
-   
-    
     DX = TMP_VP_H - L;
     DY = TMP_VP_V + 240;
     IL = (DX/DY) * (VP_FILTER_OFFSET_V - TMP_VP_V) + TMP_VP_H;
+    IL   = HORIZON_HISTOGRAM_STEP * round( IL/HORIZON_HISTOGRAM_STEP );
     
-    R  = (LANE_BOUNDARIES(1,2) + LANE_BOUNDARIES(2,2))/2; %% in VP coordiante system
+    idxL  = ( (IL - HORIZON_HISTOGRAM_BINS(1,1) )/HORIZON_HISTOGRAM_STEP ) +1;
     
-
+    %% Use Asynch to prarrelise the two computations
     
+    R  = (LANE_BOUNDARIES(1,2) + LANE_BOUNDARIES(2,2))/2; %% in VP coordiante system 
     DX = TMP_VP_H - R;
     DY = TMP_VP_V + 240;
-    IR = (DX/DY) * (VP_FILTER_OFFSET_V - TMP_VP_V) + TMP_VP_H;
-    
-
- 
-    %% To Histogram Bins %%
-    
-    IL   = HORIZON_HISTOGRAM_STEP * round( IL/HORIZON_HISTOGRAM_STEP );
+    IR = (DX/DY) * (VP_FILTER_OFFSET_V - TMP_VP_V) + TMP_VP_H; 
     IR   = HORIZON_HISTOGRAM_STEP * round( IR/HORIZON_HISTOGRAM_STEP );
-    nbBins = size(HORIZON_HISTOGRAM_BINS,2);
-    
-    
-    
-    %% To Histogram Bins-ID
-    idxL  = ( (IL - HORIZON_HISTOGRAM_BINS(1,1) )/HORIZON_HISTOGRAM_STEP ) +1;
     
     idxR  = ( (HORIZON_HISTOGRAM_BINS(1,nbBins) - IR)/HORIZON_HISTOGRAM_STEP );
     idxR  = nbBins- idxR;
+
+    
+  %%
     
     idxM  = round((idxL+idxR)/2);
-    
-
-    nbLeftNonBoundaryBins  = (idxM-3) - (idxL+2) ;    
-    
-    nbRightNonBoundaryBins = (idxR-2) - (idxM+3);
-    
+    nbLeftNonBoundaryBins  = (idxM-3) - (idxL+2) ;        
+    nbRightNonBoundaryBins = (idxR-2) - (idxM+3); 
     nbNonBoundaryBins      = nbLeftNonBoundaryBins + nbRightNonBoundaryBins;
-
-        
-    
-%% Create Expected Models %%
 
 
     Width = IR-IL;

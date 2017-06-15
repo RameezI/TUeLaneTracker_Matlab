@@ -30,7 +30,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
     
       %% APEX PROCESS %%
       TEMP = imfilter( VP_FILTER, VP_TRANSITION, 'Replicate' );
-      TEMP = int32( (single(TEMP) / single(sum(sum(TEMP))) ) *2^15);
+      TEMP = int32( (single(TEMP) / single(sum(sum(TEMP))) ) *2^16);
       VP_FILTER_TRANSITIONED = 0.5*TEMP +0.5*VP_PRIOR ; 
 
     
@@ -54,7 +54,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
             
          % Probability of the Lane according to Lane Widith
             
-            Width       = (1/VP_LANE_RATIO) * WidthPx * (1/CM_TO_PIXEL);
+            Width       = (1/VP_LANE_RATIO)     * WidthPx * (1/CM_TO_PIXEL);
             WidhtProb   = LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-Width)^2 / LANE_WIDTH_DIFF_NOMIN );
             
 
@@ -84,7 +84,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
                 
                 
             % Combined Conditional Probabability
-                conditional_prob = int32(BoundaryProb * NegBoundaryProb * WidhtProb * 2^15 );
+                conditional_prob = int32(BoundaryProb * NegBoundaryProb * WidhtProb * 2^16 );
                 
 
             
@@ -110,7 +110,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
 
     %% Normalize %%
         %% APEX Process %%
-    VP_FILTER = int32( (single(VP_FILTER) / single( sum(sum(VP_FILTER)) )   )*2^15);
+    VP_FILTER = int32( (single(VP_FILTER) / single( sum(sum(VP_FILTER)) )   )*2^16);
 
     
     %% Assign the new VP %%

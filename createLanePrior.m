@@ -52,8 +52,8 @@ function [ Prior, Trans, LaneBoundaryModels, NegLaneBoundaryModels] = createLane
             
 
                  % Prior on Location
-                    pL = exp( -(hmean-binsLaneOffsets_cm(leftOffsetIdx))^2 / (2*(8*SigmaL)^2) ) /  ( sqrt(2*pi)*8*SigmaL ) * (2^15);     
-                    pR = exp( -(hmean-binsLaneOffsets_cm(rightOffsetIdx))^2 / (2*(8*SigmaL)^2) ) / ( sqrt(2*pi)*8*SigmaL )* (2^15);
+                    pL = exp( -(hmean-binsLaneOffsets_cm(leftOffsetIdx))^2 / (2*(8*SigmaL)^2) ) /  ( sqrt(2*pi)*8*SigmaL ) * (2^16);     
+                    pR = exp( -(hmean-binsLaneOffsets_cm(rightOffsetIdx))^2 / (2*(8*SigmaL)^2) ) / ( sqrt(2*pi)*8*SigmaL )* (2^16);
                     
                     
 
@@ -102,8 +102,7 @@ function [ Prior, Trans, LaneBoundaryModels, NegLaneBoundaryModels] = createLane
                                   for i= 0: nbRightNonBoundaryBins-1
                                             NegLaneBoundaryModels(ModelsCount).histogramBinsID(nbLeftNonBoundaryBins+i+1)= (idxM + 4) +i;
                                   end
-                                  
-                                  a= int32(pL*pR);
+
                                   Prior(leftOffsetIdx,rightOffsetIdx) = int32(pL*pR);
 
                               end                
@@ -115,13 +114,12 @@ function [ Prior, Trans, LaneBoundaryModels, NegLaneBoundaryModels] = createLane
 
     end
     
-    % Normalize
-    Prior = int32 ( round(( single(Prior) / single(sum(sum(Prior)) ) )* 2^15)) ;
+   
+    Prior = (Prior* 2^16) /sum(sum(Prior));
     
-%     Prior = int32(Prior *2^15);
 
     
     % Transition
-    Trans = ones(10);
+    Trans = ones(11);
     
 end
