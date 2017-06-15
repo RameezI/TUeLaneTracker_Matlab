@@ -1,0 +1,2 @@
+load('csvDataPath.mat')
+dlmwrite(strcat(Path, 'DELETEME.csv'), a, 'delimiter', ',', 'precision', 9);
