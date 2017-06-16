@@ -211,9 +211,9 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
                 
                 conditional_prob       = int32(likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary * 2^16);
                 
-                conditional_prob_int64 = single(likelihood_leftLaneBoundary_int32);
-                conditional_prob_int64 = (conditional_prob_int64 * single(likelihood_rightLaneBoundary_int32) ) *2^-16;
-                conditional_prob_int64 = (conditional_prob_int64 * single(likelihood_NegLaneBoundary_int32)   )*2^-16;
+                conditional_prob_int64 = int64(likelihood_leftLaneBoundary_int32);
+                conditional_prob_int64 = (conditional_prob_int64 * int64(likelihood_rightLaneBoundary_int32) ) *2^-16;
+                conditional_prob_int64 = (conditional_prob_int64 * int64(likelihood_NegLaneBoundary_int32)   )*2^-16;
                 conditional_prob_int32 = int32(conditional_prob_int64);
 
                 

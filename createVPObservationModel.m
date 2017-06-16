@@ -39,6 +39,7 @@ function [LaneBoundaryModel, NegLaneBoundaryModel, Width ] = createVPObservation
     nbNonBoundaryBins      = nbLeftNonBoundaryBins + nbRightNonBoundaryBins;
 
 
+    
     Width = IR-IL;
 
     LaneBoundaryModel= struct;

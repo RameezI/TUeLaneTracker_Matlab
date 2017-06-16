@@ -58,7 +58,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
             WidhtProb        = LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-Width)^2 / LANE_WIDTH_DIFF_NOMIN );
             WidthProb_int32   = 2^16*LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-Width)^2 / LANE_WIDTH_DIFF_NOMIN );
             
-            WidthProb_int32 = int32(WidthProb_int32);
+            WidthProb_int32 =int32(WidthProb_int32);
             
           % Probability of Boundary Segments of the Lane
                 BoundaryProb        = 0;
@@ -100,7 +100,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
                 
 
                 if conditional_prob_double ~= conditional_prob
-                    a= 2;
+                    a= 2
                 end
             
             %Update the Filter %%
