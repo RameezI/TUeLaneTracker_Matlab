@@ -26,9 +26,13 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     SCALE_EXP_10 = int32(2^10);
     
     %% Provided Interface 
-    %%  ARM LOOP %%
     global LANE_BOUNDARIES    
      
+
+    
+    
+    
+    %% Compute Intersections of each possible lane pixel with the Base and Purview Line
 
     halfImage       = int16(RES_VH(1)/2);
                  
@@ -94,9 +98,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
             
             
         end
-    end
-  
-    
+    end   
     
     % Keep only valid Intersections
     Lane_Int_Purview   = int32(Lane_Int_Purview(1:Index));
@@ -105,9 +107,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
 
     
 
-    %% Weighted Histogram over both dicretised Intersections
-    %% APEX Process %%
-    
+    %% Weighted Histogram over both dicretised Intersections   
     
     %Purview intersection discretised
     firstDim_N  =  Lane_Int_Purview - SCALE_EXP_10*int32( HORIZON_HISTOGRAM_BINS(1) )  + idivide( SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP), 2) ;
@@ -136,10 +136,18 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     %% APEX Process %%
     
      INT_HIST_LANE_PROB = INT_HIST_LANE_PROB';
-     INT_HIST_VP_PROB   = INT_HIST_VP_PROB';   
+     INT_HIST_VP_PROB   = INT_HIST_VP_PROB'; 
+     
+     INT_HIST_LANE_PROB_int32 = int32( (int64(INT_HIST_LANE_PROB)*2^16) / sum(int64(INT_HIST_LANE_PROB),2) );        
+     INT_HIST_VP_PROB_int32   = int32( (int64(INT_HIST_VP_PROB)  *2^16) / sum(int64(INT_HIST_VP_PROB),2)   );     
+     
+    
+     INT_HIST_LANE_PROB = INT_HIST_LANE_PROB / sum(INT_HIST_LANE_PROB,2);        
+     INT_HIST_VP_PROB   = INT_HIST_VP_PROB   / sum(INT_HIST_VP_PROB,2);
 
+     
     %% Predict Step %%
-    %% APEX Process %%
+    
       TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'replicate' );
       TEMP = int64(TEMP);
       TEMP = int32( (TEMP*2^16) /sum(sum(TEMP) ) );
@@ -151,107 +159,96 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
       
 
     %% Update Step %%
-    %% ARM LOOP %%      
-     
-     INT_HIST_LANE_PROB_int32 = int32( (int64(INT_HIST_LANE_PROB)*2^16) / sum(int64(INT_HIST_LANE_PROB),2) );        
-     INT_HIST_VP_PROB_int32   = int32( (int64(INT_HIST_VP_PROB)  *2^16) / sum(int64(INT_HIST_VP_PROB),2)   );     
-     
-    
-     INT_HIST_LANE_PROB = INT_HIST_LANE_PROB / sum(INT_HIST_LANE_PROB,2);        
-     INT_HIST_VP_PROB   = INT_HIST_VP_PROB   / sum(INT_HIST_VP_PROB,2);
-     
+   
     best  = 0;
     
     for modelIdx = 1:size(LaneBoundaryModels,2)
-        
-              left  = LaneBoundaryModels(modelIdx).leftOffsetIdx;
-              right = LaneBoundaryModels(modelIdx).rightOffsetIdx;
-              width = (LANE_OFFSETS_BINS(left)+LANE_OFFSETS_BINS(right)) * 1/CM_TO_PIXEL;
+
+            left  = LaneBoundaryModels(modelIdx).leftOffsetIdx;
+            right = LaneBoundaryModels(modelIdx).rightOffsetIdx;
+            width = (LANE_OFFSETS_BINS(left)+LANE_OFFSETS_BINS(right)) * 1/CM_TO_PIXEL;
 
 
-              left_offset  = LANE_OFFSETS_BINS(left);
-              right_offset = LANE_OFFSETS_BINS(right);
+            left_offset  = LANE_OFFSETS_BINS(left);
+            right_offset = LANE_OFFSETS_BINS(right);
 
 
 
-                    ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary(2);
+            ID_Left           = LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary(2);
                     
-                    likelihood_leftLaneBoundary = single( INT_HIST_LANE_PROB_int32(ID-1) )*0.25 ...
-                                                + single( INT_HIST_LANE_PROB_int32(ID)   )       ...
-                                                + single( INT_HIST_LANE_PROB_int32(ID+1) )*0.25;
-               
+                likelihood_leftLaneBoundary = single( INT_HIST_LANE_PROB_int32(ID_Left-1) )*0.25 ...
+                                            + single( INT_HIST_LANE_PROB_int32(ID_Left)   )       ...
+                                            + single( INT_HIST_LANE_PROB_int32(ID_Left+1) )*0.25;
+
                    
-                   likelihood_leftLaneBoundary_int32 = int32(likelihood_leftLaneBoundary);
+            likelihood_leftLaneBoundary_int32 = int32(likelihood_leftLaneBoundary);
                    
                 
-                    ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary(2);
+            ID_Right           = LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary(2);
                    
-                    likelihood_rightLaneBoundary = single( INT_HIST_LANE_PROB_int32(ID-1) )*0.25 ...
-                                                + single( INT_HIST_LANE_PROB_int32(ID)   )       ...
-                                                + single( INT_HIST_LANE_PROB_int32(ID+1) )*0.25;
-                    
-                    likelihood_rightLaneBoundary_int32 = int32(likelihood_rightLaneBoundary);
+                likelihood_rightLaneBoundary = single( INT_HIST_LANE_PROB_int32(ID_Right-1) )*0.25 ...
+                                            + single( INT_HIST_LANE_PROB_int32(ID_Right)   )       ...
+                                            + single( INT_HIST_LANE_PROB_int32(ID_Right+1) )*0.25;
+
+            likelihood_rightLaneBoundary_int32 = int32(likelihood_rightLaneBoundary);
 
 
-                    NegLaneCorrelation_int32= 0;
+            NegLaneCorrelation_int32= 0;
 
                 
-                for idx=1:size(NegLaneBoundaryModel(modelIdx).histogramBinsID,2)
-                     
-                    ID  = NegLaneBoundaryModel(modelIdx).histogramBinsID(idx);
-                    
-                    NegLaneCorrelation_int32   = NegLaneCorrelation_int32 + INT_HIST_LANE_PROB_int32(ID);
+            for idx=1:size(NegLaneBoundaryModel(modelIdx).histogramBinsID,2)
+
+                ID_Left  = NegLaneBoundaryModel(modelIdx).histogramBinsID(idx);
+
+                NegLaneCorrelation_int32   = NegLaneCorrelation_int32 + INT_HIST_LANE_PROB_int32(ID_Left);
+
+            end
+
                 
-                end
-                
-                
-                x = single(NegLaneCorrelation_int32)/2^16;     
-                likelihood_NegLaneBoundary_float =   2^16*OBS_NEG_NORMA * exp( - x^2/OBS_NEG_NOMIN );
-                
-                conditional_prob_float =  single(likelihood_leftLaneBoundary_int32);
-                conditional_prob_float =  conditional_prob_float * single(likelihood_rightLaneBoundary_int32) *2^-16;
-                conditional_prob_float =  conditional_prob_float * likelihood_NegLaneBoundary_float*2^-16;
-               
-                
+            x = single(NegLaneCorrelation_int32)/2^16;     
+            likelihood_NegLaneBoundary_float =   2^16*OBS_NEG_NORMA * exp( - x^2/OBS_NEG_NOMIN );
+
+            conditional_prob =  likelihood_leftLaneBoundary_int32 * likelihood_rightLaneBoundary_int32;
+            conditional_prob_float =  single(conditional_prob) *2^-16;
+            conditional_prob_float =  conditional_prob_float * likelihood_NegLaneBoundary_float*2^-16;          
               
-                posterior_prob_int32 = int32( conditional_prob_float*  single(LANE_FILTER_TRANSITIONED(left,right)) );
+            posterior_prob_int32 = int32( conditional_prob_float*  single(LANE_FILTER_TRANSITIONED(left,right)) );
                                
     
-                % Already keep Track of Max Probable State
+            % Already keep Track of Max Probable State
 
-                  if best < posterior_prob_int32
-                            
-                     best       = posterior_prob_int32;
-                     LANE_MODEL = [left_offset right_offset likelihood_leftLaneBoundary likelihood_rightLaneBoundary];
-                     LANE_WIDTH = width;
-                               
-                  end
+            if best < posterior_prob_int32
+
+             best       = posterior_prob_int32;
+             LANE_MODEL = [left_offset right_offset likelihood_leftLaneBoundary likelihood_rightLaneBoundary];
+             LANE_WIDTH = width;
+
+            end
                   
-                  LANE_FILTER(left,right) = posterior_prob_int32;
-                  
-                  
+            LANE_FILTER(left,right) = posterior_prob_int32;                              
     end
      
     LANE_MODEL
     LANE_WIDTH
       
-    
-    %% Normalize Lane Filter
-       %% APEX PROCESS %%
-  
-
 
     %% Find the Lane Boundaries
-       %% ARM %%
-        LANE_BOUNDARIES = [ -LANE_MODEL(1)-BASE_HISTOGRAM_STEP/2 LANE_MODEL(2)-BASE_HISTOGRAM_STEP/2; -LANE_MODEL(1)+BASE_HISTOGRAM_STEP/2 LANE_MODEL(2)+BASE_HISTOGRAM_STEP/2; 0 0; 0 0; 100*LANE_MODEL(3) 100*LANE_MODEL(4)];
+    
+        LANE_BOUNDARIES = [ -LANE_MODEL(1)-BASE_HISTOGRAM_STEP/2 LANE_MODEL(2)-BASE_HISTOGRAM_STEP/2;...
+                            -LANE_MODEL(1)+BASE_HISTOGRAM_STEP/2 LANE_MODEL(2)+BASE_HISTOGRAM_STEP/2;...
+                              0 0; ...
+                              0 0; ...
+                              100*LANE_MODEL(3) 100*LANE_MODEL(4)];
+        
         LANE_BOUNDARIES(3,1) = (LANE_BOUNDARIES(1,1)+LANE_BOUNDARIES(2,2))/2;
+        
         LANE_BOUNDARIES(3,2) = LANE_BOUNDARIES(3,1);
     
     
         
     
     %% Unstable Track ?
-       %% ARM %%
+    
     
     LANE_BOUNDARIES
     
