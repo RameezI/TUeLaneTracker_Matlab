@@ -143,7 +143,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
       TEMP = imfilter( LANE_FILTER, LANE_TRANSITION, 'replicate' );
       TEMP = int64(TEMP);
       TEMP = int32( (TEMP*2^16) /sum(sum(TEMP) ) );
-      LANE_FILTER_TRANSITIONED = 0.5*TEMP +0.5*LANE_PRIOR ; 
+      LANE_FILTER_TRANSITIONED = TEMP + LANE_PRIOR ; 
       
     
       
@@ -173,64 +173,63 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
               right_offset = LANE_OFFSETS_BINS(right);
 
 
-              likelihood_leftLaneBoundary =0;
-              likelihood_leftLaneBoundary_int32 = int32(0);
 
-                for idx=1:  size(LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary,2)
-
-                    ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary(idx);
-                    Value        = LaneBoundaryModels(modelIdx).histogramWeights_leftBoundary(idx);
-                    likelihood_leftLaneBoundary = likelihood_leftLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;
-                    likelihood_leftLaneBoundary_int32 = likelihood_leftLaneBoundary_int32 + INT_HIST_LANE_PROB_int32(ID)*Value;
-                end
+                    ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_leftBoundary(2);
+                    
+                    likelihood_leftLaneBoundary = single( INT_HIST_LANE_PROB_int32(ID-1) )*0.25 ...
+                                                + single( INT_HIST_LANE_PROB_int32(ID)   )       ...
+                                                + single( INT_HIST_LANE_PROB_int32(ID+1) )*0.25;
+               
+                   
+                   likelihood_leftLaneBoundary_int32 = int32(likelihood_leftLaneBoundary);
+                   
                 
+                    ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary(2);
+                   
+                    likelihood_rightLaneBoundary = single( INT_HIST_LANE_PROB_int32(ID-1) )*0.25 ...
+                                                + single( INT_HIST_LANE_PROB_int32(ID)   )       ...
+                                                + single( INT_HIST_LANE_PROB_int32(ID+1) )*0.25;
+                    
+                    likelihood_rightLaneBoundary_int32 = int32(likelihood_rightLaneBoundary);
+
+
+                    NegLaneCorrelation_int32= 0;
+
                 
-               likelihood_rightLaneBoundary =0;
-               likelihood_rightLaneBoundary_int32 =int32(0);
-
-                for idx=1:size(LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary,2)
-
-                    ID           = LaneBoundaryModels(modelIdx).histogramBinIDs_rightBoundary(idx);
-                    Value        = LaneBoundaryModels(modelIdx).histogramWeights_rightBoundary(idx);
-                    likelihood_rightLaneBoundary = likelihood_rightLaneBoundary + INT_HIST_LANE_PROB(ID)*Value;
-                    likelihood_rightLaneBoundary_int32 =likelihood_rightLaneBoundary_int32 + INT_HIST_LANE_PROB_int32(ID)*Value;
-                end
-                
-                NegLaneCorrelation= 0;
-                NegLaneCorrelation_int32 = int32(0);
-
                 for idx=1:size(NegLaneBoundaryModel(modelIdx).histogramBinsID,2)
-                     ID  = NegLaneBoundaryModel(modelIdx).histogramBinsID(idx);
-                     NegLaneCorrelation         = NegLaneCorrelation + INT_HIST_LANE_PROB(ID);
-                     NegLaneCorrelation_int32   = NegLaneCorrelation_int32 + INT_HIST_LANE_PROB_int32(ID);
+                     
+                    ID  = NegLaneBoundaryModel(modelIdx).histogramBinsID(idx);
+                    
+                    NegLaneCorrelation_int32   = NegLaneCorrelation_int32 + INT_HIST_LANE_PROB_int32(ID);
+                
                 end
+                
                 
                 x = single(NegLaneCorrelation_int32)/2^16;     
-                likelihood_NegLaneBoundary    =     OBS_NEG_NORMA * exp( - x^2/OBS_NEG_NOMIN );
-                likelihood_NegLaneBoundary_int32 =   likelihood_NegLaneBoundary * 2^16;
+                likelihood_NegLaneBoundary_float =   2^16*OBS_NEG_NORMA * exp( - x^2/OBS_NEG_NOMIN );
                 
-                conditional_prob       = int32(likelihood_leftLaneBoundary * likelihood_rightLaneBoundary* likelihood_NegLaneBoundary * 2^16);
+                conditional_prob_float =  single(likelihood_leftLaneBoundary_int32);
+                conditional_prob_float =  conditional_prob_float * single(likelihood_rightLaneBoundary_int32) *2^-16;
+                conditional_prob_float =  conditional_prob_float * likelihood_NegLaneBoundary_float*2^-16;
+               
                 
-                conditional_prob_int64 = single(likelihood_leftLaneBoundary_int32);
-                conditional_prob_int64 = (conditional_prob_int64 * single(likelihood_rightLaneBoundary_int32) ) *2^-16;
-                conditional_prob_int64 = (conditional_prob_int64 * single(likelihood_NegLaneBoundary_int32)   )*2^-16;
-                conditional_prob_int32 = int32(conditional_prob_int64);
-
-                
-                
-                % Update Lane Filter (only legitimate states)
-
-                  LANE_FILTER(left,right) = LANE_FILTER_TRANSITIONED(left,right) * conditional_prob_int32;
+              
+                posterior_prob_int32 = int32( conditional_prob_float*  single(LANE_FILTER_TRANSITIONED(left,right)) );
+                               
     
                 % Already keep Track of Max Probable State
 
-                  if best < LANE_FILTER(left,right)
+                  if best < posterior_prob_int32
                             
-                     best       = LANE_FILTER(left,right);
+                     best       = posterior_prob_int32;
                      LANE_MODEL = [left_offset right_offset likelihood_leftLaneBoundary likelihood_rightLaneBoundary];
                      LANE_WIDTH = width;
                                
                   end
+                  
+                  LANE_FILTER(left,right) = posterior_prob_int32;
+                  
+                  
     end
      
     LANE_MODEL

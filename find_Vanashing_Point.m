@@ -31,7 +31,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
       %% APEX PROCESS %%
       TEMP = imfilter( VP_FILTER, VP_TRANSITION, 'Replicate' );
       TEMP = int32( (single(TEMP) / single(sum(sum(TEMP))) ) *2^16);
-      VP_FILTER_TRANSITIONED = 0.5*TEMP +0.5*VP_PRIOR ; 
+      VP_FILTER_TRANSITIONED = TEMP + VP_PRIOR ; 
 
     
 
