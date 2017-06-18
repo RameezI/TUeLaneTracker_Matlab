@@ -67,7 +67,7 @@ function [] = laneTracker2()
     
     ImageOutCount =0;
     NBUFFER = 3;  
-    STEP_SIZE = 2;
+    STEP_SIZE = 1;
     CENTER_OFFSET = 0.5; %% ?? 
     
     
