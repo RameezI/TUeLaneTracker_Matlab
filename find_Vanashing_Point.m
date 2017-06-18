@@ -7,7 +7,9 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
 
 %% Required Interface
 
-    global VP_LANE_RATIO CM_TO_PIXEL LANE_WIDTH C_V C_H 
+    global LANE_WIDTH 
+   
+    global VP_LANE_RATIO CM_TO_PIXEL
     
     global LANE_WIDTH_DIFF_NORMA LANE_WIDTH_DIFF_NOMIN OBS_NEG_NORMA OBS_NEG_NOMIN
     
@@ -15,7 +17,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
     
     global VP_FILTER_OFFSET_V VP_BINS_V VP_BINS_H  
     
-    global LANE_BOUNDARIES INT_HIST_VP_PROB INT_HIST_VP_PROB_int32
+    global LANE_BOUNDARIES  INT_HIST_VP_PROB_int32
     
     global VP_TRANSITION VP_PRIOR
     
@@ -39,84 +41,132 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
       %% ARM LOOP %%
     
     best  = 0;
+    NegBoundaryVPModel= struct;
     
     for nv = 1:size(VP_BINS_V,2)
         for nh = 1:size(VP_BINS_H,2)
 
 
-         %Get Expected VP%
+            %% Get Expected VP
             TMP_VP_V = -VP_BINS_V(nv); %% V axis is reversed for VP coordinate system 
             TMP_VP_H =  VP_BINS_H(nh);
-            
-            
-          [LaneBoundaryModel,NegLaneBoundaryModel, WidthPx] = createVPObservationModel( LANE_BOUNDARIES, TMP_VP_H, TMP_VP_V, HORIZON_HISTOGRAM_STEP, HORIZON_HISTOGRAM_BINS, VP_FILTER_OFFSET_V );
-            
-            
-         % Probability of the Lane according to Lane Widith
-            
-            Width            = (1/VP_LANE_RATIO)     * WidthPx * (1/CM_TO_PIXEL);
-            WidhtProb        = LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-Width)^2 / LANE_WIDTH_DIFF_NOMIN );
-            WidthProb_int32   = 2^16*LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-Width)^2 / LANE_WIDTH_DIFF_NOMIN );
-            
-            WidthProb_int32 = int32(WidthProb_int32);
-            
-          % Probability of Boundary Segments of the Lane
-                BoundaryProb        = 0;
-                BoundaryProb_int32  = 0;
-                
-                ObservedHistogramHorizon = INT_HIST_VP_PROB';
+            nbBins = size(HORIZON_HISTOGRAM_BINS,2);
 
-                for idx=1:size(LaneBoundaryModel.BinID,2)
-                     ID           = LaneBoundaryModel.BinID(idx);
-                     Value        = LaneBoundaryModel.Value(idx);
-                     BoundaryProb = BoundaryProb + ObservedHistogramHorizon(ID)*Value;
-                     BoundaryProb_int32 = BoundaryProb_int32 + INT_HIST_VP_PROB_int32(ID)*Value;
+
+            %% Left Index
+            L  = (LANE_BOUNDARIES(1,1) + LANE_BOUNDARIES(2,1))/2; %% in VP coordiante system
+            DX = TMP_VP_H - L;
+            DY = TMP_VP_V + 240;
+            IL = (DX/DY) * (VP_FILTER_OFFSET_V - TMP_VP_V) + TMP_VP_H;
+            IL   = HORIZON_HISTOGRAM_STEP * round( IL/HORIZON_HISTOGRAM_STEP );
+
+            IdxLeft  = ( (IL - HORIZON_HISTOGRAM_BINS(1,1) )/HORIZON_HISTOGRAM_STEP ) +1;
+
+            %% Right Index
+
+            R  = (LANE_BOUNDARIES(1,2) + LANE_BOUNDARIES(2,2))/2; %% in VP coordiante system 
+            DX = TMP_VP_H - R;
+            DY = TMP_VP_V + 240;
+            IR = (DX/DY) * (VP_FILTER_OFFSET_V - TMP_VP_V) + TMP_VP_H; 
+            IR   = HORIZON_HISTOGRAM_STEP * round( IR/HORIZON_HISTOGRAM_STEP );
+
+            IdxRight  = ( (HORIZON_HISTOGRAM_BINS(1,nbBins) - IR)/HORIZON_HISTOGRAM_STEP );
+            IdxRight  = nbBins- IdxRight;
+
+
+            %% Mid Index
+            
+            idxM  = round((IdxLeft+IdxRight)/2);
+            nbLeftNonBoundaryBins  = (idxM-3) - (IdxLeft+2) ;        
+            nbRightNonBoundaryBins = (IdxRight-2) - (idxM+3); 
+            nbNonBoundaryBins      = nbLeftNonBoundaryBins + nbRightNonBoundaryBins;
+
+
+       
+
+
+            %% Valid Bins Only
+            if 2 <= IdxLeft && IdxRight <= nbBins-1
+
+                
+                
+                
+                %% Construct NegBoundary Model for VP 
+                
+                NegBoundaryVPModel.BinID = ones(1, nbNonBoundaryBins);
+                for i= 0: nbLeftNonBoundaryBins-1
+                  NegBoundaryVPModel.BinID(i+1)= (IdxLeft +2) +i;
                 end
-            
 
-            
-            % Probability of Non-Boundary Segments of the Lane
-                
-                NegLaneCorrelation_int32 =0;
-                for idx=1:size(NegLaneBoundaryModel.BinID,2)
-                     ID           = NegLaneBoundaryModel.BinID(idx);
-                     NegLaneCorrelation_int32   = NegLaneCorrelation_int32 + INT_HIST_VP_PROB_int32(ID);                      
+                for i= 0: nbRightNonBoundaryBins-1
+                  NegBoundaryVPModel.BinID(nbLeftNonBoundaryBins+i+1)= (idxM + 4) +i;
                 end
-                
-                 x = single(NegLaneCorrelation_int32)/2^16;  
 
-                NegBoundaryProb        = OBS_NEG_NORMA * exp( -x^2/OBS_NEG_NOMIN );
                 
-                NegBoundaryProb_int32  = 2^16* OBS_NEG_NORMA * exp( -x^2/OBS_NEG_NOMIN );
-                NegBoundaryProb_int32  = int32(NegBoundaryProb_int32);
+                %% Probability of VP from Lane Width'
+                
+                Width = (1/VP_LANE_RATIO) * (IR-IL) * (1/CM_TO_PIXEL);
+                WidthProb_float   = LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-Width)^2 / LANE_WIDTH_DIFF_NOMIN );
                 
                 
-            % Combined Conditional Probabability
-                conditional_prob = int32(BoundaryProb * NegBoundaryProb * WidhtProb * 2^16 );
                 
-                conditional_prob_double = WidthProb_int32;
-                conditional_prob_double = conditional_prob_double*BoundaryProb_int32*2^-16;
-                conditional_prob_double = conditional_prob_double *NegBoundaryProb_int32* 2^-16;
-                
+                %% Probability of VP from Boundary Segments of the Lane
 
-                if conditional_prob_double ~= conditional_prob
-                    a= 2;
+                likelihoodLeftLaneVP =    single( INT_HIST_VP_PROB_int32(IdxLeft-1) )*0.25 ...
+                                        + single( INT_HIST_VP_PROB_int32(IdxLeft)   )...
+                                        + single( INT_HIST_VP_PROB_int32(IdxLeft+1) )*0.25;
+
+                likelihoodLeftLaneVP_int32 = int32(likelihoodLeftLaneVP);
+
+
+
+                likelihoodRightLaneVP =   single( INT_HIST_VP_PROB_int32(IdxRight-1) )*0.25 ...
+                                        + single( INT_HIST_VP_PROB_int32(IdxRight) )      ...
+                                        + single( INT_HIST_VP_PROB_int32(IdxRight+1) )*0.25;
+
+                likelihoodRightLaneVP_int32 = int32(likelihoodRightLaneVP);   
+
+
+                
+                
+                %% Probability of VP from Non-Boundary Segments of the Lane
+
+                NegBoundaryCorrelation_int32 =0;
+
+                for idx=1:size(NegBoundaryVPModel.BinID,2)
+                     ID           = NegBoundaryVPModel.BinID(idx);
+                     NegBoundaryCorrelation_int32   = NegBoundaryCorrelation_int32 + INT_HIST_VP_PROB_int32(ID);                      
                 end
-            
-            %Update the Filter %%
 
-                VP_FILTER(nv,nh) = VP_FILTER_TRANSITIONED(nv,nh) * conditional_prob;
-            
-            
-            
-            % Already keep Track of Max Probable State
-           
-            if best < VP_FILTER(nv,nh)
-                UPD_VP_V  = -TMP_VP_V;  %% to center image coordinate system
-                UPD_VP_H  =  TMP_VP_H;   %% to center image coordinate system
-                best = VP_FILTER(nv,nh);
-            end
-            
+                 x = single(NegBoundaryCorrelation_int32)/2^16;  
+
+
+                likelihoodNegBoundaryVP_float  = OBS_NEG_NORMA * exp( -x^2/OBS_NEG_NOMIN );
+
+
+                %% Combined Conditional Probabability
+                conditional_prob          =  likelihoodLeftLaneVP_int32 * likelihoodRightLaneVP_int32; 
+                conditional_prob_float    =  single(conditional_prob) *2^-16;
+                conditional_prob_float    =  conditional_prob_float*WidthProb_float;
+                conditional_prob_float    =  (conditional_prob_float * likelihoodNegBoundaryVP_float);
+
+                
+
+                %% Update the Filter
+                posterior_prob_int32 = int32( conditional_prob_float*  single(VP_FILTER_TRANSITIONED(nv,nh)) );
+                VP_FILTER(nv,nh) = posterior_prob_int32;
+
+                %% Already keep Track of Max Probable State
+
+                if best < posterior_prob_int32
+
+                    UPD_VP_V  = -TMP_VP_V;      %% to center image coordinate system
+                    UPD_VP_H  =  TMP_VP_H;      %% to center image coordinate system
+                    best = posterior_prob_int32;
+
+                end
+
+            end   
             
 
         end
@@ -125,7 +175,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
 
     %% Normalize %%
         %% APEX Process %%
-    VP_FILTER = int32( (single(VP_FILTER) / single( sum(sum(VP_FILTER)) )   )*2^16);
+    %VP_FILTER = int32( (single(VP_FILTER) / single( sum(sum(VP_FILTER)) )   )*2^16);
 
     
     %% Assign the new VP %%

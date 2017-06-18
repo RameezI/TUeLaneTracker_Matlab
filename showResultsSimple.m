@@ -8,7 +8,7 @@ function [] = showResultsSimple( RGB, VanishingPt, message )
 
     global   BASE_HISTOGRAM_BINS HORIZON_HISTOGRAM_BINS INT_HIST_LANE_PROB INT_HIST_VP_PROB 
     
-    clr = 'r';
+    clr = 'g';
 
 
 %% Show Image
@@ -18,7 +18,7 @@ function [] = showResultsSimple( RGB, VanishingPt, message )
     
     imshow(RGB)     
     
-    axis([BASE_HISTOGRAM_BINS(1)+320 BASE_HISTOGRAM_BINS(end)+320 0 480] )
+  %  axis([BASE_HISTOGRAM_BINS(1)+320 BASE_HISTOGRAM_BINS(end)+320 0 480] )
     hold on
 
     
@@ -30,7 +30,7 @@ function [] = showResultsSimple( RGB, VanishingPt, message )
     for nl = 1:size(LANE_BOUNDARIES,2)
 
 
-        laneLeftEdge = LANE_BOUNDARIES(1,nl);
+        laneLeftEdge    = LANE_BOUNDARIES(1,nl);
         laneRightEdge   = LANE_BOUNDARIES(2,nl);
 
 
