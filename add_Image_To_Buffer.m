@@ -1,5 +1,5 @@
           
-function [Templates, Likelihoods, Mask] = add_Image_To_Buffer( RGB, VanishingPt, Templates, Likelihoods, Mask)
+function [Templates, Likelihoods, Mask] = add_Image_To_Buffer( RGB, GRAY_OPENCV, VanishingPt, Templates, Likelihoods, Mask)
 
 
 
@@ -59,6 +59,7 @@ VP_H = VanishingPt.H;
     %Templates.DEPTH          = imcrop(Templates.DEPTH_ROOT, [1,RES_VH(1)-span+1,RES_VH(2), span]);   
 
     I_uint8                  = imcrop  (I_uint8,     [1,RES_VH(1)-span+1,RES_VH(2), span]);
+    I_uint8                  = GRAY_OPENCV;
  
     %% Get Gradients %%    
     [MAG, tanDIR]            =  getGradientInfo( I_uint8  );

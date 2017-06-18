@@ -11,9 +11,9 @@ msg = STATE_BUSY;
   
 %% Add Image Buffer %% 
     
-   RGB = readImage( N_IMAGE );
+   [RGB, GRAY_OPENCV] = readImage( N_IMAGE );
    
-   [Templates, Likelihoods, Masks] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Mask);
+   [Templates, Likelihoods, Masks] = add_Image_To_Buffer(RGB, GRAY_OPENCV, VanishingPt, Templates, Likelihoods, Mask);
                      
    if  NBUFFER <= STATE_COUNTER
         msg = STATE_READY;

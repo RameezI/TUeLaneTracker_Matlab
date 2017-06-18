@@ -51,15 +51,20 @@ function [] = laneTracker2()
 
 
 %% TUe DATASET %%
-    global DATASET IMAGE_FILES NBUFFER ImageOutCount STEP_SIZE CENTER_OFFSET
+    global DATASET IMAGE_FILES NBUFFER ImageOutCount STEP_SIZE CENTER_OFFSET IMAGE_FILES_OPENCV
    
     
     DATASET = '/media/rameez/Linux-Extended/DataSet/eindhoven/PNG_imgs/';
+    DATASET_OPENCV = '/media/rameez/Linux-Extended/DataSet/eindhoven/GRAY_OPENCV/';
+    
     %DATASET = '/home/rameez/TestDataBackup/';
     
     DATASET
     
-    IMAGE_FILES= dir([DATASET,'*.png']); 
+    IMAGE_FILES= dir([DATASET,'*.png']);
+    IMAGE_FILES_OPENCV= dir([DATASET_OPENCV,'*.png']);
+    
+    
     ImageOutCount =0;
     NBUFFER = 3;  
     STEP_SIZE = 2;

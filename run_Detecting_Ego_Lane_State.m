@@ -11,8 +11,8 @@ function [msg, VanishingPt, Templates, Likelihoods, Mask] = run_Detecting_Ego_La
     
     %% Add an Image to the Buffer 
     
-        RGB = readImage( N_IMAGE );
-        [Templates, Likelihoods, Mask] = add_Image_To_Buffer(RGB, VanishingPt, Templates, Likelihoods, Mask );
+        [RGB, GRAY_OPENCV] = readImage( N_IMAGE );
+        [Templates, Likelihoods, Mask] = add_Image_To_Buffer(RGB, GRAY_OPENCV, VanishingPt, Templates, Likelihoods, Mask );
     
                
        
