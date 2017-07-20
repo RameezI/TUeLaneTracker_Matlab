@@ -55,7 +55,6 @@ function [] = laneTracker2()
    
     
     DATASET = '/media/rameez/Linux-Extended/DataSet/eindhoven/PNG_imgs/';
-    %DATASET = '/home/rameez/TestDataBackup/';
     
     DATASET
     
