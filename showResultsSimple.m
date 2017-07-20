@@ -74,18 +74,18 @@ function [] = showResultsSimple( RGB, VanishingPt, message )
 
     
 
-    %% plot the observation histogram %%
-
-    if ~isempty(INT_HIST_LANE_PROB) && ~isempty(INT_HIST_VP_PROB)
-        
-        plot( [[320+(BASE_HISTOGRAM_BINS)]; [320+(BASE_HISTOGRAM_BINS)]], [[240+240-(INT_HIST_LANE_PROB*600)]; [240+240-(INT_HIST_LANE_PROB*0)]], ['-',clr] )
-       
-        plot( 320+(BASE_HISTOGRAM_BINS), 240+240-(INT_HIST_LANE_PROB*0), ['x',clr] )  
-
-        plot( [HORIZON_HISTOGRAM_BINS+320; HORIZON_HISTOGRAM_BINS+320], [[240+120-(INT_HIST_VP_PROB*600)]; 240+120-(INT_HIST_VP_PROB*0)], ['-',clr] )
-        plot( HORIZON_HISTOGRAM_BINS+320, 240+120-(INT_HIST_VP_PROB*0), ['x',clr] )
-   
-    end
+%     %% plot the observation histogram %%
+% 
+%     if ~isempty(INT_HIST_LANE_PROB) && ~isempty(INT_HIST_VP_PROB)
+%         
+%         plot( [[320+(BASE_HISTOGRAM_BINS)]; [320+(BASE_HISTOGRAM_BINS)]], [[240+240-(INT_HIST_LANE_PROB*600)]; [240+240-(INT_HIST_LANE_PROB*0)]], ['-',clr] )
+%        
+%         plot( 320+(BASE_HISTOGRAM_BINS), 240+240-(INT_HIST_LANE_PROB*0), ['x',clr] )  
+% 
+%         plot( [HORIZON_HISTOGRAM_BINS+320; HORIZON_HISTOGRAM_BINS+320], [[240+120-(INT_HIST_VP_PROB*600)]; 240+120-(INT_HIST_VP_PROB*0)], ['-',clr] )
+%         plot( HORIZON_HISTOGRAM_BINS+320, 240+120-(INT_HIST_VP_PROB*0), ['x',clr] )
+%    
+%     end
 
     drawnow
 

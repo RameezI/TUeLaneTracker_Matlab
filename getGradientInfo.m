@@ -1,20 +1,16 @@
-%%
-%%
-%% 
-%% Create the gradient template
-%%
-%%
-%%
+
 function [ magnitude, tanDIR] = getGradientInfo( IN )
-      
+
+global Path CrossCheck
+
 % Sobel Filter
     sobel = [ -1 -2 -1; 0 0 0; 1 2 1];
     
 
     
 %% compute gradient
-    dX = imfilter( int16(IN), sobel' );
-    dY = imfilter( int16(IN), sobel  );
+    dX = imfilter( int16(IN), sobel', 'replicate' );
+    dY = imfilter( int16(IN), sobel , 'replicate'  );
 
  
 %% Apply saturation
@@ -24,25 +20,22 @@ function [ magnitude, tanDIR] = getGradientInfo( IN )
  
  dY( dY < -255 ) =  -255;
  dX( dX < -255 ) =  -255;
- 
+ dY(dY==0)= 1;
 
   
   %% get mangitude
   
   %magnitude = sqrt(dX.^2 + dY.^2); 
-  magnitude = abs(dX)*0.5+ abs(dY)*0.5;
+  magnitude = abs(dX)+ abs(dY);
   magnitude(magnitude>255) = 255;
   magnitude = uint8(magnitude);
-  
 
-  
-%% get angle
-      %angle= atan2(single(dX),single(dY));
-      %angle= angle * (180/pi);
-%       angle = floor(angle);
-
-
-dY(dY==0)= 1;
 tanDIR= dX*2^7./dY;
-tanDIR = int16(tanDIR);    
+
+%% Writing to CSV file, to verify against Opencv Code
+    if CrossCheck==true
+        dlmwrite(strcat(Path, 'GradientX.csv'), dX , 'delimiter', ',', 'precision', 9);
+        dlmwrite(strcat(Path, 'GradientY.csv'), dY , 'delimiter', ',', 'precision', 9);
+
+    end
 end

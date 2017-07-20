@@ -1,6 +1,6 @@
   function [PROB] = laneMarkerProbabilities(tippingPoint_gray, tippingPoint_gradMag, I, gradMAG , gradDIRTangent, gradDirTanget_template)
 
-
+global Path CrossCheck
   % This function computes the per pixel probability for a lane boundary
 % pixel. The result is a Probability Map of the focussed region. The
 % computed Proability MAP is represented by scaled integer in range [0 255]  
@@ -35,7 +35,10 @@
 
       PROB = uint8(PROB);
       
-             
-%     figure(220);
-%     imshow(PROB, [0, 1]);
+%% Writing to CSV file, to verify against Opencv Code
+    if CrossCheck==true
+        dlmwrite(strcat(Path,  'PROB_GRAY.csv'),GRAY_P, 'delimiter' , ',' , 'precision', 9);
+        dlmwrite(strcat(Path,  'PROB_MAG.csv'), MAG_P , 'delimiter' , ',' , 'precision', 9);
+        dlmwrite(strcat(Path,  'PROB_DIR.csv'), DIR_P , 'delimiter' , ',' , 'precision', 9);
+    end
 end

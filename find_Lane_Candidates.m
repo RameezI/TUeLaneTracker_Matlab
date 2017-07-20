@@ -13,6 +13,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     
     
     %% Required Interface
+   
     global STATE_READY STATE_ERROR
     global LANE_CONF_THRESHOLD RES_VH CM_TO_PIXEL 
     global OBS_NEG_NOMIN OBS_NEG_NORMA LaneBoundaryModels NegLaneBoundaryModel   
@@ -22,6 +23,9 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     global LANE_FILTER LANE_TRANSITION LANE_PRIOR  
     global LANE_WIDTH INT_HIST_LANE_PROB INT_HIST_VP_PROB %% the Lane intersection observations histograms
     global INT_HIST_LANE_PROB_int32 INT_HIST_VP_PROB_int32 
+    
+     global CrossCheck Path
+    
     
     SCALE_EXP_10 = int32(2^10);
     
@@ -72,7 +76,10 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
                 depthSqr    =  Templates.DEPTH(row_current+1, col_current+1);
 
                 Lane_Int_Base_tmp     =  idivide( int32(bottom- y) *2^7 * SCALE_EXP_10, int32(tanGradient) ) +  int32(x)*SCALE_EXP_10;
-                Lane_Int_Purview_tmp  =  idivide( int32(horizon-y) *2^7 * SCALE_EXP_10, int32(tanGradient) ) +  int32(x)*SCALE_EXP_10;                
+                %Lane_Int_Base_tmp     =  int32(bottom- y) *2^7 * SCALE_EXP_10/ int32(tanGradient) +  int32(x)*SCALE_EXP_10;
+                
+                Lane_Int_Purview_tmp  = idivide( int32(horizon-y) *2^7 * SCALE_EXP_10, int32(tanGradient) ) +  int32(x)*SCALE_EXP_10;
+                %Lane_Int_Purview_tmp  =  int32(horizon-y) *2^7 * SCALE_EXP_10/ int32(tanGradient)  +  int32(x)*SCALE_EXP_10;  
                 
                 Lane_Int_Weights_tmp  =   (int32(prob)* int32(depthSqr) );
                 
@@ -80,10 +87,22 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
                 if (     Lane_Int_Base_tmp > SCALE_EXP_10*int32( BASE_HISTOGRAM_BINS(1) )   - idivide(SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP), 2) ...
                    &&    Lane_Int_Base_tmp < SCALE_EXP_10*int32( BASE_HISTOGRAM_BINS(end) ) + idivide(SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP), 2)  ...  
                    )
+
+                
+%                 if (     Lane_Int_Base_tmp > SCALE_EXP_10*int32( BASE_HISTOGRAM_BINS(1) )   - SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP)/ 2 ...
+%                    &&    Lane_Int_Base_tmp < SCALE_EXP_10*int32( BASE_HISTOGRAM_BINS(end) ) + SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP)/ 2  ...  
+%                    )
+
+
                  
                 if (    Lane_Int_Purview_tmp > SCALE_EXP_10*int32(-VP_RANGE_H)  - idivide(SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP) , 2) ...   
                    &&   Lane_Int_Purview_tmp < SCALE_EXP_10*int32(VP_RANGE_H)   + idivide(SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP) , 2) ...
-                   )                
+                   )
+
+
+%                 if (    Lane_Int_Purview_tmp > SCALE_EXP_10*int32(-VP_RANGE_H)  - SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP)/ 2 ...   
+%                    &&   Lane_Int_Purview_tmp < SCALE_EXP_10*int32(VP_RANGE_H)   + SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP)/2 ...
+%                    ) 
                              Index = Index+1;
                              
                              Lane_Int_Base(Index)      = Lane_Int_Base_tmp;                        
@@ -110,19 +129,35 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     %% Weighted Histogram over both dicretised Intersections   
     
     %Purview intersection discretised
+    
     firstDim_N  =  Lane_Int_Purview - SCALE_EXP_10*int32( HORIZON_HISTOGRAM_BINS(1) )  + idivide( SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP), 2) ;
-    firstDim_D   =  SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP);
+%   firstDim_N  =  Lane_Int_Purview - SCALE_EXP_10*int32( HORIZON_HISTOGRAM_BINS(1) )  + SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP)/ 2 ;    
+    firstDim_D   =  SCALE_EXP_10*int32(HORIZON_HISTOGRAM_STEP);  
     firstDim     = idivide(firstDim_N, firstDim_D);
+%   firstDim     = firstDim_N/ firstDim_D;
     
     %Bottom intersection discretised
     secondDim_N =  Lane_Int_Base -  SCALE_EXP_10*int32(BASE_HISTOGRAM_BINS(1)) + idivide( SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP), 2) ;
+%   secondDim_N =  Lane_Int_Base -  SCALE_EXP_10*int32(BASE_HISTOGRAM_BINS(1)) + SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP)/ 2 ;
     secondDim_D =  SCALE_EXP_10*int32(BASE_HISTOGRAM_STEP);
-    secondDim   =  idivide(secondDim_N, secondDim_D);
+    secondDim   =  idivide(secondDim_N, secondDim_D);  
+%     secondDim   =  secondDim_N/secondDim_D;
     
+
+ 
+     if CrossCheck==true
+        
+        dlmwrite(strcat(Path,  'BaseBinIdx.csv'),       secondDim,  'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'PurviewBinIdx.csv'),    firstDim,   'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'WeightsHistogram.csv'), Lane_Int_Weights,   'delimiter',   ',', 'precision', 9);
+  
+     end
+
+
     firstDim   = firstDim + 1;
     secondDim  = secondDim +1; 
 
-    firstDim(end+1)      = size(HORIZON_HISTOGRAM_BINS,2);
+    firstDim(end+1)     = size(HORIZON_HISTOGRAM_BINS,2);
     secondDim(end+1)    = size(BASE_HISTOGRAM_BINS,2);
     
     INT_HIST_LANE_PROB =   accumarray( secondDim, [Lane_Int_Weights; 0] );
@@ -136,14 +171,18 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
     %% APEX Process %%
     
      INT_HIST_LANE_PROB = INT_HIST_LANE_PROB';
-     INT_HIST_VP_PROB   = INT_HIST_VP_PROB'; 
+     INT_HIST_VP_PROB   = INT_HIST_VP_PROB';
      
      INT_HIST_LANE_PROB_int32 = int32( (int64(INT_HIST_LANE_PROB)*2^16) / sum(int64(INT_HIST_LANE_PROB),2) );        
      INT_HIST_VP_PROB_int32   = int32( (int64(INT_HIST_VP_PROB)  *2^16) / sum(int64(INT_HIST_VP_PROB),2)   );     
+        
      
-    
+     
      INT_HIST_LANE_PROB = INT_HIST_LANE_PROB / sum(INT_HIST_LANE_PROB,2);        
      INT_HIST_VP_PROB   = INT_HIST_VP_PROB   / sum(INT_HIST_VP_PROB,2);
+
+     
+    
 
      
     %% Predict Step %%
@@ -153,7 +192,15 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
       TEMP = int32( (TEMP*2^16) /sum(sum(TEMP) ) );
       LANE_FILTER_TRANSITIONED = TEMP + LANE_PRIOR ; 
       
-    
+      
+      
+   if CrossCheck==true
+        
+        dlmwrite(strcat(Path,  'HistogramBase.csv'),    INT_HIST_LANE_PROB_int32',  'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'HistogramPurview.csv'), INT_HIST_VP_PROB_int32'  ,    'delimiter',   ',', 'precision', 9);
+  
+    end
+     
       
 
       
@@ -220,7 +267,14 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
             if best < posterior_prob_int32
 
              best       = posterior_prob_int32;
-             LANE_MODEL = [left_offset right_offset likelihood_leftLaneBoundary likelihood_rightLaneBoundary];
+             
+             confLeft  = likelihood_leftLaneBoundary_int32;
+             confRight = likelihood_rightLaneBoundary_int32;
+
+             LANE_MODEL = [left_offset right_offset ...
+                           100*(single(likelihood_leftLaneBoundary_int32)/2^16) 100*(single(likelihood_rightLaneBoundary_int32)/2^16) ];
+             
+             LANE_MODEL = int32(LANE_MODEL);
              LANE_WIDTH = width;
 
             end
@@ -230,6 +284,15 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
      
     LANE_MODEL
     LANE_WIDTH
+    
+    
+        
+     if CrossCheck==true
+        
+        dlmwrite(strcat(Path,  'TransitionedLane.csv'),  LANE_FILTER_TRANSITIONED ,  'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'UpdatedLaneFilter.csv'), LANE_FILTER ,               'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'LaneModel.csv'),         LANE_MODEL' ,          'delimiter',   ',', 'precision', 9)
+    end 
       
 
     %% Find the Lane Boundaries
@@ -238,7 +301,7 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
                             -LANE_MODEL(1)+BASE_HISTOGRAM_STEP/2 LANE_MODEL(2)+BASE_HISTOGRAM_STEP/2;...
                               0 0; ...
                               0 0; ...
-                              100*LANE_MODEL(3) 100*LANE_MODEL(4)];
+                              LANE_MODEL(3) LANE_MODEL(4)];
         
         LANE_BOUNDARIES(3,1) = (LANE_BOUNDARIES(1,1)+LANE_BOUNDARIES(2,2))/2;
         
@@ -258,5 +321,5 @@ function [ msg ] = find_Lane_Candidates(Likelihoods, Templates)
         msg = STATE_READY;    
     end
     
-    
+    LANE_BOUNDARIES = single(LANE_BOUNDARIES);
 end

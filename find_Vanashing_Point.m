@@ -21,6 +21,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
     
     global VP_TRANSITION VP_PRIOR
     
+    global CrossCheck Path
     
 
     
@@ -36,6 +37,11 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
       VP_FILTER_TRANSITIONED = TEMP + VP_PRIOR ; 
 
     
+      
+      
+      
+      
+      
 
     %% Update Step %%
       %% ARM LOOP %%
@@ -105,7 +111,7 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
                 
                 %% Probability of VP from Lane Width'
                 
-                Width = (1/VP_LANE_RATIO) * (IR-IL) * (1/CM_TO_PIXEL);
+                Width = (1/VP_LANE_RATIO) * single(IR-IL) * (1/CM_TO_PIXEL);
                 WidthProb_float   = LANE_WIDTH_DIFF_NORMA * exp( -(LANE_WIDTH-Width)^2 / LANE_WIDTH_DIFF_NOMIN );
                 
                 
@@ -172,17 +178,23 @@ function VanishingPt = find_Vanashing_Point(VanishingPt)
         end
     end
 
-
-    %% Normalize %%
-        %% APEX Process %%
-    %VP_FILTER = int32( (single(VP_FILTER) / single( sum(sum(VP_FILTER)) )   )*2^16);
-
     
     %% Assign the new VP %%
     VanishingPt.V_prev = VanishingPt.V;
     VanishingPt.H_prev = VanishingPt.H;
     VanishingPt.V = UPD_VP_V;
     VanishingPt.H = UPD_VP_H;
+    
+    VanishPt = [VanishingPt.V; VanishingPt.H];
+    
+       if CrossCheck==true
+        
+        dlmwrite(strcat(Path,    'TransitionedVP.csv'),  VP_FILTER_TRANSITIONED,  'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path, 'UpdatedVPFilter.csv'), VP_FILTER,   'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,      'VanishingPt.csv'), VanishPt,   'delimiter',   ',', 'precision', 9);
+
+       end
+
 
 end
 

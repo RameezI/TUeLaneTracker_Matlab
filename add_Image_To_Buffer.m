@@ -5,7 +5,9 @@ function [Templates, Likelihoods, Mask] = add_Image_To_Buffer( RGB, GRAY_OPENCV,
 
 
 %%Required Global Variables %%
-global  NBUFFER RES_VH  tippingPoint_gradMag tippingPoint_gray          
+global  NBUFFER RES_VH  tippingPoint_gradMag tippingPoint_gray
+
+global  Path CrossCheck
  
 %%Local Variables Extracted from Arguments%%
 VP_V = VanishingPt.V;
@@ -58,11 +60,16 @@ VP_H = VanishingPt.H;
     %Templates.DEPTH         = Templates.DEPTH_ROOT( (RES_VH(1)-VP_V+1)-240:RES_VH(1)-VP_V+240, : ); 
     %Templates.DEPTH          = imcrop(Templates.DEPTH_ROOT, [1,RES_VH(1)-span+1,RES_VH(2), span]);   
 
-    I_uint8                  = imcrop  (I_uint8,     [1,RES_VH(1)-span+1,RES_VH(2), span]);
-    I_uint8                  = GRAY_OPENCV;
- 
+    %I_uint8                  = imcrop  (I_uint8,     [1,RES_VH(1)-span+1,RES_VH(2), span]);
+    I_uint8                   = GRAY_OPENCV;
+    
+       
+    
+        
     %% Get Gradients %%    
     [MAG, tanDIR]            =  getGradientInfo( I_uint8  );
+    
+    
     %MAG                      = imcrop  (MAGI,        [1,RES_VH(1)-span+1,RES_VH(2), span]);    
     %tanDIR                   = imcrop  (tanDIRI,     [1,RES_VH(1)-span+1,RES_VH(2), span]);
 
@@ -75,7 +82,22 @@ VP_H = VanishingPt.H;
 
  PROB = laneMarkerProbabilities( tippingPoint_gray, tippingPoint_gradMag, I_uint8, MAG, tanDIR, TemplateGradientDir_tangent);
     
+
  [Likelihoods] = updateLaneLikelihoods(NBUFFER, PROB,  tanDIR, Likelihoods);
-     
+  
+  
+ 
+   
+%% Writing to CSV file, to verify against Opencv Code
+    if CrossCheck==true
+        dlmwrite(strcat(Path,  'TemplateGradientTan.csv'),  TemplateGradientDir_tangent ,  'delimiter',   ',', 'precision', 9);     
+        dlmwrite(strcat(Path,  'TemplateFocus.csv'),  Mask.FOCUS,      'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'TemplateDepth.csv'),  Templates.DEPTH ,   'delimiter',   ',', 'precision', 9);
         
+        dlmwrite(strcat(Path,  'BlurredFrame.csv'),  I_uint8 ,  'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'MAG_FRAME.csv'),     MAG ,      'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'GradTan_FRAME.csv'), tanDIR ,   'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'PROB_FRAME.csv'),    PROB ,     'delimiter',   ',', 'precision', 9);
+    end
+    
 end

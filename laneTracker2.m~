@@ -52,15 +52,9 @@ function [] = laneTracker2()
 
 %% TUe DATASET %%
     global DATASET IMAGE_FILES NBUFFER ImageOutCount STEP_SIZE CENTER_OFFSET IMAGE_FILES_OPENCV
-
+   
+    global CrossTest
     
-    
-%%      
-    global Path CrossCheck
-    Path = '/home/rameez/TUeLaneTracker/UnitTests/TestData/';
-    CrossCheck = true; %This is needed to verify against Opencv Code and generate .csv files.
-
-
     DATASET = '/media/rameez/Linux-Extended/DataSet/eindhoven/PNG_imgs/';
     DATASET_OPENCV = '/media/rameez/Linux-Extended/DataSet/eindhoven/GRAY_OPENCV/';
     
@@ -76,9 +70,10 @@ function [] = laneTracker2()
     STEP_SIZE = 1;
     CENTER_OFFSET = 0.5; %% ?? 
     
-
+    global Path CrossCheck
     
-
+    Path = '/home/rameez/TUeLaneTracker/UnitTests/TestData/';
+    CrossCheck = true;
     
     
 %% System States %%

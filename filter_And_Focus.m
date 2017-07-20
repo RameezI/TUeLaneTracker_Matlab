@@ -5,7 +5,7 @@ function  Likelihoods = filter_And_Focus(Likelihoods, MASKS, VanishingPt)
 
     %%
     %% Required Global Variables %%
-    global  NBUFFER 
+    global  NBUFFER Path CrossCheck
     
     
     %%
@@ -34,6 +34,24 @@ function  Likelihoods = filter_And_Focus(Likelihoods, MASKS, VanishingPt)
     %% Apply the focus maks to the probs %%
     
     Likelihoods.TOT_MAX_FOCUSED = bitand(MASKS.FOCUS, Likelihoods.TOT_MAX);
+    
+   
+    if CrossCheck==true
+        
+        dlmwrite(strcat(Path,  'Prob_1.csv'),  Likelihoods.TOT_ALL(:,:,1) ,  'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'Prob_2.csv'),  Likelihoods.TOT_ALL(:,:,2) ,   'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'Prob_3.csv'),  Likelihoods.TOT_ALL(:,:,3) ,   'delimiter',   ',', 'precision', 9);
+        
+        dlmwrite(strcat(Path,  'GradTan_1.csv'), Likelihoods.GRADIENT_DIR_ALL(:,:,1) , 'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'GradTan_2.csv'), Likelihoods.GRADIENT_DIR_ALL(:,:,2) , 'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'GradTan_3.csv'), Likelihoods.GRADIENT_DIR_ALL(:,:,3) , 'delimiter',   ',', 'precision', 9);
+        
+        dlmwrite(strcat(Path,  'MAX_PROB_FOCUSSED.csv'),  Likelihoods.TOT_MAX_FOCUSED      , 'delimiter',   ',', 'precision', 9);
+        dlmwrite(strcat(Path,  'GradTan_MAX_PROB.csv'),  Likelihoods.GRADIENT_DIR_TOT_MAX  , 'delimiter',    ',', 'precision', 9);
+        
+        
+    end
+    
 
 end
 

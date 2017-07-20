@@ -10,7 +10,7 @@ global CURRENT_STATE FILLING_BUFFERS DETECTING_EGO_LANE RESET_STATE INIT_STATE S
 Number_Of_Images = size(IMAGE_FILES,1);
         
                 START = 4500;
-                START = 200;
+                START = 1;
                 END   = Number_Of_Images;
 
    
@@ -54,9 +54,10 @@ N_IMAGE       = START;
                %%Transition
                
                 if msg == STATE_READY
-                    
+                 
                  CURRENT_STATE = DETECTING_EGO_LANE;
                  STATE_COUNTER = 0;
+                  N_IMAGE =   N_IMAGE +STEP_SIZE;
                 
                 else
                     
